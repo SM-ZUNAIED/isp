@@ -71,10 +71,15 @@ function AdminDashboard() {
                 নিজেকে Owner (Admin) হিসেবে দাবি করুন।
               </p>
             </div>
-            <Button onClick={() => claimMut.mutate()} disabled={claimMut.isPending}>
-              {claimMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
-              Owner হিসেবে দাবি করুন
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="outline" asChild>
+                <a href="/customer">কাস্টমার পোর্টাল</a>
+              </Button>
+              <Button onClick={() => claimMut.mutate()} disabled={claimMut.isPending}>
+                {claimMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+                Owner হিসেবে দাবি করুন
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
