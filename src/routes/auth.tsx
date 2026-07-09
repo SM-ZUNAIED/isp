@@ -122,12 +122,12 @@ function AuthPage() {
         {/* Form card */}
         <section className="mx-auto w-full max-w-md animate-fade-in-up">
           {/* Mobile brand mini */}
-          <div className="mb-6 flex items-center justify-center gap-2 lg:hidden">
+          <Link to="/" className="mb-6 flex items-center justify-center gap-2 lg:hidden hover:opacity-80 transition-opacity">
             <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-primary shadow-glow">
               <Wifi className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-extrabold">Net Bill Pro</span>
-          </div>
+          </Link>
 
           <div className="rounded-3xl border bg-gradient-card p-6 shadow-elevated md:p-8">
             {mode === "forgot" ? (
