@@ -241,13 +241,19 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: customer } = await supabase
       .from("customers")
-      .select("id, customer_code, full_name, mobile, address, monthly_bill, status, expiry_date, packages(name, download_speed, upload_speed), zones(name)")
+      .select("id, customer_code, full_name, mobile, alt_mobile, email, address, monthly_bill, status, connection_date, expiry_date, pppoe_username, package_id, zone_id, packages(name, download_speed, upload_speed, monthly_price), zones(name)")
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (!customer) return { customer: null, bills: [], payments: [], tickets: [] };
+    if (!customer) {
+      const [pk, zn] = await Promise.all([
+        supabase.from("packages").select("id, name, download_speed, upload_speed, monthly_price").eq("is_active", true).order("monthly_price"),
+        supabase.from("zones").select("id, name").order("name"),
+      ]);
+      return { customer: null, bills: [], payments: [], tickets: [], packages: pk.data ?? [], zones: zn.data ?? [] };
+    }
 
-    const [bills, payments, tickets] = await Promise.all([
+    const [bills, payments, tickets, pk, zn] = await Promise.all([
       supabase.from("bills")
         .select("id, bill_number, billing_month, amount, paid_amount, due_amount, status, due_date")
         .eq("customer_id", customer.id).order("billing_month", { ascending: false }).limit(20),
@@ -255,8 +261,10 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
         .select("id, receipt_number, amount, method, paid_at")
         .eq("customer_id", customer.id).order("paid_at", { ascending: false }).limit(20),
       supabase.from("tickets")
-        .select("id, ticket_number, subject, status, category, created_at")
-        .eq("customer_id", customer.id).order("created_at", { ascending: false }).limit(20),
+        .select("id, ticket_number, subject, description, status, category, created_at")
+        .eq("customer_id", customer.id).order("created_at", { ascending: false }).limit(50),
+      supabase.from("packages").select("id, name, download_speed, upload_speed, monthly_price").eq("is_active", true).order("monthly_price"),
+      supabase.from("zones").select("id, name").order("name"),
     ]);
 
     return {
@@ -264,5 +272,57 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
       bills: bills.data ?? [],
       payments: payments.data ?? [],
       tickets: tickets.data ?? [],
+      packages: pk.data ?? [],
+      zones: zn.data ?? [],
     };
   });
+
+/** Customer submits a service request (package upgrade or area/zone change). */
+export const submitCustomerRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      kind: z.enum(["package_change", "area_change"]),
+      target_package_id: z.string().uuid().optional().nullable(),
+      target_zone_id: z.string().uuid().optional().nullable(),
+      new_address: z.string().trim().max(500).optional().nullable(),
+      note: z.string().trim().max(1000).optional().nullable(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: cust, error: cErr } = await supabase
+      .from("customers").select("id, customer_code, full_name").eq("user_id", userId).maybeSingle();
+    if (cErr) throw new Error(cErr.message);
+    if (!cust) throw new Error("Customer profile not linked");
+
+    let subject = "";
+    const lines: string[] = [];
+    if (data.kind === "package_change") {
+      if (!data.target_package_id) throw new Error("Please select a package");
+      const { data: pk } = await supabase.from("packages")
+        .select("name, download_speed, upload_speed, monthly_price").eq("id", data.target_package_id).maybeSingle();
+      subject = `[Package Change] ${pk?.name ?? "Requested package"}`;
+      lines.push(`Requested package: ${pk?.name ?? "-"} (${pk?.download_speed ?? "-"}/${pk?.upload_speed ?? "-"} Mbps, ৳${pk?.monthly_price ?? "-"}/mo)`);
+    } else {
+      if (!data.target_zone_id) throw new Error("Please select an area");
+      const { data: zn } = await supabase.from("zones").select("name").eq("id", data.target_zone_id).maybeSingle();
+      subject = `[Area Change] Move to ${zn?.name ?? "new area"}`;
+      lines.push(`New area / zone: ${zn?.name ?? "-"}`);
+      if (data.new_address) lines.push(`New address: ${data.new_address}`);
+    }
+    if (data.note) lines.push(`Note: ${data.note}`);
+
+    const ticketNumber = `REQ-${Date.now().toString(36).toUpperCase()}`;
+    const { data: row, error } = await supabase.from("tickets").insert({
+      ticket_number: ticketNumber,
+      customer_id: cust.id,
+      category: "other",
+      subject,
+      description: lines.join("\n"),
+      status: "pending",
+    }).select().single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id, ticket_number: row.ticket_number };
+  });
+
