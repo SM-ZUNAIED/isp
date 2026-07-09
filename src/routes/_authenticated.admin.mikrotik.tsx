@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Loader2, Plus, Trash2, Wifi, WifiOff, Activity, Router as RouterIcon } from "lucide-react";
+import { Loader2, Plus, Trash2, Wifi, WifiOff, Activity, Router as RouterIcon, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +14,19 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  listMikrotiks, createMikrotik, pingMikrotik, deleteMikrotik,
+  listMikrotiks, createMikrotik, updateMikrotik, pingMikrotik, deleteMikrotik,
 } from "@/lib/network.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/mikrotik")({
   head: () => ({ meta: [{ title: "MikroTik — Net Bill Pro" }] }),
   component: MikrotikPage,
 });
+
+type MtRow = {
+  id: string; name: string; ip_address: string; api_port?: number | null;
+  username: string; notes?: string | null; is_online?: boolean | null;
+  cpu_load?: number | null; ram_usage?: number | null; last_checked_at?: string | null;
+};
 
 function MikrotikPage() {
   const qc = useQueryClient();
@@ -49,7 +55,7 @@ function MikrotikPage() {
           <h1 className="text-2xl md:text-3xl font-bold">MikroTik রাউটার</h1>
           <p className="text-muted-foreground">রাউটার যুক্ত করুন এবং স্ট্যাটাস পরীক্ষা করুন</p>
         </div>
-        <NewMikrotikDialog onCreated={invalidate} />
+        <MikrotikFormDialog mode="create" onSaved={invalidate} />
       </div>
 
       {q.isLoading ? (
@@ -95,6 +101,12 @@ function MikrotikPage() {
                     {pingMut.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Activity className="h-4 w-4 mr-1" />}
                     হেলথ চেক
                   </Button>
+                  <MikrotikFormDialog
+                    mode="edit"
+                    initial={m as unknown as MtRow}
+                    onSaved={invalidate}
+                    trigger={<Button size="sm" variant="ghost"><Pencil className="h-4 w-4" /></Button>}
+                  />
                   <Button size="sm" variant="ghost" className="text-destructive"
                     onClick={() => delMut.mutate(m.id)}>
                     <Trash2 className="h-4 w-4" />
@@ -122,36 +134,53 @@ function MetricBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-function NewMikrotikDialog({ onCreated }: { onCreated: () => void }) {
+function MikrotikFormDialog({
+  mode, initial, onSaved, trigger,
+}: {
+  mode: "create" | "edit";
+  initial?: MtRow;
+  onSaved: () => void;
+  trigger?: React.ReactNode;
+}) {
   const create = useServerFn(createMikrotik);
+  const update = useServerFn(updateMikrotik);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({
-    name: "", ip_address: "", api_port: "8728", username: "admin", password: "", notes: "",
-  });
+  const empty = { name: "", ip_address: "", api_port: "8728", username: "admin", password: "", notes: "" };
+  const seed = initial ? {
+    name: initial.name, ip_address: initial.ip_address,
+    api_port: String(initial.api_port ?? 8728),
+    username: initial.username, password: "",
+    notes: initial.notes ?? "",
+  } : empty;
+  const [f, setF] = useState(seed);
   const mut = useMutation({
-    mutationFn: () => create({
-      data: {
+    mutationFn: async () => {
+      const payload = {
         name: f.name.trim(), ip_address: f.ip_address.trim(),
         api_port: Number(f.api_port) || 8728,
         username: f.username.trim(), password: f.password,
         notes: f.notes || null,
-      },
-    }),
+      };
+      if (mode === "create") await create({ data: payload });
+      else await update({ data: { id: initial!.id, ...payload } });
+    },
     onSuccess: () => {
-      toast.success("MikroTik যুক্ত হয়েছে");
-      setOpen(false); onCreated();
-      setF({ name: "", ip_address: "", api_port: "8728", username: "admin", password: "", notes: "" });
+      toast.success(mode === "create" ? "MikroTik যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      setOpen(false); onSaved();
+      if (mode === "create") setF(empty);
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন MikroTik</Button>
+        {trigger ?? (
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন MikroTik</Button>
+        )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>MikroTik যোগ করুন</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? "MikroTik যোগ করুন" : "MikroTik এডিট"}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="col-span-2 space-y-1.5"><Label>নাম *</Label>
             <Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Main Router" /></div>
@@ -161,8 +190,8 @@ function NewMikrotikDialog({ onCreated }: { onCreated: () => void }) {
             <Input type="number" value={f.api_port} onChange={(e) => setF({ ...f, api_port: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>ইউজারনেম *</Label>
             <Input required value={f.username} onChange={(e) => setF({ ...f, username: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>পাসওয়ার্ড *</Label>
-            <Input required type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
+          <div className="space-y-1.5"><Label>পাসওয়ার্ড {mode === "create" ? "*" : "(পরিবর্তনে নতুন দিন)"}</Label>
+            <Input required={mode === "create"} type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
           <div className="col-span-2 space-y-1.5"><Label>নোট</Label>
             <Input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
           <DialogFooter className="col-span-2">
