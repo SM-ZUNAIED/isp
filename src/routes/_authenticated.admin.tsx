@@ -48,8 +48,10 @@ const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exac
   { to: "/admin/olt", label: "OLT / ONU", icon: Radio },
   { to: "/admin/accounts", label: "একাউন্টস", icon: Wallet },
   { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
+  { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
   { to: "/admin/notices", label: "নোটিশ", icon: Bell },
-  { to: "/admin/settings", label: "সেটিংস", icon: SettingsIcon },
+  { to: "/admin/users", label: "ইউজার ও রোল", icon: UserCog, adminOnly: true },
+  { to: "/admin/settings", label: "সেটিংস", icon: SettingsIcon, adminOnly: true },
 ];
 
 function AdminLayout() {
