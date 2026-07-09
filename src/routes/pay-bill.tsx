@@ -166,30 +166,7 @@ function PayBillPage() {
   };
 
 
-  const handlePay = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!invoice?.billId) return;
-    if ((method === "bkash" || method === "nagad" || method === "rocket") && !/^01[3-9]\d{8}$/.test(msisdn)) {
-      return toast.error(t("pay.err.mobile"));
-    }
-    setPaying(true);
-    try {
-      const res = await payFn({
-        data: {
-          bill_id: invoice.billId,
-          method,
-          transaction_id: txnId.trim() || null,
-          msisdn: method === "card" || method === "bank" ? null : msisdn,
-        },
-      });
-      setSuccess({ receipt: res.receipt, amount: res.amount });
-      toast.success(lang === "bn" ? "পেমেন্ট সফল হয়েছে" : "Payment successful");
-    } catch (err: any) {
-      toast.error(String(err?.message ?? err));
-    } finally {
-      setPaying(false);
-    }
-  };
+
 
   const resetAll = () => {
     setCustomerId("");
