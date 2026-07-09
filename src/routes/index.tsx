@@ -104,10 +104,10 @@ function LandingPage() {
           {/* Stats */}
           <div className="mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
             {[
-              { label: "গ্রাহক", value: "১০,০০০+", icon: Users },
-              { label: "কাভারেজ এলাকা", value: "৫০+", icon: MapPin },
-              { label: "আপটাইম", value: "৯৯.৯%", icon: TrendingUp },
-              { label: "সাপোর্ট", value: "২৪/৭", icon: Headphones },
+              { label: t("stats.customers"), value: t("stats.customersValue"), icon: Users },
+              { label: t("stats.coverage"), value: t("stats.coverageValue"), icon: MapPin },
+              { label: t("stats.uptime"), value: t("stats.uptimeValue"), icon: TrendingUp },
+              { label: t("stats.support"), value: t("stats.supportValue"), icon: Headphones },
             ].map((s) => (
               <div key={s.label} className="glass rounded-2xl p-6 text-center">
                 <s.icon className="mx-auto mb-2 h-6 w-6" />
@@ -123,17 +123,17 @@ function LandingPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">কেন আমরা সেরা?</h2>
-            <p className="mt-4 text-muted-foreground">প্রযুক্তি, গতি ও সেবায় আমরা সবার চেয়ে এগিয়ে</p>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("features.title")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("features.subtitle")}</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {[
-              { icon: Zap, title: "সুপার ফাস্ট স্পিড", desc: "আধুনিক ফাইবার অপটিক নেটওয়ার্কে গিগাবিট গতির ইন্টারনেট।", color: "bg-gradient-primary" },
-              { icon: Shield, title: "নিরাপদ কানেকশন", desc: "এন্টারপ্রাইজ-গ্রেড সিকিউরিটি এবং DDoS প্রোটেকশন।", color: "bg-gradient-accent" },
-              { icon: Signal, title: "স্থিতিশীল সংযোগ", desc: "রিডানডেন্ট আপলিংক ও ২৪/৭ মনিটরিং।", color: "bg-gradient-hero" },
-              { icon: Router, title: "মিকরোটিক অটোমেশন", desc: "সম্পূর্ণ অটোমেটিক PPPoE, Radius ও ব্যান্ডউইথ ব্যবস্থাপনা।", color: "bg-gradient-primary" },
-              { icon: Headphones, title: "২৪/৭ কাস্টমার কেয়ার", desc: "যেকোনো সমস্যায় তাৎক্ষণিক সাপোর্ট।", color: "bg-gradient-accent" },
-              { icon: Award, title: "সেরা মূল্য", desc: "বাজারের সেরা প্যাকেজ এবং অসীম ডেটা।", color: "bg-gradient-hero" },
+              { icon: Zap, title: t("features.speed.title"), desc: t("features.speed.desc"), color: "bg-gradient-primary" },
+              { icon: Shield, title: t("features.secure.title"), desc: t("features.secure.desc"), color: "bg-gradient-accent" },
+              { icon: Signal, title: t("features.stable.title"), desc: t("features.stable.desc"), color: "bg-gradient-hero" },
+              { icon: Router, title: t("features.mikrotik.title"), desc: t("features.mikrotik.desc"), color: "bg-gradient-primary" },
+              { icon: Headphones, title: t("features.care.title"), desc: t("features.care.desc"), color: "bg-gradient-accent" },
+              { icon: Award, title: t("features.price.title"), desc: t("features.price.desc"), color: "bg-gradient-hero" },
             ].map((f) => (
               <div key={f.title} className="group rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-1">
                 <div className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl ${f.color} shadow-glow`}>
@@ -151,8 +151,8 @@ function LandingPage() {
       <section id="packages" className="bg-muted/30 py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">আমাদের ইন্টারনেট প্যাকেজ</h2>
-            <p className="mt-4 text-muted-foreground">আপনার প্রয়োজন অনুযায়ী প্যাকেজ বেছে নিন</p>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("packages.title")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("packages.subtitle")}</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {packages.map((pkg) => (
@@ -164,7 +164,7 @@ function LandingPage() {
               >
                 {pkg.is_popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-accent px-4 py-1 text-xs font-bold text-accent-foreground shadow-soft">
-                    জনপ্রিয়
+                    {t("packages.popular")}
                   </div>
                 )}
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: pkg.color ?? "var(--gradient-primary)" }}>
@@ -173,16 +173,16 @@ function LandingPage() {
                 <h3 className="text-2xl font-bold">{pkg.name}</h3>
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">৳{Math.round(Number(pkg.monthly_price))}</span>
-                  <span className="text-muted-foreground">/মাস</span>
+                  <span className="text-muted-foreground">{t("packages.perMonth")}</span>
                 </div>
                 <ul className="mt-6 space-y-3 text-sm">
-                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> ডাউনলোড: {pkg.download_speed} Mbps</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> আপলোড: {pkg.upload_speed} Mbps</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> অসীম ব্যান্ডউইথ</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> ২৪/৭ সাপোর্ট</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.download")}: {pkg.download_speed} Mbps</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.upload")}: {pkg.upload_speed} Mbps</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.unlimited")}</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.support247")}</li>
                 </ul>
                 <Button className={`mt-6 w-full ${pkg.is_popular ? "bg-gradient-primary shadow-glow" : ""}`} variant={pkg.is_popular ? "default" : "outline"}>
-                  অর্ডার করুন
+                  {t("packages.order")}
                 </Button>
               </div>
             ))}
@@ -194,14 +194,14 @@ function LandingPage() {
       <section id="coverage" className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">আমাদের কাভারেজ এলাকা</h2>
-            <p className="mt-4 text-muted-foreground">সারা বাংলাদেশে ছড়িয়ে আছে আমাদের নেটওয়ার্ক</p>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("coverage.title")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("coverage.subtitle")}</p>
           </div>
           <div className="mt-12 grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {["ঢাকা", "চট্টগ্রাম", "রাজশাহী", "খুলনা", "সিলেট", "বরিশাল", "রংপুর", "ময়মনসিংহ"].map((city) => (
-              <div key={city} className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft transition-all hover:shadow-elevated">
+            {(["city.dhaka","city.chittagong","city.rajshahi","city.khulna","city.sylhet","city.barisal","city.rangpur","city.mymensingh"] as const).map((key) => (
+              <div key={key} className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft transition-all hover:shadow-elevated">
                 <MapPin className="h-5 w-5 text-primary" />
-                <span className="font-semibold">{city}</span>
+                <span className="font-semibold">{t(key)}</span>
               </div>
             ))}
           </div>
@@ -212,18 +212,18 @@ function LandingPage() {
       <section id="about" className="bg-muted/30 py-20">
         <div className="container mx-auto grid gap-12 px-4 md:grid-cols-2 md:items-center">
           <div>
-            <h2 className="text-3xl font-bold md:text-4xl">আমাদের সম্পর্কে</h2>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("about.title")}</h2>
             <p className="mt-4 text-muted-foreground">
-              {settings?.about_text ?? `${ispName} বাংলাদেশের একটি অগ্রণী ISP কোম্পানি। আমরা গত কয়েক বছর ধরে দেশের বিভিন্ন প্রান্তে দ্রুতগতির ইন্টারনেট সেবা প্রদান করে আসছি।`}
+              {settings?.about_text ?? `${ispName} — ${t("about.default")}`}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div className="rounded-2xl border bg-card p-4">
-                <div className="text-3xl font-bold text-primary">১০+</div>
-                <div className="text-sm text-muted-foreground">বছরের অভিজ্ঞতা</div>
+                <div className="text-3xl font-bold text-primary">{t("about.yearsValue")}</div>
+                <div className="text-sm text-muted-foreground">{t("about.years")}</div>
               </div>
               <div className="rounded-2xl border bg-card p-4">
-                <div className="text-3xl font-bold text-secondary">১০০+</div>
-                <div className="text-sm text-muted-foreground">টেকনিক্যাল টিম</div>
+                <div className="text-3xl font-bold text-secondary">{t("about.teamValue")}</div>
+                <div className="text-sm text-muted-foreground">{t("about.team")}</div>
               </div>
             </div>
           </div>
@@ -239,30 +239,31 @@ function LandingPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">গ্রাহকদের মতামত</h2>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("reviews.title")}</h2>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              { name: "মোঃ রফিকুল ইসলাম", loc: "ঢাকা", text: "দুর্দান্ত সেবা! কোনো ডাউনটাইম নেই। ২৪ ঘণ্টা সাপোর্ট সবসময় পাওয়া যায়।" },
-              { name: "সাবরিনা আক্তার", loc: "চট্টগ্রাম", text: "স্পিড অসাধারণ। বাসায় সবাই একসাথে ব্যবহার করেও কোনো সমস্যা হয় না।" },
-              { name: "মোঃ কামাল হোসেন", loc: "সিলেট", text: "বিলিং সিস্টেম খুব সহজ। বিকাশ থেকে সরাসরি পেমেন্ট করা যায়।" },
-            ].map((r) => (
-              <div key={r.name} className="rounded-3xl border bg-gradient-card p-6 shadow-soft">
-                <div className="flex gap-1 text-warning">
-                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
-                </div>
-                <p className="mt-4 text-muted-foreground">"{r.text}"</p>
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground font-bold">
-                    {r.name.charAt(0)}
+            {([1, 2, 3] as const).map((i) => {
+              const name = t(`reviews.${i}.name` as const);
+              const loc = t(`reviews.${i}.loc` as const);
+              const text = t(`reviews.${i}.text` as const);
+              return (
+                <div key={i} className="rounded-3xl border bg-gradient-card p-6 shadow-soft">
+                  <div className="flex gap-1 text-warning">
+                    {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}
                   </div>
-                  <div>
-                    <div className="font-semibold">{r.name}</div>
-                    <div className="text-xs text-muted-foreground">{r.loc}</div>
+                  <p className="mt-4 text-muted-foreground">"{text}"</p>
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground font-bold">
+                      {name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-semibold">{name}</div>
+                      <div className="text-xs text-muted-foreground">{loc}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -271,21 +272,16 @@ function LandingPage() {
       <section id="faq" className="bg-muted/30 py-20">
         <div className="container mx-auto max-w-3xl px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">প্রশ্ন ও উত্তর</h2>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("faq.title")}</h2>
           </div>
           <div className="mt-12 space-y-4">
-            {[
-              { q: "কানেকশন নিতে কত সময় লাগে?", a: "সাধারণত ২৪-৪৮ ঘণ্টার মধ্যে ইনস্টলেশন সম্পন্ন হয়।" },
-              { q: "কীভাবে বিল পরিশোধ করব?", a: "বিকাশ, নগদ, রকেট বা ব্যাংক ট্রান্সফারের মাধ্যমে সহজেই বিল দিতে পারবেন।" },
-              { q: "সাপোর্ট কীভাবে পাব?", a: "হটলাইন, WhatsApp, অথবা কাস্টমার পোর্টালে টিকিট সাবমিট করে সাপোর্ট নিতে পারবেন।" },
-              { q: "প্যাকেজ পরিবর্তন করতে পারব?", a: "হ্যাঁ, যেকোনো সময় প্যাকেজ আপগ্রেড বা ডাউনগ্রেড করা যাবে।" },
-            ].map((item) => (
-              <details key={item.q} className="group rounded-2xl border bg-card p-5 shadow-soft">
+            {([1, 2, 3, 4] as const).map((i) => (
+              <details key={i} className="group rounded-2xl border bg-card p-5 shadow-soft">
                 <summary className="flex cursor-pointer items-center justify-between font-semibold">
-                  {item.q}
+                  {t(`faq.${i}.q` as const)}
                   <ChevronRight className="h-5 w-5 transition-transform group-open:rotate-90" />
                 </summary>
-                <p className="mt-3 text-muted-foreground">{item.a}</p>
+                <p className="mt-3 text-muted-foreground">{t(`faq.${i}.a` as const)}</p>
               </details>
             ))}
           </div>
@@ -298,8 +294,8 @@ function LandingPage() {
           <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-hero p-8 text-primary-foreground shadow-elevated md:p-12">
             <div className="grid gap-8 md:grid-cols-2 md:items-center">
               <div>
-                <h2 className="text-3xl font-bold md:text-4xl">যোগাযোগ করুন</h2>
-                <p className="mt-4 opacity-90">আজই কানেকশন নিতে আমাদের সাথে যোগাযোগ করুন</p>
+                <h2 className="text-3xl font-bold md:text-4xl">{t("contact.title")}</h2>
+                <p className="mt-4 opacity-90">{t("contact.subtitle")}</p>
                 <div className="mt-6 space-y-3">
                   <div className="flex items-center gap-3"><Phone className="h-5 w-5" /> {hotline}</div>
                   <div className="flex items-center gap-3"><MessageCircle className="h-5 w-5" /> WhatsApp: {whatsapp}</div>
@@ -308,12 +304,12 @@ function LandingPage() {
                 </div>
               </div>
               <div className="glass rounded-2xl p-6">
-                <h3 className="text-xl font-bold">দ্রুত অনুসন্ধান</h3>
+                <h3 className="text-xl font-bold">{t("contact.quickInquiry")}</h3>
                 <form className="mt-4 space-y-3">
-                  <input placeholder="আপনার নাম" className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input placeholder="মোবাইল নম্বর" className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input placeholder="ঠিকানা" className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <Button type="button" className="w-full bg-background text-foreground hover:bg-background/90">অনুসন্ধান করুন</Button>
+                  <input placeholder={t("contact.name")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <input placeholder={t("contact.phone")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <input placeholder={t("contact.address")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <Button type="button" className="w-full bg-background text-foreground hover:bg-background/90">{t("contact.submit")}</Button>
                 </form>
               </div>
             </div>
@@ -325,7 +321,7 @@ function LandingPage() {
       {notices.length > 0 && (
         <section className="border-y bg-warning/10 py-4">
           <div className="container mx-auto flex items-center gap-4 px-4">
-            <span className="rounded-full bg-warning px-3 py-1 text-xs font-bold text-warning-foreground">নোটিশ</span>
+            <span className="rounded-full bg-warning px-3 py-1 text-xs font-bold text-warning-foreground">{t("notice")}</span>
             <div className="flex-1 overflow-hidden">
               <div className="whitespace-nowrap">{notices.map(n => n.title).join(" • ")}</div>
             </div>
@@ -343,34 +339,34 @@ function LandingPage() {
               </div>
               <span className="text-xl font-bold">{ispName}</span>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">বাংলাদেশের সেরা ISP সেবাদাতা প্রতিষ্ঠান।</p>
+            <p className="mt-4 text-sm text-muted-foreground">{t("footer.tagline")}</p>
           </div>
           <div>
-            <h4 className="font-bold">দ্রুত লিংক</h4>
+            <h4 className="font-bold">{t("footer.quickLinks")}</h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <li><a href="#packages" className="hover:text-primary">প্যাকেজ</a></li>
-              <li><a href="#coverage" className="hover:text-primary">কাভারেজ</a></li>
-              <li><a href="#faq" className="hover:text-primary">প্রশ্ন-উত্তর</a></li>
-              <li><Link to="/auth" className="hover:text-primary">কাস্টমার লগইন</Link></li>
+              <li><a href="#packages" className="hover:text-primary">{t("nav.packages")}</a></li>
+              <li><a href="#coverage" className="hover:text-primary">{t("nav.coverage")}</a></li>
+              <li><a href="#faq" className="hover:text-primary">{t("nav.faq")}</a></li>
+              <li><Link to="/auth" className="hover:text-primary">{t("nav.login")}</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold">যোগাযোগ</h4>
+            <h4 className="font-bold">{t("footer.contact")}</h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <li>হটলাইন: {hotline}</li>
+              <li>{t("contact.hotline")}: {hotline}</li>
               <li>WhatsApp: {whatsapp}</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold">ডেভেলপার</h4>
+            <h4 className="font-bold">{t("footer.developer")}</h4>
             <p className="mt-4 text-sm text-muted-foreground">
-              Made by <a href="https://www.technonex.net/" target="_blank" rel="noreferrer" className="font-semibold text-primary hover:underline">TechnoNex</a>
+              {t("footer.madeBy")} <a href="https://www.technonex.net/" target="_blank" rel="noreferrer" className="font-semibold text-primary hover:underline">TechnoNex</a>
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">Hotline: 01339562416</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("contact.hotline")}: 01339562416</p>
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} {ispName}. সর্বস্বত্ব সংরক্ষিত।
+          © {new Date().getFullYear()} {ispName}. {t("footer.rights")}
         </div>
       </footer>
 
@@ -388,7 +384,7 @@ function LandingPage() {
         to="/pay-bill"
         className="fixed bottom-6 left-6 z-50 flex items-center gap-2 rounded-full bg-gradient-accent px-5 py-3 font-bold text-accent-foreground shadow-glow"
       >
-        <Zap className="h-5 w-5" /> বিল পরিশোধ
+        <Zap className="h-5 w-5" /> {t("nav.payBill")}
       </Link>
     </div>
   );
