@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import {
   Loader2, LogOut, Receipt, Wifi, User, Wallet, Ticket as TicketIcon,
   ArrowLeft, MapPin, Zap, Calendar, Phone, Mail, Home, ArrowUpCircle,
-  MessageCircle, CheckCircle2, Clock, AlertCircle, Send, CreditCard,
+  MessageCircle, CheckCircle2, Clock, AlertCircle, Send, CreditCard, Pencil, Save, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { getCustomerPortal, submitCustomerRequest } from "@/lib/support.functions";
+import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/_authenticated/customer")({
   head: () => ({ meta: [{ title: "কাস্টমার পোর্টাল — Net Bill Pro" }] }),
@@ -149,24 +149,10 @@ function CustomerPortal() {
 
           {/* OVERVIEW */}
           <TabsContent value="overview" className="mt-4 space-y-4">
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />প্রোফাইল তথ্য</CardTitle></CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <InfoRow icon={User} label="নাম" value={c.full_name} />
-                <InfoRow icon={Phone} label="মোবাইল" value={c.mobile} />
-                {c.alt_mobile && <InfoRow icon={Phone} label="বিকল্প মোবাইল" value={c.alt_mobile} />}
-                {c.email && <InfoRow icon={Mail} label="ইমেইল" value={c.email} />}
-                <InfoRow icon={Home} label="ঠিকানা" value={c.address ?? "—"} />
-                <InfoRow icon={MapPin} label="এরিয়া / জোন" value={c.zones?.name ?? "—"} />
-                <InfoRow icon={Wifi} label="প্যাকেজ" value={
-                  c.packages ? `${c.packages.name} (${c.packages.download_speed}/${c.packages.upload_speed} Mbps)` : "—"
-                } />
-                {c.pppoe_username && <InfoRow icon={Zap} label="PPPoE ইউজার" value={c.pppoe_username} mono />}
-                <InfoRow icon={Calendar} label="সংযোগ তারিখ" value={c.connection_date ? new Date(c.connection_date).toLocaleDateString("bn-BD") : "—"} />
-                <InfoRow icon={Calendar} label="মেয়াদ শেষ" value={expiryDate ? expiryDate.toLocaleDateString("bn-BD") : "—"} />
-                <InfoRow icon={CheckCircle2} label="স্ট্যাটাস" value={c.status} />
-              </CardContent>
-            </Card>
+            <ProfileCard
+              customer={c}
+              onSaved={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
+            />
           </TabsContent>
 
           {/* BILLS */}
