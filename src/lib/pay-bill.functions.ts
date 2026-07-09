@@ -56,3 +56,29 @@ export const submitPublicPayment = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return res as { ok: boolean; receipt: string; amount: number; status: string };
   });
+
+/** Public receipt lookup by receipt number (shareable link). */
+export const getPublicReceipt = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ receipt_number: z.string().trim().min(4).max(64) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const supabase = publicClient();
+    const { data: res, error } = await supabase.rpc("public_get_receipt", {
+      _receipt: data.receipt_number,
+    });
+    if (error) throw new Error(error.message);
+    if (!res) throw new Error("NOT_FOUND");
+    return res as {
+      receipt_number: string;
+      paid_at: string;
+      amount: number;
+      method: string;
+      transaction_id: string | null;
+      notes: string | null;
+      customer: { name: string; code: string; mobile: string; package: string | null };
+      bill: null | { number: string; month: string; amount: number; due: number; status: string };
+      isp: { name: string | null; hotline: string | null };
+    };
+  });
+
