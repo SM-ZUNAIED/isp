@@ -370,12 +370,14 @@ function PayBillPage() {
                       </Label>
                       <Input
                         value={msisdn}
-                        onChange={(e) => setMsisdn(e.target.value)}
+                        onChange={(e) => { setMsisdn(e.target.value); setFieldErrors((f) => ({ ...f, msisdn: undefined })); }}
                         inputMode="numeric"
                         maxLength={11}
                         placeholder="01XXXXXXXXX"
-                        className="h-12 text-base tracking-wider"
+                        className={`h-12 text-base tracking-wider ${fieldErrors.msisdn ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                        aria-invalid={!!fieldErrors.msisdn}
                       />
+                      {fieldErrors.msisdn && <p className="text-xs text-destructive">{fieldErrors.msisdn}</p>}
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-medium">
@@ -383,11 +385,14 @@ function PayBillPage() {
                       </Label>
                       <Input
                         value={txnId}
-                        onChange={(e) => setTxnId(e.target.value)}
+                        onChange={(e) => { setTxnId(e.target.value); setFieldErrors((f) => ({ ...f, txnId: undefined })); }}
                         placeholder={lang === "bn" ? "যেমন 8N7A1B2C3D" : "e.g. 8N7A1B2C3D"}
-                        className="h-12 text-base tracking-wider uppercase"
+                        className={`h-12 text-base tracking-wider uppercase ${fieldErrors.txnId ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                        aria-invalid={!!fieldErrors.txnId}
                       />
+                      {fieldErrors.txnId && <p className="text-xs text-destructive">{fieldErrors.txnId}</p>}
                     </div>
+
                   </>
                 )}
                 {method === "card" && (
