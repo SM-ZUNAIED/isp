@@ -104,6 +104,23 @@ export const toggleNotice = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updateNotice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      title: z.string().min(1),
+      body: z.string().optional().nullable(),
+      is_active: z.boolean().default(true),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { id, ...patch } = data;
+    const { error } = await context.supabase.from("notices").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteNotice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
@@ -150,6 +167,22 @@ export const addExpense = createServerFn({ method: "POST" })
     const { error } = await context.supabase.from("expenses").insert({
       ...data, created_by: context.userId,
     });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateEntry = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    EntryInput.extend({
+      id: z.string().uuid(),
+      kind: z.enum(["income", "expense"]),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { id, kind, ...patch } = data;
+    const table = kind === "income" ? "incomes" : "expenses";
+    const { error } = await context.supabase.from(table).update(patch).eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

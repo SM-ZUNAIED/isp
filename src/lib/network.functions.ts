@@ -53,6 +53,16 @@ export const pingMikrotik = createServerFn({ method: "POST" })
     return { online };
   });
 
+export const updateMikrotik = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => MtInput.extend({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { id, ...patch } = data;
+    const { error } = await context.supabase.from("mikrotiks").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteMikrotik = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
@@ -93,6 +103,16 @@ export const createOlt = createServerFn({ method: "POST" })
       .from("olts").insert(data).select().single();
     if (error) throw new Error(error.message);
     return row;
+  });
+
+export const updateOlt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => OltInput.extend({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { id, ...patch } = data;
+    const { error } = await context.supabase.from("olts").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const deleteOlt = createServerFn({ method: "POST" })
@@ -145,6 +165,16 @@ export const toggleOnu = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase
       .from("onus").update({ is_enabled: data.is_enabled }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateOnu = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => OnuInput.extend({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { id, ...patch } = data;
+    const { error } = await context.supabase.from("onus").update(patch).eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

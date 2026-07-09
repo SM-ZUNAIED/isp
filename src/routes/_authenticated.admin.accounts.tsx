@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Loader2, Plus, Trash2, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Loader2, Plus, Trash2, TrendingUp, TrendingDown, Wallet, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  listAccounts, addIncome, addExpense, deleteEntry,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
+
+type EntryRow = { id: string; amount: number; category: string; description: string | null; entry_date: string };
 
 export const Route = createFileRoute("/_authenticated/admin/accounts")({
   head: () => ({ meta: [{ title: "একাউন্টস — Net Bill Pro" }] }),
@@ -164,7 +169,8 @@ function EntrySection({
                     <TableCell className="font-medium">{r.category}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{r.description ?? "—"}</TableCell>
                     <TableCell className="text-right font-semibold">{bn.format(Number(r.amount))}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-1 whitespace-nowrap">
+                      <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => delMut.mutate(r.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -177,5 +183,60 @@ function EntrySection({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function EditEntryDialog({
+  kind, row, onSaved,
+}: {
+  kind: "income" | "expense";
+  row: EntryRow;
+  onSaved: () => void;
+}) {
+  const update = useServerFn(updateEntry);
+  const [open, setOpen] = useState(false);
+  const [amount, setAmount] = useState(String(row.amount));
+  const [category, setCategory] = useState(row.category);
+  const [description, setDescription] = useState(row.description ?? "");
+  const [date, setDate] = useState(row.entry_date);
+  const mut = useMutation({
+    mutationFn: () => update({
+      data: {
+        id: row.id, kind,
+        amount: Number(amount), category: category.trim(),
+        description: description || null, entry_date: date,
+      },
+    }),
+    onSuccess: () => { toast.success("আপডেট হয়েছে"); setOpen(false); onSaved(); },
+    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+  });
+  return (
+    <Dialog open={open} onOpenChange={(v) => {
+      setOpen(v);
+      if (v) { setAmount(String(row.amount)); setCategory(row.category); setDescription(row.description ?? ""); setDate(row.entry_date); }
+    }}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost"><Pencil className="h-4 w-4" /></Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>এন্ট্রি এডিট</DialogTitle></DialogHeader>
+        <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="grid grid-cols-2 gap-3">
+          <div className="space-y-1"><Label className="text-xs">টাকা (৳)</Label>
+            <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
+          <div className="space-y-1"><Label className="text-xs">তারিখ</Label>
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">বিভাগ</Label>
+            <Input required value={category} onChange={(e) => setCategory(e.target.value)} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">বর্ণনা</Label>
+            <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <DialogFooter className="col-span-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

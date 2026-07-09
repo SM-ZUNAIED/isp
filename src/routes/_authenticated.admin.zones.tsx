@@ -2,17 +2,23 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Plus, Loader2, Trash2, MapPin } from "lucide-react";
+import { Plus, Loader2, Trash2, MapPin, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { listZones, createZone, deleteZone } from "@/lib/catalog.functions";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import { listZones, createZone, updateZone, deleteZone } from "@/lib/catalog.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/zones")({
   head: () => ({ meta: [{ title: "জোন — Net Bill Pro" }] }),
   component: ZonesPage,
 });
+
+type ZoneRow = { id: string; name: string; description?: string | null };
 
 function ZonesPage() {
   const qc = useQueryClient();
@@ -73,10 +79,13 @@ function ZonesPage() {
                     <div className="text-xs text-muted-foreground">{z.description || "—"}</div>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="text-destructive"
-                  onClick={() => delMut.mutate(z.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-1">
+                  <EditZoneDialog zone={z as ZoneRow} onSaved={invalidate} />
+                  <Button variant="ghost" size="icon" className="text-destructive"
+                    onClick={() => delMut.mutate(z.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -86,5 +95,39 @@ function ZonesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function EditZoneDialog({ zone, onSaved }: { zone: ZoneRow; onSaved: () => void }) {
+  const update = useServerFn(updateZone);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(zone.name);
+  const [desc, setDesc] = useState(zone.description ?? "");
+  const mut = useMutation({
+    mutationFn: () => update({ data: { id: zone.id, name: name.trim(), description: desc || null } }),
+    onSuccess: () => { toast.success("আপডেট হয়েছে"); setOpen(false); onSaved(); },
+    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+  });
+  return (
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) { setName(zone.name); setDesc(zone.description ?? ""); } }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>জোন এডিট</DialogTitle></DialogHeader>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
+          <div className="space-y-1.5"><Label>নাম *</Label>
+            <Input required value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div className="space-y-1.5"><Label>বর্ণনা</Label>
+            <Input value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="submit" className="bg-gradient-primary text-white" disabled={mut.isPending}>
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

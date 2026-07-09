@@ -51,6 +51,16 @@ export const togglePackage = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updatePackage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => PkgInput.extend({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { id, ...patch } = data;
+    const { error } = await context.supabase.from("packages").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deletePackage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
@@ -84,6 +94,22 @@ export const createZone = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return row;
+  });
+
+export const updateZone = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      name: z.string().min(1),
+      description: z.string().optional().nullable(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { id, ...patch } = data;
+    const { error } = await context.supabase.from("zones").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const deleteZone = createServerFn({ method: "POST" })
