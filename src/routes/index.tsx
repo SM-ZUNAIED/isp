@@ -6,6 +6,8 @@ import {
   ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/use-i18n";
+import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 
 const landingQuery = queryOptions({
   queryKey: ["landing"],
