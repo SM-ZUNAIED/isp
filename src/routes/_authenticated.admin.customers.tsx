@@ -1,0 +1,348 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useMemo, useState } from "react";
+import { Plus, Search, Loader2, Trash2, Power, PowerOff } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  listCustomers, createCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
+} from "@/lib/customers.functions";
+
+export const Route = createFileRoute("/_authenticated/admin/customers")({
+  head: () => ({ meta: [{ title: "কাস্টমার — Net Bill Pro" }] }),
+  component: CustomersPage,
+});
+
+const bn = new Intl.NumberFormat("bn-BD");
+const STATUS_LABEL: Record<string, string> = {
+  active: "সক্রিয়", pending: "অপেক্ষমাণ", suspended: "স্থগিত", expired: "মেয়াদ শেষ",
+};
+const STATUS_TONE: Record<string, string> = {
+  active: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  pending: "bg-amber-100 text-amber-700 border-amber-200",
+  suspended: "bg-rose-100 text-rose-700 border-rose-200",
+  expired: "bg-slate-200 text-slate-700 border-slate-300",
+};
+
+function CustomersPage() {
+  const qc = useQueryClient();
+  const list = useServerFn(listCustomers);
+  const opts = useServerFn(listPackagesAndZones);
+  const setStatus = useServerFn(updateCustomerStatus);
+  const del = useServerFn(deleteCustomer);
+
+  const [q, setQ] = useState("");
+
+  const customersQ = useQuery({ queryKey: ["customers"], queryFn: () => list() });
+  const optsQ = useQuery({ queryKey: ["catalog", "customers-opts"], queryFn: () => opts() });
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["customers"] });
+
+  const statusMut = useMutation({
+    mutationFn: (v: { id: string; status: "active" | "pending" | "suspended" | "expired" }) =>
+      setStatus({ data: v }),
+    onSuccess: () => { toast.success("স্ট্যাটাস আপডেট হয়েছে"); invalidate(); },
+    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+  });
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => del({ data: { id } }),
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
+    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+  });
+
+  const rows = useMemo(() => {
+    const all = customersQ.data ?? [];
+    if (!q.trim()) return all;
+    const s = q.toLowerCase();
+    return all.filter(
+      (r) =>
+        r.full_name?.toLowerCase().includes(s) ||
+        r.customer_code?.toLowerCase().includes(s) ||
+        r.mobile?.toLowerCase().includes(s),
+    );
+  }, [customersQ.data, q]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">কাস্টমার ব্যবস্থাপনা</h1>
+          <p className="text-muted-foreground">মোট {bn.format(customersQ.data?.length ?? 0)} জন কাস্টমার</p>
+        </div>
+        <NewCustomerDialog
+          packages={optsQ.data?.packages ?? []}
+          zones={optsQ.data?.zones ?? []}
+          onCreated={invalidate}
+        />
+      </div>
+
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="নাম, কোড বা মোবাইল দিয়ে খুঁজুন..."
+              className="pl-9"
+            />
+          </div>
+
+          <div className="rounded-xl border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>কোড</TableHead>
+                  <TableHead>নাম</TableHead>
+                  <TableHead>মোবাইল</TableHead>
+                  <TableHead>প্যাকেজ</TableHead>
+                  <TableHead>জোন</TableHead>
+                  <TableHead className="text-right">বিল (৳)</TableHead>
+                  <TableHead>স্ট্যাটাস</TableHead>
+                  <TableHead className="text-right">অ্যাকশন</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customersQ.isLoading && (
+                  <TableRow><TableCell colSpan={8} className="py-10 text-center">
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
+                  </TableCell></TableRow>
+                )}
+                {!customersQ.isLoading && rows.length === 0 && (
+                  <TableRow><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                    কোনো কাস্টমার নেই। উপরে "নতুন কাস্টমার" বাটনে ক্লিক করে যোগ করুন।
+                  </TableCell></TableRow>
+                )}
+                {rows.map((r) => {
+                  const isActive = r.status === "active";
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-mono text-xs">{r.customer_code}</TableCell>
+                      <TableCell className="font-medium">{r.full_name}</TableCell>
+                      <TableCell>{r.mobile}</TableCell>
+                      <TableCell>{r.packages?.name ?? "—"}</TableCell>
+                      <TableCell>{r.zones?.name ?? "—"}</TableCell>
+                      <TableCell className="text-right">{bn.format(Number(r.monthly_bill ?? 0))}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={STATUS_TONE[r.status]}>
+                          {STATUS_LABEL[r.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right space-x-1 whitespace-nowrap">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            statusMut.mutate({
+                              id: r.id,
+                              status: isActive ? "suspended" : "active",
+                            })
+                          }
+                          disabled={statusMut.isPending}
+                        >
+                          {isActive ? (
+                            <><PowerOff className="h-4 w-4 mr-1" /> স্থগিত</>
+                          ) : (
+                            <><Power className="h-4 w-4 mr-1" /> সক্রিয়</>
+                          )}
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>মুছে ফেলবেন?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                "{r.full_name}" এর সব তথ্য মুছে যাবে। এটি ফেরানো যাবে না।
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteMut.mutate(r.id)}>
+                                মুছে ফেলুন
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function NewCustomerDialog({
+  packages, zones, onCreated,
+}: {
+  packages: Array<{ id: string; name: string; monthly_price: number }>;
+  zones: Array<{ id: string; name: string }>;
+  onCreated: () => void;
+}) {
+  const create = useServerFn(createCustomer);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    customer_code: "",
+    full_name: "",
+    mobile: "",
+    address: "",
+    package_id: "",
+    zone_id: "",
+    monthly_bill: "0",
+    status: "pending" as "pending" | "active" | "suspended" | "expired",
+    pppoe_username: "",
+    pppoe_password: "",
+  });
+
+  const mut = useMutation({
+    mutationFn: () => create({
+      data: {
+        customer_code: form.customer_code.trim(),
+        full_name: form.full_name.trim(),
+        mobile: form.mobile.trim(),
+        address: form.address || null,
+        package_id: form.package_id || null,
+        zone_id: form.zone_id || null,
+        monthly_bill: Number(form.monthly_bill) || 0,
+        status: form.status,
+        pppoe_username: form.pppoe_username || null,
+        pppoe_password: form.pppoe_password || null,
+      },
+    }),
+    onSuccess: () => {
+      toast.success("কাস্টমার যুক্ত হয়েছে");
+      setOpen(false);
+      setForm({
+        customer_code: "", full_name: "", mobile: "", address: "", package_id: "",
+        zone_id: "", monthly_bill: "0", status: "pending", pppoe_username: "", pppoe_password: "",
+      });
+      onCreated();
+    },
+    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-gradient-primary text-white shadow-soft">
+          <Plus className="mr-2 h-4 w-4" /> নতুন কাস্টমার
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>নতুন কাস্টমার যোগ করুন</DialogTitle>
+        </DialogHeader>
+        <form
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}
+        >
+          <Field label="কাস্টমার কোড *">
+            <Input required value={form.customer_code}
+              onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
+          </Field>
+          <Field label="পূর্ণ নাম *">
+            <Input required value={form.full_name}
+              onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+          </Field>
+          <Field label="মোবাইল *">
+            <Input required value={form.mobile}
+              onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
+          </Field>
+          <Field label="মাসিক বিল (৳)">
+            <Input type="number" min={0} value={form.monthly_bill}
+              onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
+          </Field>
+          <Field label="প্যাকেজ">
+            <Select value={form.package_id}
+              onValueChange={(v) => {
+                const p = packages.find((x) => x.id === v);
+                setForm({ ...form, package_id: v, monthly_bill: p ? String(p.monthly_price) : form.monthly_bill });
+              }}>
+              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+              <SelectContent>
+                {packages.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name} — ৳{p.monthly_price}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="জোন">
+            <Select value={form.zone_id} onValueChange={(v) => setForm({ ...form, zone_id: v })}>
+              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+              <SelectContent>
+                {zones.map((z) => (<SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="PPPoE Username">
+            <Input value={form.pppoe_username}
+              onChange={(e) => setForm({ ...form, pppoe_username: e.target.value })} />
+          </Field>
+          <Field label="PPPoE Password">
+            <Input value={form.pppoe_password}
+              onChange={(e) => setForm({ ...form, pppoe_password: e.target.value })} />
+          </Field>
+          <Field label="স্ট্যাটাস">
+            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as typeof form.status })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
+                <SelectItem value="active">সক্রিয়</SelectItem>
+                <SelectItem value="suspended">স্থগিত</SelectItem>
+                <SelectItem value="expired">মেয়াদ শেষ</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <div className="sm:col-span-2">
+            <Field label="ঠিকানা">
+              <Input value={form.address}
+                onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            </Field>
+          </div>
+          <DialogFooter className="sm:col-span-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              সংরক্ষণ করুন
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium">{label}</Label>
+      {children}
+    </div>
+  );
+}
