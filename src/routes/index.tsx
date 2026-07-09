@@ -1,13 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useRef, useState } from "react";
 import { getLandingData } from "@/lib/landing.functions";
+import { submitInquiry } from "@/lib/inquiry.functions";
 import {
   Wifi, Zap, Shield, Users, Award, Phone, MapPin, Mail, MessageCircle,
-  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp,
+  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import { toast } from "sonner";
 
 const landingQuery = queryOptions({
   queryKey: ["landing"],
@@ -36,6 +40,11 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
+function scrollToId(id: string) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
@@ -44,6 +53,56 @@ function LandingPage() {
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
   const whatsapp = settings?.whatsapp ?? "01339562416";
+
+  const submitInquiryFn = useServerFn(submitInquiry);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleOrder = (pkg: { id: string; name: string }) => {
+    setSelectedPkg({ id: pkg.id, name: pkg.name });
+    toast.success(`${pkg.name} — ${t("contact.subtitle")}`);
+    setTimeout(() => {
+      scrollToId("contact");
+      messageRef.current?.focus();
+    }, 100);
+  };
+
+  const handleInquiry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = nameRef.current?.value.trim() ?? "";
+    const phone = phoneRef.current?.value.trim() ?? "";
+    const address = addressRef.current?.value.trim() ?? "";
+    const message = messageRef.current?.value.trim() ?? "";
+    if (name.length < 2) return toast.error("নাম দিন / Enter your name");
+    if (!/^01[3-9][0-9]{8}$/.test(phone)) return toast.error("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)");
+    setSubmitting(true);
+    try {
+      await submitInquiryFn({
+        data: {
+          name, phone,
+          address: address || null,
+          package_id: selectedPkg?.id ?? null,
+          package_name: selectedPkg?.name ?? null,
+          message: message || null,
+        },
+      });
+      toast.success("আপনার তথ্য গ্রহণ করা হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।");
+      if (nameRef.current) nameRef.current.value = "";
+      if (phoneRef.current) phoneRef.current.value = "";
+      if (addressRef.current) addressRef.current.value = "";
+      if (messageRef.current) messageRef.current.value = "";
+      setSelectedPkg(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to submit");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,10 +151,10 @@ function LandingPage() {
               {settings?.hero_subtitle ?? t("hero.subtitle")}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
+              <Button size="lg" onClick={() => scrollToId("packages")} className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
                 {t("hero.cta1")} <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20">
+              <Button size="lg" variant="outline" onClick={() => scrollToId("coverage")} className="border-white/40 bg-white/10 text-white hover:bg-white/20">
                 {t("hero.cta2")}
               </Button>
             </div>
@@ -181,7 +240,7 @@ function LandingPage() {
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.unlimited")}</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.support247")}</li>
                 </ul>
-                <Button className={`mt-6 w-full ${pkg.is_popular ? "bg-gradient-primary shadow-glow" : ""}`} variant={pkg.is_popular ? "default" : "outline"}>
+                <Button onClick={() => handleOrder({ id: pkg.id, name: pkg.name })} className={`mt-6 w-full ${pkg.is_popular ? "bg-gradient-primary shadow-glow" : ""}`} variant={pkg.is_popular ? "default" : "outline"}>
                   {t("packages.order")}
                 </Button>
               </div>
@@ -305,11 +364,20 @@ function LandingPage() {
               </div>
               <div className="glass rounded-2xl p-6">
                 <h3 className="text-xl font-bold">{t("contact.quickInquiry")}</h3>
-                <form className="mt-4 space-y-3">
-                  <input placeholder={t("contact.name")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input placeholder={t("contact.phone")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input placeholder={t("contact.address")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <Button type="button" className="w-full bg-background text-foreground hover:bg-background/90">{t("contact.submit")}</Button>
+                {selectedPkg && (
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {selectedPkg.name}
+                    <button type="button" onClick={() => setSelectedPkg(null)} className="ml-1 opacity-70 hover:opacity-100">×</button>
+                  </div>
+                )}
+                <form onSubmit={handleInquiry} className="mt-4 space-y-3">
+                  <input ref={nameRef} required maxLength={100} placeholder={t("contact.name")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <input ref={phoneRef} required maxLength={11} inputMode="tel" pattern="01[3-9][0-9]{8}" placeholder={t("contact.phone")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <input ref={addressRef} maxLength={300} placeholder={t("contact.address")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <textarea ref={messageRef} maxLength={1000} rows={3} placeholder="Message (optional)" className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30 resize-none" />
+                  <Button type="submit" disabled={submitting} className="w-full bg-background text-foreground hover:bg-background/90">
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("contact.submit")}
+                  </Button>
                 </form>
               </div>
             </div>
@@ -319,11 +387,13 @@ function LandingPage() {
 
       {/* Notices ticker */}
       {notices.length > 0 && (
-        <section className="border-y bg-warning/10 py-4">
+        <section className="border-y bg-warning/10 py-4 overflow-hidden">
           <div className="container mx-auto flex items-center gap-4 px-4">
-            <span className="rounded-full bg-warning px-3 py-1 text-xs font-bold text-warning-foreground">{t("notice")}</span>
+            <span className="shrink-0 rounded-full bg-warning px-3 py-1 text-xs font-bold text-warning-foreground">{t("notice")}</span>
             <div className="flex-1 overflow-hidden">
-              <div className="whitespace-nowrap">{notices.map(n => n.title).join(" • ")}</div>
+              <div className="whitespace-nowrap animate-marquee inline-block">
+                {notices.map(n => n.title).join("  •  ")}  •  {notices.map(n => n.title).join("  •  ")}
+              </div>
             </div>
           </div>
         </section>

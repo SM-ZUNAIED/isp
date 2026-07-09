@@ -247,6 +247,50 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          message: string | null
+          name: string
+          package_id: string | null
+          package_name: string | null
+          phone: string
+          status: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          name: string
+          package_id?: string | null
+          package_name?: string | null
+          phone: string
+          status?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          name?: string
+          package_id?: string | null
+          package_name?: string | null
+          phone?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mikrotiks: {
         Row: {
           api_port: number | null
