@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
@@ -51,8 +51,6 @@ function LandingPage() {
   const { settings, packages, notices } = data;
   const { t } = useI18n();
   const { session } = useAuth();
-  const navigate = useNavigate();
-  void navigate;
 
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
