@@ -75,7 +75,7 @@ function CustomerPortal() {
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" asChild><Link to="/">হোম</Link></Button>
-            <Button variant="secondary" size="sm" onClick={handleLogout}><LogOut className="h-4 w-4" /></Button>
+            <Button size="sm" onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:brightness-110"><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
           </div>
         </div>
       </header>
