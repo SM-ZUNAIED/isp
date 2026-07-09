@@ -5,8 +5,9 @@ import { z } from "zod";
 
 import {
   ArrowLeft, Wifi, Search, Shield, CheckCircle2, Loader2,
-  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle,
+  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle, AlertCircle,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
