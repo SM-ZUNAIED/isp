@@ -849,6 +849,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_get_receipt: { Args: { _receipt: string }; Returns: Json }
       public_lookup_bill: { Args: { _code: string }; Returns: Json }
       public_submit_payment: {
         Args: {
