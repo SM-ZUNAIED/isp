@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useI18n } from "@/hooks/use-i18n";
+import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 
 export const Route = createFileRoute("/pay-bill")({
   head: () => ({
@@ -21,32 +23,32 @@ export const Route = createFileRoute("/pay-bill")({
 
 type Method = "bkash" | "nagad" | "rocket" | "card" | "bank";
 
-const methods: { id: Method; name: string; en: string; icon: typeof Wallet; tone: string }[] = [
-  { id: "bkash",  name: "বিকাশ",   en: "bKash",         icon: Smartphone, tone: "from-pink-500 to-rose-600" },
-  { id: "nagad",  name: "নগদ",     en: "Nagad",         icon: Wallet,     tone: "from-orange-500 to-amber-600" },
-  { id: "rocket", name: "রকেট",    en: "Rocket",        icon: Smartphone, tone: "from-fuchsia-500 to-purple-600" },
-  { id: "card",   name: "কার্ড",    en: "Debit / Credit", icon: CreditCard, tone: "from-sky-500 to-indigo-600" },
-  { id: "bank",   name: "ব্যাংক",   en: "Bank Transfer", icon: Landmark,   tone: "from-emerald-500 to-teal-600" },
+const methodDefs: { id: Method; icon: typeof Wallet; tone: string; key: `pay.method.${Method}` }[] = [
+  { id: "bkash",  icon: Smartphone, tone: "from-pink-500 to-rose-600",     key: "pay.method.bkash" },
+  { id: "nagad",  icon: Wallet,     tone: "from-orange-500 to-amber-600",  key: "pay.method.nagad" },
+  { id: "rocket", icon: Smartphone, tone: "from-fuchsia-500 to-purple-600",key: "pay.method.rocket" },
+  { id: "card",   icon: CreditCard, tone: "from-sky-500 to-indigo-600",    key: "pay.method.card" },
+  { id: "bank",   icon: Landmark,   tone: "from-emerald-500 to-teal-600",  key: "pay.method.bank" },
 ];
 
 function PayBillPage() {
+  const { t, lang } = useI18n();
   const [customerId, setCustomerId] = useState("");
-  const [invoice, setInvoice] = useState<null | { id: string; name: string; pkg: string; amount: number; due: string }>(null);
+  const [invoice, setInvoice] = useState<null | { id: string; pkg: string; amount: number; due: string }>(null);
   const [loading, setLoading] = useState(false);
   const [method, setMethod] = useState<Method>("bkash");
   const [msisdn, setMsisdn] = useState("");
 
   const handleLookup = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerId.trim()) return toast.error("গ্রাহক আইডি দিন / Enter Customer ID");
+    if (!customerId.trim()) return toast.error(t("pay.err.id"));
     setLoading(true);
     setTimeout(() => {
       setInvoice({
         id: customerId.trim().toUpperCase(),
-        name: "গ্রাহক / Customer",
         pkg: "Fiber 20 Mbps",
         amount: 800,
-        due: new Date(Date.now() + 5 * 864e5).toLocaleDateString("en-GB"),
+        due: new Date(Date.now() + 5 * 864e5).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-GB"),
       });
       setLoading(false);
     }, 700);
@@ -55,10 +57,12 @@ function PayBillPage() {
   const handlePay = (e: React.FormEvent) => {
     e.preventDefault();
     if (method !== "card" && method !== "bank" && !/^01[3-9]\d{8}$/.test(msisdn)) {
-      return toast.error("সঠিক মোবাইল নম্বর দিন / Enter a valid mobile number");
+      return toast.error(t("pay.err.mobile"));
     }
-    toast.success("পেমেন্ট গেটওয়ে খোলা হচ্ছে... / Redirecting to gateway...");
+    toast.success(t("pay.redirect"));
   };
+
+  const amtFmt = (n: number) => n.toLocaleString(lang === "bn" ? "bn-BD" : "en-BD");
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
@@ -73,13 +77,17 @@ function PayBillPage() {
       <header className="sticky top-0 z-40 glass border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
-            <ArrowLeft className="h-4 w-4" /> হোমে ফিরুন / Back
+            <ArrowLeft className="h-4 w-4" /> {t("pay.back")}
           </Link>
           <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary shadow-glow">
-              <Wifi className="h-4 w-4 text-primary-foreground" />
+            <LangToggle />
+            <ThemeToggle />
+            <div className="ml-1 flex items-center gap-2">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary shadow-glow">
+                <Wifi className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="font-bold hidden sm:inline">Net Bill Pro</span>
             </div>
-            <span className="font-bold">Net Bill Pro</span>
           </div>
         </div>
       </header>
@@ -89,16 +97,13 @@ function PayBillPage() {
         <div className="mx-auto max-w-3xl text-center animate-fade-in-up">
           <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium">
             <Shield className="h-3.5 w-3.5 text-success" />
-            <span>100% নিরাপদ পেমেন্ট • Secure Payment</span>
+            <span>{t("pay.secure")}</span>
           </div>
           <h1 className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight">
-            বিল পরিশোধ করুন
-            <span className="block text-lg md:text-2xl font-semibold text-muted-foreground mt-1">
-              Pay Your Internet Bill
-            </span>
+            {t("pay.title")}
           </h1>
           <p className="mt-3 text-sm md:text-base text-muted-foreground">
-            মাত্র কয়েক সেকেন্ডে আপনার মাসিক বিল পরিশোধ করুন • Settle your monthly bill in seconds
+            {t("pay.subtitle")}
           </p>
         </div>
 
@@ -109,8 +114,8 @@ function PayBillPage() {
             <div className="flex items-center gap-3">
               <StepBadge n={1} active />
               <div>
-                <h2 className="font-bold text-lg">গ্রাহক তথ্য / Customer Lookup</h2>
-                <p className="text-xs text-muted-foreground">আপনার Customer ID অথবা মোবাইল নম্বর দিন</p>
+                <h2 className="font-bold text-lg">{t("pay.step1")}</h2>
+                <p className="text-xs text-muted-foreground">{t("pay.step1.desc")}</p>
               </div>
             </div>
 
@@ -120,12 +125,12 @@ function PayBillPage() {
                 <Input
                   value={customerId}
                   onChange={(e) => setCustomerId(e.target.value)}
-                  placeholder="যেমন / e.g. NBP-1024 বা 01XXXXXXXXX"
+                  placeholder={t("pay.placeholder")}
                   className="pl-9 h-12 text-base"
                 />
               </div>
               <Button type="submit" disabled={loading} className="h-12 px-6 bg-gradient-primary text-primary-foreground shadow-glow">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>খুঁজুন / Search</>}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("pay.search")}
               </Button>
             </form>
 
@@ -138,21 +143,21 @@ function PayBillPage() {
                       <Receipt className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">Customer ID</div>
+                      <div className="text-xs text-muted-foreground">{t("pay.customerId")}</div>
                       <div className="font-bold">{invoice.id}</div>
                     </div>
                   </div>
                   <span className="rounded-full bg-warning/15 px-3 py-1 text-xs font-semibold text-warning">
-                    বকেয়া / Due {invoice.due}
+                    {t("pay.due")}: {invoice.due}
                   </span>
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <Field label="নাম / Name" value={invoice.name} />
-                  <Field label="প্যাকেজ / Package" value={invoice.pkg} />
+                  <Field label={t("pay.package")} value={invoice.pkg} />
+                  <Field label={t("pay.name")} value="—" />
                 </dl>
                 <div className="mt-4 flex items-baseline justify-between border-t pt-4">
-                  <span className="text-sm text-muted-foreground">মোট বিল / Total Amount</span>
-                  <span className="text-3xl font-extrabold text-primary">৳ {invoice.amount.toLocaleString("en-BD")}</span>
+                  <span className="text-sm text-muted-foreground">{t("pay.total")}</span>
+                  <span className="text-3xl font-extrabold text-primary">৳ {amtFmt(invoice.amount)}</span>
                 </div>
               </div>
             )}
@@ -162,13 +167,13 @@ function PayBillPage() {
               <div className="flex items-center gap-3">
                 <StepBadge n={2} active={!!invoice} />
                 <div>
-                  <h2 className="font-bold text-lg">পেমেন্ট মাধ্যম / Payment Method</h2>
-                  <p className="text-xs text-muted-foreground">যেভাবে পরিশোধ করবেন তা বেছে নিন</p>
+                  <h2 className="font-bold text-lg">{t("pay.step2")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("pay.step2.desc")}</p>
                 </div>
               </div>
 
               <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {methods.map((m) => {
+                {methodDefs.map((m) => {
                   const Icon = m.icon;
                   const active = method === m.id;
                   return (
@@ -185,8 +190,7 @@ function PayBillPage() {
                       <span className={`grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br ${m.tone} text-white shadow-soft`}>
                         <Icon className="h-5 w-5" />
                       </span>
-                      <span className="text-sm font-bold leading-tight">{m.name}</span>
-                      <span className="text-[11px] text-muted-foreground -mt-1">{m.en}</span>
+                      <span className="text-sm font-bold leading-tight">{t(m.key)}</span>
                       {active && (
                         <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-primary" />
                       )}
@@ -199,7 +203,7 @@ function PayBillPage() {
                 {(method === "bkash" || method === "nagad" || method === "rocket") && (
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium">
-                      {methods.find((m) => m.id === method)?.name} নম্বর / Wallet Number
+                      {t(`pay.method.${method}` as const)} — {t("pay.wallet")}
                     </Label>
                     <Input
                       value={msisdn}
@@ -213,7 +217,7 @@ function PayBillPage() {
                 )}
                 {method === "card" && (
                   <p className="rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground">
-                    আপনাকে সিকিউর পেমেন্ট গেটওয়েতে পাঠানো হবে। / You'll be redirected to a secure gateway.
+                    {t("pay.cardNote")}
                   </p>
                 )}
                 {method === "bank" && (
@@ -230,7 +234,7 @@ function PayBillPage() {
                   size="lg"
                   className="w-full h-14 text-base bg-gradient-primary text-primary-foreground shadow-glow"
                 >
-                  ৳ {invoice?.amount.toLocaleString("en-BD") ?? 0} পরিশোধ করুন • Pay Now
+                  ৳ {amtFmt(invoice?.amount ?? 0)} — {t("pay.now")}
                 </Button>
               </form>
             </div>
@@ -240,39 +244,28 @@ function PayBillPage() {
           <aside className="space-y-4">
             <div className="rounded-3xl border bg-gradient-hero p-6 text-primary-foreground shadow-elevated">
               <Shield className="h-7 w-7" />
-              <h3 className="mt-3 text-xl font-bold">
-                নিরাপদ ও তাৎক্ষণিক
-                <span className="block text-sm font-medium opacity-90">Safe & Instant Payments</span>
-              </h3>
-              <p className="mt-2 text-sm opacity-90">
-                সকল লেনদেন SSL এনক্রিপশনে সুরক্ষিত। পেমেন্ট নিশ্চিত হলে আপনার সংযোগ সাথে সাথেই সক্রিয় হবে।
-              </p>
+              <h3 className="mt-3 text-xl font-bold">{t("pay.trust.title")}</h3>
+              <p className="mt-2 text-sm opacity-90">{t("pay.trust.desc")}</p>
               <ul className="mt-4 space-y-2 text-sm">
-                {[
-                  ["তাৎক্ষণিক অ্যাক্টিভেশন", "Instant activation"],
-                  ["ডিজিটাল রিসিট ইমেইলে", "Digital receipt via email"],
-                  ["২৪/৭ পেমেন্ট সাপোর্ট", "24/7 payment support"],
-                ].map(([bn, en]) => (
-                  <li key={en} className="flex items-start gap-2">
+                {([1, 2, 3] as const).map((i) => (
+                  <li key={i} className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                    <span>{bn} <span className="opacity-75">• {en}</span></span>
+                    <span>{t(`pay.trust.${i}` as const)}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div className="rounded-3xl border bg-card p-6 shadow-soft">
-              <h3 className="font-bold">সহায়তা প্রয়োজন? / Need Help?</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                বিল সংক্রান্ত যেকোনো সমস্যায় আমাদের টিম আপনাকে সহায়তা করতে প্রস্তুত।
-              </p>
+              <h3 className="font-bold">{t("pay.help.title")}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t("pay.help.desc")}</p>
               <div className="mt-4 grid gap-2">
                 <a href="tel:01339562416" className="flex items-center gap-3 rounded-xl border p-3 hover:bg-muted/50 transition-colors">
                   <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                     <Phone className="h-4 w-4" />
                   </span>
                   <div>
-                    <div className="text-xs text-muted-foreground">হটলাইন / Hotline</div>
+                    <div className="text-xs text-muted-foreground">{t("contact.hotline")}</div>
                     <div className="font-semibold">01339562416</div>
                   </div>
                 </a>
@@ -289,11 +282,11 @@ function PayBillPage() {
             </div>
 
             <div className="rounded-3xl border bg-card p-6 shadow-soft">
-              <h3 className="font-bold text-sm">গৃহীত পেমেন্ট / We Accept</h3>
+              <h3 className="font-bold text-sm">{t("pay.accept")}</h3>
               <div className="mt-3 flex flex-wrap gap-2">
-                {methods.map((m) => (
+                {methodDefs.map((m) => (
                   <span key={m.id} className={`inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br ${m.tone} px-3 py-1 text-xs font-semibold text-white shadow-soft`}>
-                    <m.icon className="h-3 w-3" /> {m.en}
+                    <m.icon className="h-3 w-3" /> {t(m.key)}
                   </span>
                 ))}
               </div>
