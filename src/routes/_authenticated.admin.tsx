@@ -164,11 +164,10 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
       <div className="border-t p-3">
         <div className="mb-2 px-2 text-xs text-muted-foreground truncate">{user?.email}</div>
         <Button
-          variant="outline"
-          className="w-full justify-start"
+          className="w-full justify-start bg-destructive text-destructive-foreground hover:brightness-110 shadow-soft"
           onClick={async () => {
             await signOut();
-            navigate({ to: "/auth" });
+            navigate({ to: "/", replace: true });
           }}
         >
           <LogOut className="mr-2 h-4 w-4" /> লগআউট

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
@@ -6,10 +6,11 @@ import { getLandingData } from "@/lib/landing.functions";
 import { submitInquiry } from "@/lib/inquiry.functions";
 import {
   Wifi, Zap, Shield, Users, Award, Phone, MapPin, Mail, MessageCircle,
-  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2,
+  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2, LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
+import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import { toast } from "sonner";
 
@@ -49,6 +50,13 @@ function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
   const { t } = useI18n();
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/", replace: true });
+    toast.success("লগআউট সফল");
+  };
 
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
@@ -123,9 +131,15 @@ function LandingPage() {
             <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.contact")}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link to="/auth">{t("nav.login")}</Link>
-            </Button>
+            {session ? (
+              <Button onClick={handleLogout} size="sm" className="bg-destructive text-destructive-foreground hover:brightness-110 shadow-glow">
+                <LogOut className="mr-2 h-4 w-4" />লগআউট
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+                <Link to="/auth">{t("nav.login")}</Link>
+              </Button>
+            )}
             <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
               <Link to="/pay-bill">{t("nav.payBill")}</Link>
             </Button>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, LogOut, Receipt, Wifi, User, Wallet, Ticket as TicketIcon, ArrowLeft } from "lucide-react";
@@ -25,6 +25,11 @@ const BILL_STATUS: Record<string, { label: string; tone: string }> = {
 
 function CustomerPortal() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/", replace: true });
+  };
   const get = useServerFn(getCustomerPortal);
   const q = useQuery({ queryKey: ["customer-portal"], queryFn: () => get() });
 
@@ -44,7 +49,7 @@ function CustomerPortal() {
             </p>
             <div className="flex gap-2 justify-center">
               <Button variant="outline" asChild><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />হোম</Link></Button>
-              <Button onClick={signOut}><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
+              <Button onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
             </div>
           </CardContent>
         </Card>
@@ -70,7 +75,7 @@ function CustomerPortal() {
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" asChild><Link to="/">হোম</Link></Button>
-            <Button variant="secondary" size="sm" onClick={signOut}><LogOut className="h-4 w-4" /></Button>
+            <Button size="sm" onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:brightness-110"><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
           </div>
         </div>
       </header>
