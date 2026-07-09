@@ -151,10 +151,10 @@ function LandingPage() {
               {settings?.hero_subtitle ?? t("hero.subtitle")}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" onClick={() => scrollToId("packages")} className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
+              <Button size="lg" onClick={() => scrollToId("contact")} className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
                 {t("hero.cta1")} <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" onClick={() => scrollToId("coverage")} className="border-white/40 bg-white/10 text-white hover:bg-white/20">
+              <Button size="lg" variant="outline" onClick={() => scrollToId("packages")} className="border-white/40 bg-white/10 text-white hover:bg-white/20">
                 {t("hero.cta2")}
               </Button>
             </div>
