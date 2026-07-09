@@ -1,63 +1,41 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import type { Database } from "@/integrations/supabase/types";
 
-/** Public bill lookup by customer code. Returns customer + latest outstanding bill. */
+function publicClient() {
+  return createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+  );
+}
+
+/** Public bill lookup by customer code. */
 export const lookupPublicBill = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({
-      customer_code: z.string().trim().min(2).max(64),
-    }).parse(d),
+    z.object({ customer_code: z.string().trim().min(2).max(64) }).parse(d),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const code = data.customer_code.toUpperCase();
-
-    const { data: customer, error: cErr } = await supabaseAdmin
-      .from("customers")
-      .select("id, customer_code, full_name, mobile, monthly_bill, status, packages(name)")
-      .ilike("customer_code", code)
-      .maybeSingle();
-
-    if (cErr) throw new Error(cErr.message);
-    if (!customer) throw new Error("NOT_FOUND");
-
-    const { data: bill, error: bErr } = await supabaseAdmin
-      .from("bills")
-      .select("id, bill_number, billing_month, amount, paid_amount, due_amount, due_date, status")
-      .eq("customer_id", customer.id)
-      .in("status", ["unpaid", "partial", "overdue"])
-      .order("due_date", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (bErr) throw new Error(bErr.message);
-
-    return {
-      customer: {
-        id: customer.id,
-        code: customer.customer_code,
-        name: customer.full_name,
-        mobile: customer.mobile,
-        package: (customer as any).packages?.name ?? null,
-      },
-      bill: bill
-        ? {
-            id: bill.id,
-            number: bill.bill_number,
-            month: bill.billing_month,
-            amount: Number(bill.amount),
-            paid: Number(bill.paid_amount ?? 0),
-            due: Number(bill.due_amount ?? bill.amount),
-            due_date: bill.due_date,
-            status: bill.status,
-          }
-        : null,
-      monthly_bill: Number(customer.monthly_bill ?? 0),
+    const supabase = publicClient();
+    const { data: res, error } = await supabase.rpc("public_lookup_bill", {
+      _code: data.customer_code,
+    });
+    if (error) throw new Error(error.message);
+    if (!res) throw new Error("NOT_FOUND");
+    const r = res as {
+      customer: { id: string; code: string; name: string; mobile: string; package: string | null };
+      bill: null | {
+        id: string; number: string; month: string;
+        amount: number; paid: number; due: number;
+        due_date: string; status: string;
+      };
+      monthly_bill: number;
     };
+    return r;
   });
 
-/** Public payment submission. Records a payment and updates the bill. */
+/** Public payment submission. */
 export const submitPublicPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
@@ -68,55 +46,13 @@ export const submitPublicPayment = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: bill, error: bErr } = await supabaseAdmin
-      .from("bills")
-      .select("id, customer_id, amount, paid_amount, due_amount, status")
-      .eq("id", data.bill_id)
-      .single();
-    if (bErr || !bill) throw new Error("Bill not found");
-    if (bill.status === "paid") throw new Error("Bill already paid");
-
-    const amount = Number(bill.due_amount ?? bill.amount);
-    if (!(amount > 0)) throw new Error("Nothing to pay");
-
-    const dbMethod =
-      data.method === "card" || data.method === "bank" ? "other" : data.method;
-
-    const receipt = `RCP-${Date.now().toString(36).toUpperCase()}`;
-
-    const notes = [
-      `channel:${data.method}`,
-      data.msisdn ? `msisdn:${data.msisdn}` : null,
-    ].filter(Boolean).join(" | ");
-
-    const { error: pErr } = await supabaseAdmin.from("payments").insert({
-      bill_id: bill.id,
-      customer_id: bill.customer_id,
-      amount,
-      method: dbMethod as "bkash" | "nagad" | "rocket" | "other",
-      transaction_id: data.transaction_id ?? null,
-      notes,
-      receipt_number: receipt,
-      received_by: null,
+    const supabase = publicClient();
+    const { data: res, error } = await supabase.rpc("public_submit_payment", {
+      _bill_id: data.bill_id,
+      _method: data.method,
+      _transaction_id: data.transaction_id ?? "",
+      _msisdn: data.msisdn ?? "",
     });
-    if (pErr) throw new Error(pErr.message);
-
-    const newPaid = Number(bill.paid_amount ?? 0) + amount;
-    const due = Number(bill.amount) - newPaid;
-    const status: "paid" | "partial" | "unpaid" =
-      due <= 0 ? "paid" : newPaid > 0 ? "partial" : "unpaid";
-
-    const { error: uErr } = await supabaseAdmin
-      .from("bills")
-      .update({
-        paid_amount: newPaid,
-        due_amount: Math.max(0, due),
-        status,
-      })
-      .eq("id", bill.id);
-    if (uErr) throw new Error(uErr.message);
-
-    return { ok: true, receipt, amount, status };
+    if (error) throw new Error(error.message);
+    return res as { ok: boolean; receipt: string; amount: number; status: string };
   });

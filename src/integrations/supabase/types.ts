@@ -805,6 +805,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_lookup_bill: { Args: { _code: string }; Returns: Json }
+      public_submit_payment: {
+        Args: {
+          _bill_id: string
+          _method: string
+          _msisdn: string
+          _transaction_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "staff" | "customer"
