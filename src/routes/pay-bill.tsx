@@ -216,7 +216,7 @@ function PayBillPage() {
                     </div>
                     <div>
                       <div className="text-xs text-muted-foreground">{t("pay.customerId")}</div>
-                      <div className="font-bold">{invoice.id}</div>
+                      <div className="font-bold">{invoice.customerCode}</div>
                     </div>
                   </div>
                   <span className="rounded-full bg-warning/15 px-3 py-1 text-xs font-semibold text-warning">
@@ -225,7 +225,7 @@ function PayBillPage() {
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <Field label={t("pay.package")} value={invoice.pkg} />
-                  <Field label={t("pay.name")} value="—" />
+                  <Field label={t("pay.name")} value={invoice.customerName} />
                 </dl>
                 <div className="mt-4 flex items-baseline justify-between border-t pt-4">
                   <span className="text-sm text-muted-foreground">{t("pay.total")}</span>
