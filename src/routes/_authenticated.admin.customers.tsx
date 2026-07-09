@@ -319,78 +319,80 @@ function CustomerFormDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "নতুন কাস্টমার যোগ করুন" : "কাস্টমার এডিট করুন"}</DialogTitle>
         </DialogHeader>
         <form
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          className="space-y-5"
           onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}
         >
-          <Field label="কাস্টমার কোড *">
-            <Input required value={form.customer_code}
-              onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
-          </Field>
-          <Field label="পূর্ণ নাম *">
-            <Input required value={form.full_name}
-              onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-          </Field>
-          <Field label="মোবাইল *">
-            <Input required value={form.mobile}
-              onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
-          </Field>
-          <Field label="মাসিক বিল (৳)">
-            <Input type="number" min={0} value={form.monthly_bill}
-              onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
-          </Field>
-          <Field label="প্যাকেজ">
-            <Select value={form.package_id}
-              onValueChange={(v) => {
-                const p = packages.find((x) => x.id === v);
-                setForm({ ...form, package_id: v, monthly_bill: p ? String(p.monthly_price) : form.monthly_bill });
-              }}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
-              <SelectContent>
-                {packages.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name} — ৳{p.monthly_price}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="জোন">
-            <Select value={form.zone_id} onValueChange={(v) => setForm({ ...form, zone_id: v })}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
-              <SelectContent>
-                {zones.map((z) => (<SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="PPPoE Username">
-            <Input value={form.pppoe_username}
-              onChange={(e) => setForm({ ...form, pppoe_username: e.target.value })} />
-          </Field>
-          <Field label="PPPoE Password">
-            <Input value={form.pppoe_password}
-              onChange={(e) => setForm({ ...form, pppoe_password: e.target.value })} />
-          </Field>
-          <Field label="স্ট্যাটাস">
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as CustomerStatus })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
-                <SelectItem value="active">সক্রিয়</SelectItem>
-                <SelectItem value="suspended">স্থগিত</SelectItem>
-                <SelectItem value="expired">মেয়াদ শেষ</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-          <div className="sm:col-span-2">
-            <Field label="ঠিকানা">
-              <Input value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="কাস্টমার কোড *">
+              <Input required value={form.customer_code}
+                onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
+            </Field>
+            <Field label="পূর্ণ নাম *">
+              <Input required value={form.full_name}
+                onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+            </Field>
+            <Field label="মোবাইল *">
+              <Input required value={form.mobile}
+                onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
+            </Field>
+            <Field label="মাসিক বিল (৳)">
+              <Input type="number" min={0} value={form.monthly_bill}
+                onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
+            </Field>
+            <Field label="প্যাকেজ">
+              <Select value={form.package_id}
+                onValueChange={(v) => {
+                  const p = packages.find((x) => x.id === v);
+                  setForm({ ...form, package_id: v, monthly_bill: p ? String(p.monthly_price) : form.monthly_bill });
+                }}>
+                <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>
+                  {packages.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} — ৳{p.monthly_price}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="জোন">
+              <Select value={form.zone_id} onValueChange={(v) => setForm({ ...form, zone_id: v })}>
+                <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>
+                  {zones.map((z) => (<SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="PPPoE Username">
+              <Input value={form.pppoe_username}
+                onChange={(e) => setForm({ ...form, pppoe_username: e.target.value })} />
+            </Field>
+            <Field label="PPPoE Password">
+              <Input value={form.pppoe_password}
+                onChange={(e) => setForm({ ...form, pppoe_password: e.target.value })} />
+            </Field>
+            <Field label="স্ট্যাটাস">
+              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as CustomerStatus })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
+                  <SelectItem value="active">সক্রিয়</SelectItem>
+                  <SelectItem value="suspended">স্থগিত</SelectItem>
+                  <SelectItem value="expired">মেয়াদ শেষ</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
           </div>
-          <DialogFooter className="sm:col-span-2">
+
+          <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+            <div className="text-sm font-semibold">ঠিকানা (ক্যাসকেডিং)</div>
+            <AddressSelector value={addr} onChange={setAddr} />
+          </div>
+
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
               {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
