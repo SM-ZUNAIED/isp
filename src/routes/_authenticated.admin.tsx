@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean }> = [
+const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
   { to: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard, exact: true },
   { to: "/admin/customers", label: "কাস্টমার", icon: Users },
   { to: "/admin/packages", label: "প্যাকেজ", icon: Package },
@@ -47,7 +47,6 @@ const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exac
   { to: "/admin/mikrotik", label: "MikroTik", icon: RouterIcon },
   { to: "/admin/olt", label: "OLT / ONU", icon: Radio },
   { to: "/admin/accounts", label: "একাউন্টস", icon: Wallet },
-  { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
   { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
   { to: "/admin/notices", label: "নোটিশ", icon: Bell },
   { to: "/admin/users", label: "ইউজার ও রোল", icon: UserCog, adminOnly: true },
