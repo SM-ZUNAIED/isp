@@ -21,9 +21,11 @@ export function LangToggle() {
     <button
       onClick={toggle}
       aria-label="Toggle language"
-      className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border bg-card px-3 text-xs font-bold hover:bg-muted transition-colors"
+      className="inline-flex h-9 w-14 items-center justify-center rounded-lg border bg-card text-xs font-bold tabular-nums hover:bg-muted transition-colors"
     >
-      {lang === "bn" ? "বাং" : "EN"}
+      <span className="inline-block w-8 text-center leading-none">
+        {lang === "bn" ? "বাং" : "EN"}
+      </span>
     </button>
   );
 }
