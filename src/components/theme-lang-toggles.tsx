@@ -1,4 +1,4 @@
-import { Moon, Sun, Languages } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { useI18n } from "@/hooks/use-i18n";
 
@@ -21,10 +21,9 @@ export function LangToggle() {
     <button
       onClick={toggle}
       aria-label="Toggle language"
-      className="inline-flex h-9 items-center gap-1.5 rounded-lg border bg-card px-3 text-xs font-bold hover:bg-muted transition-colors"
+      className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border bg-card px-3 text-xs font-bold hover:bg-muted transition-colors"
     >
-      <Languages className="h-3.5 w-3.5" />
-      {lang === "bn" ? "EN" : "বাং"}
+      {lang === "bn" ? "বাং" : "EN"}
     </button>
   );
 }
