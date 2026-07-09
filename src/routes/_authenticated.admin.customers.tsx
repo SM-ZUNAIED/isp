@@ -25,11 +25,16 @@ import {
 import {
   listCustomers, createCustomer, updateCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
 } from "@/lib/customers.functions";
+import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
 
 type CustomerStatus = "pending" | "active" | "suspended" | "expired";
 type CustomerRow = {
   id: string; customer_code: string; full_name: string; mobile: string;
-  address?: string | null; package_id?: string | null; zone_id?: string | null;
+  address?: string | null; address_line?: string | null;
+  division_id?: number | null; district_id?: number | null; upazila_id?: number | null;
+  union_id?: string | null; post_office_id?: string | null; village_id?: string | null;
+  area_id?: string | null; road_id?: string | null; building_id?: string | null;
+  package_id?: string | null; zone_id?: string | null;
   monthly_bill: number | string; status: CustomerStatus;
   pppoe_username?: string | null; pppoe_password?: string | null;
 };
