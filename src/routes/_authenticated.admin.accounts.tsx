@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Loader2, Plus, Trash2, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Loader2, Plus, Trash2, TrendingUp, TrendingDown, Wallet, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  listAccounts, addIncome, addExpense, deleteEntry,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
+
+type EntryRow = { id: string; amount: number; category: string; description: string | null; entry_date: string };
 
 export const Route = createFileRoute("/_authenticated/admin/accounts")({
   head: () => ({ meta: [{ title: "একাউন্টস — Net Bill Pro" }] }),
@@ -164,7 +169,8 @@ function EntrySection({
                     <TableCell className="font-medium">{r.category}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{r.description ?? "—"}</TableCell>
                     <TableCell className="text-right font-semibold">{bn.format(Number(r.amount))}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-1 whitespace-nowrap">
+                      <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => delMut.mutate(r.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
