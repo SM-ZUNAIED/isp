@@ -95,10 +95,11 @@ function CustomersPage() {
           <h1 className="text-2xl md:text-3xl font-bold">কাস্টমার ব্যবস্থাপনা</h1>
           <p className="text-muted-foreground">মোট {bn.format(customersQ.data?.length ?? 0)} জন কাস্টমার</p>
         </div>
-        <NewCustomerDialog
+        <CustomerFormDialog
+          mode="create"
           packages={optsQ.data?.packages ?? []}
           zones={optsQ.data?.zones ?? []}
-          onCreated={invalidate}
+          onSaved={invalidate}
         />
       </div>
 
