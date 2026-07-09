@@ -340,23 +340,15 @@ export const updateCustomerProfile = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { data: cust, error: cErr } = await supabase
-      .from("customers").select("id").eq("user_id", userId).maybeSingle();
-    if (cErr) throw new Error(cErr.message);
-    if (!cust) throw new Error("Customer profile not linked");
-
     const patch = {
       full_name: data.full_name,
       email: data.email ? data.email : null,
       alt_mobile: data.alt_mobile ? data.alt_mobile : null,
       address: data.address ? data.address : null,
     };
-
-    // Customer self-update requires bypassing RLS (only staff/admin can UPDATE via policy),
-    // scoped strictly to this user's own customer row and whitelisted columns.
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("customers").update(patch).eq("id", cust.id).eq("user_id", userId);
+    // RLS "Customers self update" policy scopes this to the caller's own row.
+    const { error } = await supabase
+      .from("customers").update(patch).eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
