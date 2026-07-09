@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Loader2, Plus, Trash2, Radio, Wifi, WifiOff } from "lucide-react";
+import { Loader2, Plus, Trash2, Radio, Wifi, WifiOff, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,14 +21,28 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  listOlts, createOlt, deleteOlt,
-  listOnus, createOnu, toggleOnu, deleteOnu, listOltsAndCustomers,
+  listOlts, createOlt, updateOlt, deleteOlt,
+  listOnus, createOnu, updateOnu, toggleOnu, deleteOnu, listOltsAndCustomers,
 } from "@/lib/network.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/olt")({
   head: () => ({ meta: [{ title: "OLT / ONU — Net Bill Pro" }] }),
   component: OltPage,
 });
+
+type OltBrand = "vsol" | "cdata" | "huawei" | "bdcom" | "zte" | "other";
+type OltRow = {
+  id: string; name: string; ip_address: string; brand: OltBrand;
+  pon_ports?: number | null; username?: string | null; notes?: string | null;
+  is_online?: boolean | null;
+};
+type OnuRow = {
+  id: string; serial_number: string; mac_address?: string | null;
+  pon_port?: string | null; olt_id?: string | null; customer_id?: string | null;
+  signal_strength?: number | null; is_online?: boolean | null; is_enabled?: boolean | null;
+  olts?: { name: string } | null;
+  customers?: { full_name: string; customer_code: string } | null;
+};
 
 const BRANDS = [
   { v: "vsol", l: "VSOL" }, { v: "cdata", l: "C-Data" }, { v: "huawei", l: "Huawei" },
@@ -69,7 +83,7 @@ function OltList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end"><NewOltDialog onCreated={invalidate} /></div>
+      <div className="flex justify-end"><OltFormDialog mode="create" onSaved={invalidate} /></div>
       {q.isLoading ? (
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
@@ -95,10 +109,18 @@ function OltList() {
                   <Info label="PON পোর্ট" value={String(o.pon_ports ?? 0)} />
                   <Info label="স্ট্যাটাস" value={o.is_online ? "অনলাইন" : "অফলাইন"} tone={o.is_online ? "emerald" : "rose"} />
                 </div>
-                <Button variant="ghost" size="sm" className="text-destructive w-full"
-                  onClick={() => delMut.mutate(o.id)}>
-                  <Trash2 className="h-4 w-4 mr-1" /> মুছে ফেলুন
-                </Button>
+                <div className="flex gap-2">
+                  <OltFormDialog
+                    mode="edit"
+                    initial={o as unknown as OltRow}
+                    onSaved={invalidate}
+                    trigger={<Button variant="outline" size="sm" className="flex-1"><Pencil className="h-4 w-4 mr-1" /> এডিট</Button>}
+                  />
+                  <Button variant="ghost" size="sm" className="text-destructive flex-1"
+                    onClick={() => delMut.mutate(o.id)}>
+                    <Trash2 className="h-4 w-4 mr-1" /> মুছুন
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -117,42 +139,62 @@ function Info({ label, value, tone }: { label: string; value: string; tone?: "em
   );
 }
 
-function NewOltDialog({ onCreated }: { onCreated: () => void }) {
+function OltFormDialog({
+  mode, initial, onSaved, trigger,
+}: {
+  mode: "create" | "edit";
+  initial?: OltRow;
+  onSaved: () => void;
+  trigger?: React.ReactNode;
+}) {
   const create = useServerFn(createOlt);
+  const update = useServerFn(updateOlt);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({
-    name: "", ip_address: "", brand: "vsol" as "vsol" | "cdata" | "huawei" | "bdcom" | "zte" | "other",
+  const empty = {
+    name: "", ip_address: "", brand: "vsol" as OltBrand,
     pon_ports: "8", username: "", password: "", notes: "",
-  });
+  };
+  const seed = initial ? {
+    name: initial.name, ip_address: initial.ip_address,
+    brand: initial.brand, pon_ports: String(initial.pon_ports ?? 8),
+    username: initial.username ?? "", password: "",
+    notes: initial.notes ?? "",
+  } : empty;
+  const [f, setF] = useState(seed);
   const mut = useMutation({
-    mutationFn: () => create({
-      data: {
+    mutationFn: async () => {
+      const payload = {
         name: f.name.trim(), ip_address: f.ip_address.trim(),
         brand: f.brand, pon_ports: Number(f.pon_ports) || 8,
         username: f.username || null, password: f.password || null,
         notes: f.notes || null,
-      },
-    }),
+      };
+      if (mode === "create") await create({ data: payload });
+      else await update({ data: { id: initial!.id, ...payload } });
+    },
     onSuccess: () => {
-      toast.success("OLT যুক্ত হয়েছে"); setOpen(false); onCreated();
-      setF({ name: "", ip_address: "", brand: "vsol", pon_ports: "8", username: "", password: "", notes: "" });
+      toast.success(mode === "create" ? "OLT যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      setOpen(false); onSaved();
+      if (mode === "create") setF(empty);
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
   });
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন OLT</Button>
+        {trigger ?? (
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন OLT</Button>
+        )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>OLT যোগ করুন</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? "OLT যোগ করুন" : "OLT এডিট"}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="col-span-2 space-y-1.5"><Label>নাম *</Label>
             <Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>IP *</Label>
             <Input required value={f.ip_address} onChange={(e) => setF({ ...f, ip_address: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>ব্র্যান্ড</Label>
-            <Select value={f.brand} onValueChange={(v) => setF({ ...f, brand: v as typeof f.brand })}>
+            <Select value={f.brand} onValueChange={(v) => setF({ ...f, brand: v as OltBrand })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{BRANDS.map((b) => <SelectItem key={b.v} value={b.v}>{b.l}</SelectItem>)}</SelectContent>
             </Select>
@@ -161,7 +203,7 @@ function NewOltDialog({ onCreated }: { onCreated: () => void }) {
             <Input type="number" value={f.pon_ports} onChange={(e) => setF({ ...f, pon_ports: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>ইউজারনেম</Label>
             <Input value={f.username} onChange={(e) => setF({ ...f, username: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>পাসওয়ার্ড</Label>
+          <div className="space-y-1.5"><Label>পাসওয়ার্ড {mode === "edit" && "(পরিবর্তনে নতুন দিন)"}</Label>
             <Input type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
           <div className="col-span-2 space-y-1.5"><Label>নোট</Label>
             <Input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
@@ -202,10 +244,11 @@ function OnuList() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <NewOnuDialog
+        <OnuFormDialog
+          mode="create"
           olts={optsQ.data?.olts ?? []}
           customers={optsQ.data?.customers ?? []}
-          onCreated={invalidate}
+          onSaved={invalidate}
         />
       </div>
 
@@ -263,7 +306,15 @@ function OnuList() {
                       <Switch checked={!!o.is_enabled}
                         onCheckedChange={(v) => toggleMut.mutate({ id: o.id, is_enabled: v })} />
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-1 whitespace-nowrap">
+                      <OnuFormDialog
+                        mode="edit"
+                        initial={o as unknown as OnuRow}
+                        olts={optsQ.data?.olts ?? []}
+                        customers={optsQ.data?.customers ?? []}
+                        onSaved={invalidate}
+                        trigger={<Button size="sm" variant="ghost"><Pencil className="h-4 w-4" /></Button>}
+                      />
                       <Button size="sm" variant="ghost" className="text-destructive"
                         onClick={() => delMut.mutate(o.id)}>
                         <Trash2 className="h-4 w-4" />
@@ -280,42 +331,58 @@ function OnuList() {
   );
 }
 
-function NewOnuDialog({
-  olts, customers, onCreated,
+function OnuFormDialog({
+  mode, initial, olts, customers, onSaved, trigger,
 }: {
+  mode: "create" | "edit";
+  initial?: OnuRow;
   olts: Array<{ id: string; name: string }>;
   customers: Array<{ id: string; full_name: string; customer_code: string }>;
-  onCreated: () => void;
+  onSaved: () => void;
+  trigger?: React.ReactNode;
 }) {
   const create = useServerFn(createOnu);
+  const update = useServerFn(updateOnu);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({
-    serial_number: "", mac_address: "", pon_port: "", olt_id: "", customer_id: "", signal_strength: "",
-  });
+  const empty = { serial_number: "", mac_address: "", pon_port: "", olt_id: "", customer_id: "", signal_strength: "" };
+  const seed = initial ? {
+    serial_number: initial.serial_number,
+    mac_address: initial.mac_address ?? "",
+    pon_port: initial.pon_port ?? "",
+    olt_id: initial.olt_id ?? "",
+    customer_id: initial.customer_id ?? "",
+    signal_strength: initial.signal_strength != null ? String(initial.signal_strength) : "",
+  } : empty;
+  const [f, setF] = useState(seed);
   const mut = useMutation({
-    mutationFn: () => create({
-      data: {
+    mutationFn: async () => {
+      const payload = {
         serial_number: f.serial_number.trim(),
         mac_address: f.mac_address || null,
         pon_port: f.pon_port || null,
         olt_id: f.olt_id || null,
         customer_id: f.customer_id || null,
         signal_strength: f.signal_strength ? Number(f.signal_strength) : null,
-      },
-    }),
+      };
+      if (mode === "create") await create({ data: payload });
+      else await update({ data: { id: initial!.id, ...payload } });
+    },
     onSuccess: () => {
-      toast.success("ONU যুক্ত হয়েছে"); setOpen(false); onCreated();
-      setF({ serial_number: "", mac_address: "", pon_port: "", olt_id: "", customer_id: "", signal_strength: "" });
+      toast.success(mode === "create" ? "ONU যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      setOpen(false); onSaved();
+      if (mode === "create") setF(empty);
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
   });
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন ONU</Button>
+        {trigger ?? (
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন ONU</Button>
+        )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>ONU যোগ করুন</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? "ONU যোগ করুন" : "ONU এডিট"}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="col-span-2 space-y-1.5"><Label>Serial *</Label>
             <Input required value={f.serial_number} onChange={(e) => setF({ ...f, serial_number: e.target.value })} /></div>
