@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import {
   Loader2, LogOut, Receipt, Wifi, User, Wallet, Ticket as TicketIcon,
   ArrowLeft, MapPin, Zap, Calendar, Phone, Mail, Home, ArrowUpCircle,
-  MessageCircle, CheckCircle2, Clock, AlertCircle, Send, CreditCard,
+  MessageCircle, CheckCircle2, Clock, AlertCircle, Send, CreditCard, Pencil, Save, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { getCustomerPortal, submitCustomerRequest } from "@/lib/support.functions";
+import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/_authenticated/customer")({
   head: () => ({ meta: [{ title: "কাস্টমার পোর্টাল — Net Bill Pro" }] }),
@@ -149,24 +149,10 @@ function CustomerPortal() {
 
           {/* OVERVIEW */}
           <TabsContent value="overview" className="mt-4 space-y-4">
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />প্রোফাইল তথ্য</CardTitle></CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <InfoRow icon={User} label="নাম" value={c.full_name} />
-                <InfoRow icon={Phone} label="মোবাইল" value={c.mobile} />
-                {c.alt_mobile && <InfoRow icon={Phone} label="বিকল্প মোবাইল" value={c.alt_mobile} />}
-                {c.email && <InfoRow icon={Mail} label="ইমেইল" value={c.email} />}
-                <InfoRow icon={Home} label="ঠিকানা" value={c.address ?? "—"} />
-                <InfoRow icon={MapPin} label="এরিয়া / জোন" value={c.zones?.name ?? "—"} />
-                <InfoRow icon={Wifi} label="প্যাকেজ" value={
-                  c.packages ? `${c.packages.name} (${c.packages.download_speed}/${c.packages.upload_speed} Mbps)` : "—"
-                } />
-                {c.pppoe_username && <InfoRow icon={Zap} label="PPPoE ইউজার" value={c.pppoe_username} mono />}
-                <InfoRow icon={Calendar} label="সংযোগ তারিখ" value={c.connection_date ? new Date(c.connection_date).toLocaleDateString("bn-BD") : "—"} />
-                <InfoRow icon={Calendar} label="মেয়াদ শেষ" value={expiryDate ? expiryDate.toLocaleDateString("bn-BD") : "—"} />
-                <InfoRow icon={CheckCircle2} label="স্ট্যাটাস" value={c.status} />
-              </CardContent>
-            </Card>
+            <ProfileCard
+              customer={c}
+              onSaved={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
+            />
           </TabsContent>
 
           {/* BILLS */}
@@ -469,6 +455,121 @@ function AreaChangeCard({
           {m.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="mr-2 h-4 w-4" />রিকোয়েস্ট পাঠান</>}
         </Button>
       </CardContent>
+    </Card>
+  );
+}
+
+/* ============ ProfileCard (view + edit) ============ */
+
+type CustomerData = {
+  full_name: string;
+  mobile: string;
+  alt_mobile: string | null;
+  email: string | null;
+  address: string | null;
+  status: string;
+  connection_date: string | null;
+  expiry_date: string | null;
+  pppoe_username: string | null;
+  packages: { name: string; download_speed: number; upload_speed: number } | null;
+  zones: { name: string } | null;
+};
+
+function ProfileCard({ customer, onSaved }: { customer: CustomerData; onSaved: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({
+    full_name: customer.full_name ?? "",
+    email: customer.email ?? "",
+    alt_mobile: customer.alt_mobile ?? "",
+    address: customer.address ?? "",
+  });
+
+  const update = useServerFn(updateCustomerProfile);
+  const m = useMutation({
+    mutationFn: () => update({ data: form }),
+    onSuccess: () => {
+      toast.success("প্রোফাইল সংরক্ষণ করা হয়েছে");
+      setEditing(false);
+      onSaved();
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : String(e)),
+  });
+
+  const cancel = () => {
+    setForm({
+      full_name: customer.full_name ?? "",
+      email: customer.email ?? "",
+      alt_mobile: customer.alt_mobile ?? "",
+      address: customer.address ?? "",
+    });
+    setEditing(false);
+  };
+
+  const expiryDate = customer.expiry_date ? new Date(customer.expiry_date) : null;
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
+        <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />প্রোফাইল তথ্য</CardTitle>
+        {!editing ? (
+          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
+            <Pencil className="mr-2 h-4 w-4" />এডিট
+          </Button>
+        ) : (
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" onClick={cancel} disabled={m.isPending}>
+              <X className="mr-1 h-4 w-4" />বাতিল
+            </Button>
+            <Button size="sm" onClick={() => m.mutate()} disabled={m.isPending} className="bg-gradient-primary text-primary-foreground">
+              {m.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="mr-1 h-4 w-4" />সংরক্ষণ</>}
+            </Button>
+          </div>
+        )}
+      </CardHeader>
+
+      {!editing ? (
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <InfoRow icon={User} label="নাম" value={customer.full_name} />
+          <InfoRow icon={Phone} label="মোবাইল" value={customer.mobile} />
+          <InfoRow icon={Phone} label="বিকল্প মোবাইল" value={customer.alt_mobile || "—"} />
+          <InfoRow icon={Mail} label="ইমেইল" value={customer.email || "—"} />
+          <InfoRow icon={Home} label="ঠিকানা" value={customer.address ?? "—"} />
+          <InfoRow icon={MapPin} label="এরিয়া / জোন" value={customer.zones?.name ?? "—"} />
+          <InfoRow icon={Wifi} label="প্যাকেজ" value={
+            customer.packages ? `${customer.packages.name} (${customer.packages.download_speed}/${customer.packages.upload_speed} Mbps)` : "—"
+          } />
+          {customer.pppoe_username && <InfoRow icon={Zap} label="PPPoE ইউজার" value={customer.pppoe_username} mono />}
+          <InfoRow icon={Calendar} label="সংযোগ তারিখ" value={customer.connection_date ? new Date(customer.connection_date).toLocaleDateString("bn-BD") : "—"} />
+          <InfoRow icon={Calendar} label="মেয়াদ শেষ" value={expiryDate ? expiryDate.toLocaleDateString("bn-BD") : "—"} />
+          <InfoRow icon={CheckCircle2} label="স্ট্যাটাস" value={customer.status} />
+        </CardContent>
+      ) : (
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs">নাম *</Label>
+            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} maxLength={120} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">মোবাইল (পরিবর্তনযোগ্য নয়)</Label>
+            <Input value={customer.mobile} disabled />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">বিকল্প মোবাইল</Label>
+            <Input value={form.alt_mobile} onChange={(e) => setForm({ ...form, alt_mobile: e.target.value })} placeholder="01XXXXXXXXX" maxLength={11} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">ইমেইল</Label>
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={255} />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label className="text-xs">ঠিকানা</Label>
+            <Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} rows={2} maxLength={500} />
+          </div>
+          <p className="sm:col-span-2 text-xs text-muted-foreground">
+            প্যাকেজ, এরিয়া বা মোবাইল পরিবর্তনের জন্য "রিকোয়েস্ট" ট্যাব ব্যবহার করুন।
+          </p>
+        </CardContent>
+      )}
     </Card>
   );
 }

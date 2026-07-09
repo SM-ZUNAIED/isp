@@ -326,3 +326,38 @@ export const submitCustomerRequest = createServerFn({ method: "POST" })
     return { ok: true, id: row.id, ticket_number: row.ticket_number };
   });
 
+/* ============= CUSTOMER PROFILE UPDATE ============= */
+
+export const updateCustomerProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      full_name: z.string().trim().min(2).max(120),
+      email: z.string().trim().email().max(255).optional().nullable().or(z.literal("")),
+      alt_mobile: z.string().trim().regex(/^01[3-9][0-9]{8}$/, "Invalid mobile").optional().nullable().or(z.literal("")),
+      address: z.string().trim().max(500).optional().nullable().or(z.literal("")),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: cust, error: cErr } = await supabase
+      .from("customers").select("id").eq("user_id", userId).maybeSingle();
+    if (cErr) throw new Error(cErr.message);
+    if (!cust) throw new Error("Customer profile not linked");
+
+    const patch = {
+      full_name: data.full_name,
+      email: data.email ? data.email : null,
+      alt_mobile: data.alt_mobile ? data.alt_mobile : null,
+      address: data.address ? data.address : null,
+    };
+
+    // Customer self-update requires bypassing RLS (only staff/admin can UPDATE via policy),
+    // scoped strictly to this user's own customer row and whitelisted columns.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("customers").update(patch).eq("id", cust.id).eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
