@@ -98,7 +98,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               key={i}
               onClick={() => {
                 if (item.disabled) return;
-                navigate({ to: item.to });
+                navigate({ to: item.to as "/admin" });
                 onNavigate?.();
               }}
               className={cn(
