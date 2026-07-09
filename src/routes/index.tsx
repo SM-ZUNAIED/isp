@@ -104,10 +104,10 @@ function LandingPage() {
           {/* Stats */}
           <div className="mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
             {[
-              { label: "গ্রাহক", value: "১০,০০০+", icon: Users },
-              { label: "কাভারেজ এলাকা", value: "৫০+", icon: MapPin },
-              { label: "আপটাইম", value: "৯৯.৯%", icon: TrendingUp },
-              { label: "সাপোর্ট", value: "২৪/৭", icon: Headphones },
+              { label: t("stats.customers"), value: t("stats.customersValue"), icon: Users },
+              { label: t("stats.coverage"), value: t("stats.coverageValue"), icon: MapPin },
+              { label: t("stats.uptime"), value: t("stats.uptimeValue"), icon: TrendingUp },
+              { label: t("stats.support"), value: t("stats.supportValue"), icon: Headphones },
             ].map((s) => (
               <div key={s.label} className="glass rounded-2xl p-6 text-center">
                 <s.icon className="mx-auto mb-2 h-6 w-6" />
@@ -123,17 +123,17 @@ function LandingPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">কেন আমরা সেরা?</h2>
-            <p className="mt-4 text-muted-foreground">প্রযুক্তি, গতি ও সেবায় আমরা সবার চেয়ে এগিয়ে</p>
+            <h2 className="text-3xl font-bold md:text-4xl">{t("features.title")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("features.subtitle")}</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {[
-              { icon: Zap, title: "সুপার ফাস্ট স্পিড", desc: "আধুনিক ফাইবার অপটিক নেটওয়ার্কে গিগাবিট গতির ইন্টারনেট।", color: "bg-gradient-primary" },
-              { icon: Shield, title: "নিরাপদ কানেকশন", desc: "এন্টারপ্রাইজ-গ্রেড সিকিউরিটি এবং DDoS প্রোটেকশন।", color: "bg-gradient-accent" },
-              { icon: Signal, title: "স্থিতিশীল সংযোগ", desc: "রিডানডেন্ট আপলিংক ও ২৪/৭ মনিটরিং।", color: "bg-gradient-hero" },
-              { icon: Router, title: "মিকরোটিক অটোমেশন", desc: "সম্পূর্ণ অটোমেটিক PPPoE, Radius ও ব্যান্ডউইথ ব্যবস্থাপনা।", color: "bg-gradient-primary" },
-              { icon: Headphones, title: "২৪/৭ কাস্টমার কেয়ার", desc: "যেকোনো সমস্যায় তাৎক্ষণিক সাপোর্ট।", color: "bg-gradient-accent" },
-              { icon: Award, title: "সেরা মূল্য", desc: "বাজারের সেরা প্যাকেজ এবং অসীম ডেটা।", color: "bg-gradient-hero" },
+              { icon: Zap, title: t("features.speed.title"), desc: t("features.speed.desc"), color: "bg-gradient-primary" },
+              { icon: Shield, title: t("features.secure.title"), desc: t("features.secure.desc"), color: "bg-gradient-accent" },
+              { icon: Signal, title: t("features.stable.title"), desc: t("features.stable.desc"), color: "bg-gradient-hero" },
+              { icon: Router, title: t("features.mikrotik.title"), desc: t("features.mikrotik.desc"), color: "bg-gradient-primary" },
+              { icon: Headphones, title: t("features.care.title"), desc: t("features.care.desc"), color: "bg-gradient-accent" },
+              { icon: Award, title: t("features.price.title"), desc: t("features.price.desc"), color: "bg-gradient-hero" },
             ].map((f) => (
               <div key={f.title} className="group rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-1">
                 <div className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl ${f.color} shadow-glow`}>
