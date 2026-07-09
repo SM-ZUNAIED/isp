@@ -223,11 +223,18 @@ function CustomerPortal() {
               />
               <AreaChangeCard
                 currentZoneId={c.zone_id}
-                currentAddress={c.address ?? ""}
+                currentAddress={c.address_line ?? c.address ?? ""}
                 zones={q.data.zones}
                 onSubmitted={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
               />
             </div>
+
+            <PresentAddressCard
+              customer={c}
+              onSaved={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
+            />
+
+
 
             <Card>
               <CardHeader><CardTitle className="text-base">আপনার সাম্প্রতিক রিকোয়েস্ট</CardTitle></CardHeader>
