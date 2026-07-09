@@ -185,3 +185,58 @@ function EntrySection({
     </div>
   );
 }
+
+function EditEntryDialog({
+  kind, row, onSaved,
+}: {
+  kind: "income" | "expense";
+  row: EntryRow;
+  onSaved: () => void;
+}) {
+  const update = useServerFn(updateEntry);
+  const [open, setOpen] = useState(false);
+  const [amount, setAmount] = useState(String(row.amount));
+  const [category, setCategory] = useState(row.category);
+  const [description, setDescription] = useState(row.description ?? "");
+  const [date, setDate] = useState(row.entry_date);
+  const mut = useMutation({
+    mutationFn: () => update({
+      data: {
+        id: row.id, kind,
+        amount: Number(amount), category: category.trim(),
+        description: description || null, entry_date: date,
+      },
+    }),
+    onSuccess: () => { toast.success("আপডেট হয়েছে"); setOpen(false); onSaved(); },
+    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+  });
+  return (
+    <Dialog open={open} onOpenChange={(v) => {
+      setOpen(v);
+      if (v) { setAmount(String(row.amount)); setCategory(row.category); setDescription(row.description ?? ""); setDate(row.entry_date); }
+    }}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost"><Pencil className="h-4 w-4" /></Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>এন্ট্রি এডিট</DialogTitle></DialogHeader>
+        <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="grid grid-cols-2 gap-3">
+          <div className="space-y-1"><Label className="text-xs">টাকা (৳)</Label>
+            <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
+          <div className="space-y-1"><Label className="text-xs">তারিখ</Label>
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">বিভাগ</Label>
+            <Input required value={category} onChange={(e) => setCategory(e.target.value)} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">বর্ণনা</Label>
+            <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <DialogFooter className="col-span-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
