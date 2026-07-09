@@ -84,7 +84,7 @@ function PayBillPage() {
           customerCode: res.customer.code,
           pkg: res.customer.package ?? "—",
           amount: res.bill.due,
-          due: new Date(res.bill.due_date).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-GB"),
+          due: res.bill.due_date ? new Date(res.bill.due_date).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-GB") : "—",
         });
       }
     } catch (err: any) {
