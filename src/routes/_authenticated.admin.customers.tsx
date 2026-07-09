@@ -257,6 +257,22 @@ function CustomerFormDialog({
       }
     : empty;
   const [form, setForm] = useState(seed);
+  const [addr, setAddr] = useState<AddressValue>(
+    initial
+      ? {
+          division_id: initial.division_id ?? null,
+          district_id: initial.district_id ?? null,
+          upazila_id: initial.upazila_id ?? null,
+          union_id: initial.union_id ?? null,
+          post_office_id: initial.post_office_id ?? null,
+          village_id: initial.village_id ?? null,
+          area_id: initial.area_id ?? null,
+          road_id: initial.road_id ?? null,
+          building_id: initial.building_id ?? null,
+          address_line: initial.address_line ?? initial.address ?? null,
+        }
+      : emptyAddress,
+  );
 
   const mut = useMutation({
     mutationFn: async () => {
@@ -264,7 +280,17 @@ function CustomerFormDialog({
         customer_code: form.customer_code.trim(),
         full_name: form.full_name.trim(),
         mobile: form.mobile.trim(),
-        address: form.address || null,
+        address: addr.address_line || form.address || null,
+        address_line: addr.address_line || null,
+        division_id: addr.division_id,
+        district_id: addr.district_id,
+        upazila_id: addr.upazila_id,
+        union_id: addr.union_id,
+        post_office_id: addr.post_office_id,
+        village_id: addr.village_id,
+        area_id: addr.area_id,
+        road_id: addr.road_id,
+        building_id: addr.building_id,
         package_id: form.package_id || null,
         zone_id: form.zone_id || null,
         monthly_bill: Number(form.monthly_bill) || 0,
@@ -278,7 +304,7 @@ function CustomerFormDialog({
     onSuccess: () => {
       toast.success(mode === "create" ? "কাস্টমার যুক্ত হয়েছে" : "আপডেট হয়েছে");
       setOpen(false);
-      if (mode === "create") setForm(empty);
+      if (mode === "create") { setForm(empty); setAddr(emptyAddress); }
       onSaved();
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
