@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PayBillRouteImport } from './routes/pay-bill'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -29,6 +30,11 @@ import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBillsRouteImport } from './routes/_authenticated.admin.bills'
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PayBillRoute = PayBillRouteImport.update({
   id: '/pay-bill',
   path: '/pay-bill',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pay-bill': typeof PayBillRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/customer': typeof AuthenticatedCustomerRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pay-bill': typeof PayBillRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/customer': typeof AuthenticatedCustomerRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/bills': typeof AuthenticatedAdminBillsRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/pay-bill': typeof PayBillRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/customer': typeof AuthenticatedCustomerRoute
   '/_authenticated/admin/accounts': typeof AuthenticatedAdminAccountsRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pay-bill'
+    | '/reset-password'
     | '/admin'
     | '/customer'
     | '/admin/accounts'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pay-bill'
+    | '/reset-password'
     | '/customer'
     | '/admin/accounts'
     | '/admin/bills'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/pay-bill'
+    | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/customer'
     | '/_authenticated/admin/accounts'
@@ -261,10 +273,18 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
   PayBillRoute: typeof PayBillRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pay-bill': {
       id: '/pay-bill'
       path: '/pay-bill'
@@ -455,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
   PayBillRoute: PayBillRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

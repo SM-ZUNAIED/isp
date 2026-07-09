@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -370,26 +371,59 @@ function SignupForm({ onDone }: { onDone: () => void }) {
 }
 
 /* ---------- Forgot ---------- */
+const forgotSchema = z.object({
+  email: z.string().trim().min(1, "Email is required").email("Enter a valid email address").max(255),
+});
+
 function ForgotForm({ onBack }: { onBack: () => void }) {
   const { lang } = useI18n();
   const bn = lang === "bn";
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sentTo, setSentTo] = useState("");
+  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  const send = async (target: string) => {
     setBusy(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/auth`,
+    const { error } = await supabase.auth.resetPasswordForEmail(target, {
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     setBusy(false);
     if (error) {
-      toast.error(bn ? "পাঠানো যায়নি" : "Could not send", { description: error.message });
+      const msg = /rate|too many|seconds/i.test(error.message)
+        ? bn ? "অনেকবার চেষ্টা করা হয়েছে, কিছুক্ষণ পরে আবার চেষ্টা করুন।" : "Too many attempts. Please wait a moment and try again."
+        : error.message;
+      toast.error(bn ? "রিসেট লিংক পাঠানো যায়নি" : "Could not send reset link", { description: msg });
+      return false;
+    }
+    setSentTo(target);
+    setSent(true);
+    setCooldown(45);
+    toast.success(bn ? "রিসেট লিংক পাঠানো হয়েছে" : "Reset link sent", {
+      description: bn ? `${target} এ ইমেইল পাঠানো হয়েছে।` : `Email sent to ${target}.`,
+    });
+    return true;
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFieldError(null);
+    const parsed = forgotSchema.safeParse({ email });
+    if (!parsed.success) {
+      const msg = parsed.error.issues[0]?.message ?? "Invalid email";
+      setFieldError(msg);
+      toast.error(bn ? "সঠিক ইমেইল দিন" : "Invalid email", { description: msg });
       return;
     }
-    setSent(true);
-    toast.success(bn ? "রিসেট লিংক পাঠানো হয়েছে" : "Reset link sent");
+    await send(parsed.data.email);
   };
 
   return (
@@ -400,33 +434,76 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
         </div>
         <h2 className="mt-3 text-2xl font-bold">{bn ? "পাসওয়ার্ড রিসেট" : "Reset password"}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {bn ? "আপনার ইমেইলে রিসেট লিংক পাঠানো হবে।" : "We'll email you a reset link."}
+          {bn
+            ? "আপনার অ্যাকাউন্টের ইমেইল দিন — আমরা একটি সুরক্ষিত রিসেট লিংক পাঠাবো।"
+            : "Enter your account email and we'll send you a secure reset link."}
         </p>
       </div>
 
       {sent ? (
-        <div className="rounded-2xl border bg-success/10 p-4 text-sm">
-          {bn
-            ? "লিংক পাঠানো হয়েছে। আপনার ইমেইল চেক করুন।"
-            : "The link has been sent. Please check your inbox."}
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-success/30 bg-success/10 p-4 text-sm">
+            <div className="flex items-start gap-3">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-success/20 text-success">
+                <Mail className="h-4 w-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="font-semibold text-foreground">
+                  {bn ? "লিংক পাঠানো হয়েছে" : "Reset link sent"}
+                </div>
+                <p className="text-muted-foreground">
+                  {bn
+                    ? <>আমরা <span className="font-medium text-foreground">{sentTo}</span> এ একটি রিসেট লিংক পাঠিয়েছি। ইমেইলটি খুলে লিংকে ক্লিক করুন — লিংক ৬০ মিনিট পর মেয়াদোত্তীর্ণ হবে।</>
+                    : <>We sent a reset link to <span className="font-medium text-foreground">{sentTo}</span>. Open the email and click the link — it expires in 60 minutes.</>}
+                </p>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            {bn ? "ইমেইল দেখতে পাচ্ছেন না? স্প্যাম / প্রোমোশন ফোল্ডার চেক করুন।" : "Don't see the email? Check your spam / promotions folder."}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11"
+            disabled={busy || cooldown > 0}
+            onClick={() => send(sentTo)}
+          >
+            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {cooldown > 0
+              ? (bn ? `আবার পাঠান (${cooldown}স)` : `Resend in ${cooldown}s`)
+              : (bn ? "আবার লিংক পাঠান" : "Resend link")}
+          </Button>
         </div>
       ) : (
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <IconField id="f-email" icon={Mail} label={bn ? "ইমেইল" : "Email"}>
             <Input
               id="f-email"
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); if (fieldError) setFieldError(null); }}
               placeholder="you@example.com"
-              className="h-11 pl-10"
+              aria-invalid={!!fieldError}
+              aria-describedby={fieldError ? "f-email-err" : undefined}
+              className={`h-11 pl-10 ${fieldError ? "border-destructive focus-visible:ring-destructive" : ""}`}
             />
           </IconField>
+          {fieldError && (
+            <p id="f-email-err" className="text-xs font-medium text-destructive -mt-2">
+              {fieldError}
+            </p>
+          )}
           <Button type="submit" disabled={busy} className="w-full h-11 bg-gradient-primary text-primary-foreground shadow-glow">
             {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {bn ? "রিসেট লিংক পাঠান" : "Send reset link"}
           </Button>
+          <p className="text-xs text-muted-foreground text-center">
+            {bn
+              ? "নিরাপত্তার কারণে অ্যাকাউন্ট আছে কিনা তা প্রকাশ করা হয় না।"
+              : "For your security, we don't reveal whether an account exists."}
+          </p>
         </form>
       )}
 
