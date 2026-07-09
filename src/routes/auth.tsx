@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
