@@ -20,6 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile, updateCustomerAvatar } from "@/lib/support.functions";
+import { updateMyAddress } from "@/lib/address.functions";
+import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
 
 export const Route = createFileRoute("/_authenticated/customer")({
   head: () => ({ meta: [{ title: "কাস্টমার পোর্টাল — Net Bill Pro" }] }),
@@ -223,11 +225,18 @@ function CustomerPortal() {
               />
               <AreaChangeCard
                 currentZoneId={c.zone_id}
-                currentAddress={c.address ?? ""}
+                currentAddress={c.address_line ?? c.address ?? ""}
                 zones={q.data.zones}
                 onSubmitted={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
               />
             </div>
+
+            <PresentAddressCard
+              customer={c}
+              onSaved={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
+            />
+
+
 
             <Card>
               <CardHeader><CardTitle className="text-base">আপনার সাম্প্রতিক রিকোয়েস্ট</CardTitle></CardHeader>
@@ -400,7 +409,7 @@ function AreaChangeCard({
 }: { currentZoneId: string | null; currentAddress: string; zones: Zn[]; onSubmitted: () => void }) {
   const submit = useServerFn(submitCustomerRequest);
   const [targetId, setTargetId] = useState<string>("");
-  const [newAddress, setNewAddress] = useState("");
+  const [addr, setAddr] = useState<AddressValue>(emptyAddress);
   const [note, setNote] = useState("");
 
   const options = useMemo(() => zones.filter((z) => z.id !== currentZoneId), [zones, currentZoneId]);
@@ -409,12 +418,12 @@ function AreaChangeCard({
     mutationFn: () => submit({ data: {
       kind: "area_change",
       target_zone_id: targetId,
-      new_address: newAddress || null,
+      new_address: addr.address_line || null,
       note: note || null,
     } }),
     onSuccess: (res) => {
       toast.success(`রিকোয়েস্ট জমা হয়েছে (${res.ticket_number})`);
-      setTargetId(""); setNewAddress(""); setNote("");
+      setTargetId(""); setAddr(emptyAddress); setNote("");
       onSubmitted();
     },
     onError: (e: any) => toast.error(String(e?.message ?? e)),
@@ -433,7 +442,7 @@ function AreaChangeCard({
           বর্তমান ঠিকানা: <b>{currentAddress || "—"}</b>
         </p>
         <div className="space-y-1.5">
-          <Label className="text-xs">নতুন এরিয়া</Label>
+          <Label className="text-xs">নতুন এরিয়া (সার্ভিস জোন)</Label>
           <Select value={targetId} onValueChange={setTargetId}>
             <SelectTrigger><SelectValue placeholder="নতুন এরিয়া বাছাই করুন" /></SelectTrigger>
             <SelectContent>
@@ -442,8 +451,8 @@ function AreaChangeCard({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs">নতুন ঠিকানা</Label>
-          <Input value={newAddress} onChange={(e) => setNewAddress(e.target.value)} placeholder="বিস্তারিত ঠিকানা" />
+          <Label className="text-xs">নতুন ঠিকানা — সঠিক লোকেশন বাছাই করুন</Label>
+          <AddressSelector value={addr} onChange={setAddr} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">মন্তব্য (ঐচ্ছিক)</Label>
@@ -460,6 +469,51 @@ function AreaChangeCard({
     </Card>
   );
 }
+
+function PresentAddressCard({
+  customer, onSaved,
+}: { customer: CustomerData; onSaved: () => void }) {
+  const update = useServerFn(updateMyAddress);
+  const [addr, setAddr] = useState<AddressValue>({
+    division_id: customer.division_id ?? null,
+    district_id: customer.district_id ?? null,
+    upazila_id: customer.upazila_id ?? null,
+    union_id: customer.union_id ?? null,
+    post_office_id: customer.post_office_id ?? null,
+    village_id: customer.village_id ?? null,
+    area_id: customer.area_id ?? null,
+    road_id: customer.road_id ?? null,
+    building_id: customer.building_id ?? null,
+    address_line: customer.address_line ?? customer.address ?? null,
+  });
+
+  const m = useMutation({
+    mutationFn: () => update({ data: addr }),
+    onSuccess: () => { toast.success("ঠিকানা আপডেট হয়েছে"); onSaved(); },
+    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Home className="h-5 w-5 text-primary" />
+          বর্তমান ঠিকানা আপডেট (Cascading)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <AddressSelector value={addr} onChange={setAddr} />
+        <div className="flex justify-end">
+          <Button className="bg-gradient-primary text-white" onClick={() => m.mutate()} disabled={m.isPending}>
+            {m.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            ঠিকানা সংরক্ষণ করুন
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 /* ============ Avatar helpers ============ */
 
@@ -510,6 +564,16 @@ type CustomerData = {
   connection_date: string | null;
   expiry_date: string | null;
   pppoe_username: string | null;
+  division_id: number | null;
+  district_id: number | null;
+  upazila_id: number | null;
+  union_id: string | null;
+  post_office_id: string | null;
+  village_id: string | null;
+  area_id: string | null;
+  road_id: string | null;
+  building_id: string | null;
+  address_line: string | null;
   packages: { name: string; download_speed: number; upload_speed: number } | null;
   zones: { name: string } | null;
 };
