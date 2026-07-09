@@ -216,7 +216,7 @@ function ParentSelect({
       }
       const { data, error } = await query.limit(2000);
       if (error) throw error;
-      return data as Array<{ id: string | number; name: string; bn_name: string | null }>;
+      return (data ?? []) as unknown as Array<{ id: string | number; name: string; bn_name: string | null }>;
     },
   });
 
