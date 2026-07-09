@@ -23,14 +23,14 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const NAV = [
+const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean }> = [
   { to: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard, exact: true },
-  { to: "/admin", label: "কাস্টমার", icon: Users, disabled: true },
-  { to: "/admin", label: "প্যাকেজ", icon: Package, disabled: true },
+  { to: "/admin/customers", label: "কাস্টমার", icon: Users },
+  { to: "/admin/packages", label: "প্যাকেজ", icon: Package },
+  { to: "/admin/zones", label: "জোন / এলাকা", icon: Radio },
   { to: "/admin", label: "বিল ও পেমেন্ট", icon: Receipt, disabled: true },
   { to: "/admin", label: "একাউন্টস", icon: Wallet, disabled: true },
   { to: "/admin", label: "MikroTik", icon: RouterIcon, disabled: true },
-  { to: "/admin", label: "OLT / ONU", icon: Radio, disabled: true },
   { to: "/admin", label: "সাপোর্ট টিকেট", icon: Ticket, disabled: true },
   { to: "/admin", label: "নোটিশ", icon: Bell, disabled: true },
   { to: "/admin", label: "সেটিংস", icon: SettingsIcon, disabled: true },
