@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Plus, Loader2, Trash2, Star } from "lucide-react";
+import { Plus, Loader2, Trash2, Star, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,14 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  listPackages, createPackage, togglePackage, deletePackage,
+  listPackages, createPackage, updatePackage, togglePackage, deletePackage,
 } from "@/lib/catalog.functions";
+
+type PackageRow = {
+  id: string; name: string; download_speed: number; upload_speed: number;
+  monthly_price: number | string; setup_charge?: number | string | null;
+  description?: string | null; is_popular?: boolean | null; is_active?: boolean | null;
+};
 
 export const Route = createFileRoute("/_authenticated/admin/packages")({
   head: () => ({ meta: [{ title: "প্যাকেজ — Net Bill Pro" }] }),
