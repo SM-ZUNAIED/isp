@@ -29,8 +29,8 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       supabase.from("customers").select("id", { count: "exact", head: true }),
       supabase.from("customers").select("id", { count: "exact", head: true }).eq("status", "active"),
       supabase.from("bills").select("amount,status"),
-      supabase.from("tickets").select("id", { count: "exact", head: true }).eq("status", "open"),
-      supabase.from("mikrotiks").select("id", { count: "exact", head: true }).eq("status", "online"),
+      supabase.from("tickets").select("id", { count: "exact", head: true }).in("status", ["pending", "in_progress"]),
+      supabase.from("mikrotiks").select("id", { count: "exact", head: true }).eq("is_online", true),
     ]);
 
     const monthStart = new Date();
