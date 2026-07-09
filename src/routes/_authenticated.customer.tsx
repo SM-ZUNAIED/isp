@@ -49,7 +49,7 @@ function CustomerPortal() {
             </p>
             <div className="flex gap-2 justify-center">
               <Button variant="outline" asChild><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />হোম</Link></Button>
-              <Button onClick={signOut}><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
+              <Button onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
             </div>
           </CardContent>
         </Card>
@@ -75,7 +75,7 @@ function CustomerPortal() {
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" asChild><Link to="/">হোম</Link></Button>
-            <Button variant="secondary" size="sm" onClick={signOut}><LogOut className="h-4 w-4" /></Button>
+            <Button variant="secondary" size="sm" onClick={handleLogout}><LogOut className="h-4 w-4" /></Button>
           </div>
         </div>
       </header>
