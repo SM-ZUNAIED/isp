@@ -16,8 +16,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
+import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authenticated.admin.payments'
 import { Route as AuthenticatedAdminPackagesRouteImport } from './routes/_authenticated.admin.packages'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated.admin.customers'
+import { Route as AuthenticatedAdminBillsRouteImport } from './routes/_authenticated.admin.bills'
 
 const PayBillRoute = PayBillRouteImport.update({
   id: '/pay-bill',
@@ -53,6 +55,12 @@ const AuthenticatedAdminZonesRoute = AuthenticatedAdminZonesRouteImport.update({
   path: '/zones',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminPaymentsRoute =
+  AuthenticatedAdminPaymentsRouteImport.update({
+    id: '/payments',
+    path: '/payments',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPackagesRoute =
   AuthenticatedAdminPackagesRouteImport.update({
     id: '/packages',
@@ -65,14 +73,21 @@ const AuthenticatedAdminCustomersRoute =
     path: '/customers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBillsRoute = AuthenticatedAdminBillsRouteImport.update({
+  id: '/bills',
+  path: '/bills',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pay-bill': typeof PayBillRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/admin/bills': typeof AuthenticatedAdminBillsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/packages': typeof AuthenticatedAdminPackagesRoute
+  '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -80,8 +95,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pay-bill': typeof PayBillRoute
+  '/admin/bills': typeof AuthenticatedAdminBillsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/packages': typeof AuthenticatedAdminPackagesRoute
+  '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -92,8 +109,10 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/pay-bill': typeof PayBillRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/admin/bills': typeof AuthenticatedAdminBillsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/packages': typeof AuthenticatedAdminPackagesRoute
+  '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -104,8 +123,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pay-bill'
     | '/admin'
+    | '/admin/bills'
     | '/admin/customers'
     | '/admin/packages'
+    | '/admin/payments'
     | '/admin/zones'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -113,8 +134,10 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pay-bill'
+    | '/admin/bills'
     | '/admin/customers'
     | '/admin/packages'
+    | '/admin/payments'
     | '/admin/zones'
     | '/admin'
   id:
@@ -124,8 +147,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pay-bill'
     | '/_authenticated/admin'
+    | '/_authenticated/admin/bills'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/packages'
+    | '/_authenticated/admin/payments'
     | '/_authenticated/admin/zones'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -188,6 +213,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminZonesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/payments': {
+      id: '/_authenticated/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AuthenticatedAdminPaymentsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/packages': {
       id: '/_authenticated/admin/packages'
       path: '/packages'
@@ -202,19 +234,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/bills': {
+      id: '/_authenticated/admin/bills'
+      path: '/bills'
+      fullPath: '/admin/bills'
+      preLoaderRoute: typeof AuthenticatedAdminBillsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBillsRoute: typeof AuthenticatedAdminBillsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminPackagesRoute: typeof AuthenticatedAdminPackagesRoute
+  AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
   AuthenticatedAdminZonesRoute: typeof AuthenticatedAdminZonesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBillsRoute: AuthenticatedAdminBillsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminPackagesRoute: AuthenticatedAdminPackagesRoute,
+  AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
   AuthenticatedAdminZonesRoute: AuthenticatedAdminZonesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
