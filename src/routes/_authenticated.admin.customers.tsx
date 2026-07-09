@@ -25,11 +25,16 @@ import {
 import {
   listCustomers, createCustomer, updateCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
 } from "@/lib/customers.functions";
+import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
 
 type CustomerStatus = "pending" | "active" | "suspended" | "expired";
 type CustomerRow = {
   id: string; customer_code: string; full_name: string; mobile: string;
-  address?: string | null; package_id?: string | null; zone_id?: string | null;
+  address?: string | null; address_line?: string | null;
+  division_id?: number | null; district_id?: number | null; upazila_id?: number | null;
+  union_id?: string | null; post_office_id?: string | null; village_id?: string | null;
+  area_id?: string | null; road_id?: string | null; building_id?: string | null;
+  package_id?: string | null; zone_id?: string | null;
   monthly_bill: number | string; status: CustomerStatus;
   pppoe_username?: string | null; pppoe_password?: string | null;
 };
@@ -252,6 +257,22 @@ function CustomerFormDialog({
       }
     : empty;
   const [form, setForm] = useState(seed);
+  const [addr, setAddr] = useState<AddressValue>(
+    initial
+      ? {
+          division_id: initial.division_id ?? null,
+          district_id: initial.district_id ?? null,
+          upazila_id: initial.upazila_id ?? null,
+          union_id: initial.union_id ?? null,
+          post_office_id: initial.post_office_id ?? null,
+          village_id: initial.village_id ?? null,
+          area_id: initial.area_id ?? null,
+          road_id: initial.road_id ?? null,
+          building_id: initial.building_id ?? null,
+          address_line: initial.address_line ?? initial.address ?? null,
+        }
+      : emptyAddress,
+  );
 
   const mut = useMutation({
     mutationFn: async () => {
@@ -259,7 +280,17 @@ function CustomerFormDialog({
         customer_code: form.customer_code.trim(),
         full_name: form.full_name.trim(),
         mobile: form.mobile.trim(),
-        address: form.address || null,
+        address: addr.address_line || form.address || null,
+        address_line: addr.address_line || null,
+        division_id: addr.division_id,
+        district_id: addr.district_id,
+        upazila_id: addr.upazila_id,
+        union_id: addr.union_id,
+        post_office_id: addr.post_office_id,
+        village_id: addr.village_id,
+        area_id: addr.area_id,
+        road_id: addr.road_id,
+        building_id: addr.building_id,
         package_id: form.package_id || null,
         zone_id: form.zone_id || null,
         monthly_bill: Number(form.monthly_bill) || 0,
@@ -273,7 +304,7 @@ function CustomerFormDialog({
     onSuccess: () => {
       toast.success(mode === "create" ? "কাস্টমার যুক্ত হয়েছে" : "আপডেট হয়েছে");
       setOpen(false);
-      if (mode === "create") setForm(empty);
+      if (mode === "create") { setForm(empty); setAddr(emptyAddress); }
       onSaved();
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
@@ -288,78 +319,80 @@ function CustomerFormDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "নতুন কাস্টমার যোগ করুন" : "কাস্টমার এডিট করুন"}</DialogTitle>
         </DialogHeader>
         <form
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          className="space-y-5"
           onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}
         >
-          <Field label="কাস্টমার কোড *">
-            <Input required value={form.customer_code}
-              onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
-          </Field>
-          <Field label="পূর্ণ নাম *">
-            <Input required value={form.full_name}
-              onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-          </Field>
-          <Field label="মোবাইল *">
-            <Input required value={form.mobile}
-              onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
-          </Field>
-          <Field label="মাসিক বিল (৳)">
-            <Input type="number" min={0} value={form.monthly_bill}
-              onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
-          </Field>
-          <Field label="প্যাকেজ">
-            <Select value={form.package_id}
-              onValueChange={(v) => {
-                const p = packages.find((x) => x.id === v);
-                setForm({ ...form, package_id: v, monthly_bill: p ? String(p.monthly_price) : form.monthly_bill });
-              }}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
-              <SelectContent>
-                {packages.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name} — ৳{p.monthly_price}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="জোন">
-            <Select value={form.zone_id} onValueChange={(v) => setForm({ ...form, zone_id: v })}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
-              <SelectContent>
-                {zones.map((z) => (<SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="PPPoE Username">
-            <Input value={form.pppoe_username}
-              onChange={(e) => setForm({ ...form, pppoe_username: e.target.value })} />
-          </Field>
-          <Field label="PPPoE Password">
-            <Input value={form.pppoe_password}
-              onChange={(e) => setForm({ ...form, pppoe_password: e.target.value })} />
-          </Field>
-          <Field label="স্ট্যাটাস">
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as CustomerStatus })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
-                <SelectItem value="active">সক্রিয়</SelectItem>
-                <SelectItem value="suspended">স্থগিত</SelectItem>
-                <SelectItem value="expired">মেয়াদ শেষ</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-          <div className="sm:col-span-2">
-            <Field label="ঠিকানা">
-              <Input value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="কাস্টমার কোড *">
+              <Input required value={form.customer_code}
+                onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
+            </Field>
+            <Field label="পূর্ণ নাম *">
+              <Input required value={form.full_name}
+                onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+            </Field>
+            <Field label="মোবাইল *">
+              <Input required value={form.mobile}
+                onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
+            </Field>
+            <Field label="মাসিক বিল (৳)">
+              <Input type="number" min={0} value={form.monthly_bill}
+                onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
+            </Field>
+            <Field label="প্যাকেজ">
+              <Select value={form.package_id}
+                onValueChange={(v) => {
+                  const p = packages.find((x) => x.id === v);
+                  setForm({ ...form, package_id: v, monthly_bill: p ? String(p.monthly_price) : form.monthly_bill });
+                }}>
+                <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>
+                  {packages.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} — ৳{p.monthly_price}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="জোন">
+              <Select value={form.zone_id} onValueChange={(v) => setForm({ ...form, zone_id: v })}>
+                <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>
+                  {zones.map((z) => (<SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="PPPoE Username">
+              <Input value={form.pppoe_username}
+                onChange={(e) => setForm({ ...form, pppoe_username: e.target.value })} />
+            </Field>
+            <Field label="PPPoE Password">
+              <Input value={form.pppoe_password}
+                onChange={(e) => setForm({ ...form, pppoe_password: e.target.value })} />
+            </Field>
+            <Field label="স্ট্যাটাস">
+              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as CustomerStatus })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
+                  <SelectItem value="active">সক্রিয়</SelectItem>
+                  <SelectItem value="suspended">স্থগিত</SelectItem>
+                  <SelectItem value="expired">মেয়াদ শেষ</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
           </div>
-          <DialogFooter className="sm:col-span-2">
+
+          <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+            <div className="text-sm font-semibold">ঠিকানা (ক্যাসকেডিং)</div>
+            <AddressSelector value={addr} onChange={setAddr} />
+          </div>
+
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
               {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
