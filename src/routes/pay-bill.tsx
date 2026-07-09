@@ -234,10 +234,31 @@ function PayBillPage() {
               </div>
             )}
 
+            {/* Success view */}
+            {success && (
+              <div className="mt-6 rounded-2xl border-2 border-success/40 bg-success/5 p-6 animate-fade-in-up">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-8 w-8 text-success" />
+                  <div>
+                    <div className="text-lg font-bold">{lang === "bn" ? "পেমেন্ট সফল" : "Payment Successful"}</div>
+                    <div className="text-xs text-muted-foreground">{lang === "bn" ? "রিসিট নম্বর" : "Receipt No."}: <b>{success.receipt}</b></div>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-baseline justify-between border-t pt-4">
+                  <span className="text-sm text-muted-foreground">{lang === "bn" ? "পরিশোধিত" : "Paid"}</span>
+                  <span className="text-2xl font-extrabold text-success">৳ {amtFmt(success.amount)}</span>
+                </div>
+                <Button onClick={resetAll} variant="outline" className="mt-4 w-full">
+                  {lang === "bn" ? "নতুন পেমেন্ট" : "New Payment"}
+                </Button>
+              </div>
+            )}
+
             {/* Step 2: method */}
-            <div className={`mt-8 ${invoice ? "" : "opacity-50 pointer-events-none"}`}>
+            {!success && (
+            <div className={`mt-8 ${invoice?.billId ? "" : "opacity-50 pointer-events-none"}`}>
               <div className="flex items-center gap-3">
-                <StepBadge n={2} active={!!invoice} />
+                <StepBadge n={2} active={!!invoice?.billId} />
                 <div>
                   <h2 className="font-bold text-lg">{t("pay.step2")}</h2>
                   <p className="text-xs text-muted-foreground">{t("pay.step2.desc")}</p>
@@ -273,19 +294,32 @@ function PayBillPage() {
 
               <form onSubmit={handlePay} className="mt-6 space-y-4">
                 {(method === "bkash" || method === "nagad" || method === "rocket") && (
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium">
-                      {t(`pay.method.${method}` as const)} — {t("pay.wallet")}
-                    </Label>
-                    <Input
-                      value={msisdn}
-                      onChange={(e) => setMsisdn(e.target.value)}
-                      inputMode="numeric"
-                      maxLength={11}
-                      placeholder="01XXXXXXXXX"
-                      className="h-12 text-base tracking-wider"
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">
+                        {t(`pay.method.${method}` as const)} — {t("pay.wallet")}
+                      </Label>
+                      <Input
+                        value={msisdn}
+                        onChange={(e) => setMsisdn(e.target.value)}
+                        inputMode="numeric"
+                        maxLength={11}
+                        placeholder="01XXXXXXXXX"
+                        className="h-12 text-base tracking-wider"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">
+                        {lang === "bn" ? "ট্রানজেকশন আইডি (TrxID)" : "Transaction ID (TrxID)"}
+                      </Label>
+                      <Input
+                        value={txnId}
+                        onChange={(e) => setTxnId(e.target.value)}
+                        placeholder={lang === "bn" ? "যেমন 8N7A1B2C3D" : "e.g. 8N7A1B2C3D"}
+                        className="h-12 text-base tracking-wider uppercase"
+                      />
+                    </div>
+                  </>
                 )}
                 {method === "card" && (
                   <p className="rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground">
@@ -293,23 +327,42 @@ function PayBillPage() {
                   </p>
                 )}
                 {method === "bank" && (
-                  <div className="rounded-xl bg-muted/50 p-4 text-sm space-y-1">
-                    <div><b>Bank:</b> Dutch-Bangla Bank Ltd.</div>
-                    <div><b>A/C Name:</b> Net Bill Pro</div>
-                    <div><b>A/C No:</b> 1234-5678-9012</div>
-                    <div><b>Branch:</b> Dhanmondi</div>
-                  </div>
+                  <>
+                    <div className="rounded-xl bg-muted/50 p-4 text-sm space-y-1">
+                      <div><b>Bank:</b> Dutch-Bangla Bank Ltd.</div>
+                      <div><b>A/C Name:</b> Net Bill Pro</div>
+                      <div><b>A/C No:</b> 1234-5678-9012</div>
+                      <div><b>Branch:</b> Dhanmondi</div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">
+                        {lang === "bn" ? "ব্যাংক রেফারেন্স" : "Bank Reference"}
+                      </Label>
+                      <Input
+                        value={txnId}
+                        onChange={(e) => setTxnId(e.target.value)}
+                        placeholder={lang === "bn" ? "রেফারেন্স নম্বর" : "Reference number"}
+                        className="h-12 text-base"
+                      />
+                    </div>
+                  </>
                 )}
 
                 <Button
                   type="submit"
                   size="lg"
+                  disabled={paying || !invoice?.billId}
                   className="w-full h-14 text-base bg-gradient-primary text-primary-foreground shadow-glow"
                 >
-                  ৳ {amtFmt(invoice?.amount ?? 0)} — {t("pay.now")}
+                  {paying ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <>৳ {amtFmt(invoice?.amount ?? 0)} — {t("pay.now")}</>
+                  )}
                 </Button>
               </form>
             </div>
+            )}
           </div>
 
           {/* Right: help / trust */}
