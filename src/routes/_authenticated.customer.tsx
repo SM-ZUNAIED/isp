@@ -92,9 +92,7 @@ function CustomerPortal() {
       <header className="bg-gradient-primary text-white shadow-elevated">
         <div className="mx-auto max-w-6xl px-4 py-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/20 backdrop-blur">
-              <User className="h-6 w-6" />
-            </div>
+            <HeaderAvatar path={c.avatar_path} name={c.full_name} />
             <div className="min-w-0">
               <div className="font-bold text-lg truncate">{c.full_name}</div>
               <div className="text-sm opacity-90 truncate">
@@ -107,6 +105,7 @@ function CustomerPortal() {
           </div>
         </div>
       </header>
+
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         {/* Top stat strip */}
