@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2, LogOut, Receipt, Wifi, User, Wallet, Ticket as TicketIcon,
   ArrowLeft, MapPin, Zap, Calendar, Phone, Mail, Home, ArrowUpCircle,
   MessageCircle, CheckCircle2, Clock, AlertCircle, Send, CreditCard, Pencil, Save, X,
+  Camera, Upload, Trash2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -17,12 +18,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile } from "@/lib/support.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile, updateCustomerAvatar } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/_authenticated/customer")({
   head: () => ({ meta: [{ title: "কাস্টমার পোর্টাল — Net Bill Pro" }] }),
   component: CustomerPortal,
 });
+
 
 const bn = new Intl.NumberFormat("bn-BD");
 const bdt = (n: number) => `৳ ${bn.format(Math.round(Number(n) || 0))}`;
