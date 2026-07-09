@@ -55,14 +55,41 @@ const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exac
 
 function AdminLayout() {
   const [open, setOpen] = useState(false);
+  const fetchRoles = useServerFn(getMyRoles);
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const roles = rolesQ.data ?? [];
+  const isAdmin = roles.includes("admin");
+  const isStaff = roles.includes("staff");
+  const hasAccess = isAdmin || isStaff;
+
+  if (rolesQ.isLoading) {
+    return <div className="grid min-h-screen place-items-center"><div className="text-muted-foreground text-sm">লোড হচ্ছে...</div></div>;
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="grid min-h-screen place-items-center p-6">
+        <div className="max-w-md text-center space-y-4">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-destructive/10">
+            <ShieldAlert className="h-8 w-8 text-destructive" />
+          </div>
+          <h1 className="text-2xl font-bold">অ্যাক্সেস নেই</h1>
+          <p className="text-muted-foreground">এই প্যানেলে প্রবেশের জন্য Admin বা Staff role প্রয়োজন।</p>
+          <div className="flex gap-2 justify-center">
+            <Link to="/customer"><Button variant="outline">কাস্টমার প্যানেলে যান</Button></Link>
+            <Link to="/"><Button className="bg-gradient-primary text-white">হোম</Button></Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r bg-card">
-        <SidebarContent />
+        <SidebarContent isAdmin={isAdmin} />
       </aside>
 
-      {/* Mobile top bar */}
       <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-card px-4 py-3">
         <Link to="/admin" className="flex items-center gap-2 font-bold">
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-white">NB</div>
@@ -73,7 +100,7 @@ function AdminLayout() {
             <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-0">
-            <SidebarContent onNavigate={() => setOpen(false)} />
+            <SidebarContent isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
       </header>
