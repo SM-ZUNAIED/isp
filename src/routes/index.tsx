@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
@@ -6,10 +6,11 @@ import { getLandingData } from "@/lib/landing.functions";
 import { submitInquiry } from "@/lib/inquiry.functions";
 import {
   Wifi, Zap, Shield, Users, Award, Phone, MapPin, Mail, MessageCircle,
-  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2,
+  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2, LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
+import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import { toast } from "sonner";
 
