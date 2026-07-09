@@ -32,9 +32,10 @@ const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exac
   { to: "/admin/payments", label: "পেমেন্ট লগ", icon: Wallet },
   { to: "/admin/mikrotik", label: "MikroTik", icon: RouterIcon },
   { to: "/admin/olt", label: "OLT / ONU", icon: Radio },
-  { to: "/admin", label: "সাপোর্ট টিকেট", icon: Ticket, disabled: true },
-  { to: "/admin", label: "নোটিশ", icon: Bell, disabled: true },
-  { to: "/admin", label: "সেটিংস", icon: SettingsIcon, disabled: true },
+  { to: "/admin/accounts", label: "একাউন্টস", icon: Wallet },
+  { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
+  { to: "/admin/notices", label: "নোটিশ", icon: Bell },
+  { to: "/admin/settings", label: "সেটিংস", icon: SettingsIcon },
 ];
 
 function AdminLayout() {
