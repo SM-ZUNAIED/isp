@@ -1,0 +1,125 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+/** List all bills with customer name. */
+export const listBills = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("bills")
+      .select("id, bill_number, billing_month, amount, paid_amount, due_amount, due_date, status, customer_id, customers(full_name, customer_code, mobile)")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+/** Generate monthly bills for all active customers. */
+export const generateMonthlyBills = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ billing_month: z.string().regex(/^\d{4}-\d{2}$/) }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const monthStart = `${data.billing_month}-01`;
+    const dueDate = new Date(monthStart);
+    dueDate.setMonth(dueDate.getMonth() + 1);
+    dueDate.setDate(10);
+
+    const { data: customers, error: cErr } = await context.supabase
+      .from("customers")
+      .select("id, customer_code, monthly_bill")
+      .eq("status", "active");
+    if (cErr) throw new Error(cErr.message);
+
+    const { data: existing } = await context.supabase
+      .from("bills")
+      .select("customer_id")
+      .eq("billing_month", monthStart);
+    const existingSet = new Set((existing ?? []).map((b) => b.customer_id));
+
+    const toInsert = (customers ?? [])
+      .filter((c) => !existingSet.has(c.id) && Number(c.monthly_bill) > 0)
+      .map((c, i) => ({
+        customer_id: c.id,
+        bill_number: `INV-${data.billing_month.replace("-", "")}-${c.customer_code}-${String(i + 1).padStart(3, "0")}`,
+        billing_month: monthStart,
+        amount: Number(c.monthly_bill),
+        due_amount: Number(c.monthly_bill),
+        due_date: dueDate.toISOString().slice(0, 10),
+        status: "unpaid" as const,
+      }));
+
+    if (toInsert.length === 0) return { created: 0, skipped: existingSet.size };
+    const { error } = await context.supabase.from("bills").insert(toInsert);
+    if (error) throw new Error(error.message);
+    return { created: toInsert.length, skipped: existingSet.size };
+  });
+
+/** Collect a payment against a bill (or standalone). */
+export const collectPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      bill_id: z.string().uuid(),
+      amount: z.number().positive(),
+      method: z.enum(["cash", "bkash", "nagad", "rocket", "bank", "other"]),
+      transaction_id: z.string().optional().nullable(),
+      notes: z.string().optional().nullable(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+
+    const { data: bill, error: bErr } = await supabase
+      .from("bills")
+      .select("id, customer_id, amount, paid_amount")
+      .eq("id", data.bill_id)
+      .single();
+    if (bErr || !bill) throw new Error(bErr?.message ?? "Bill not found");
+
+    const receipt = `RCP-${Date.now().toString(36).toUpperCase()}`;
+
+    const { error: pErr } = await supabase.from("payments").insert({
+      bill_id: bill.id,
+      customer_id: bill.customer_id,
+      amount: data.amount,
+      method: data.method,
+      transaction_id: data.transaction_id ?? null,
+      notes: data.notes ?? null,
+      receipt_number: receipt,
+      received_by: userId,
+    });
+    if (pErr) throw new Error(pErr.message);
+
+    const newPaid = Number(bill.paid_amount ?? 0) + data.amount;
+    const due = Number(bill.amount) - newPaid;
+    const status: "paid" | "partial" | "unpaid" =
+      due <= 0 ? "paid" : newPaid > 0 ? "partial" : "unpaid";
+
+    const { error: uErr } = await supabase
+      .from("bills")
+      .update({
+        paid_amount: newPaid,
+        due_amount: Math.max(0, due),
+        status,
+      })
+      .eq("id", bill.id);
+    if (uErr) throw new Error(uErr.message);
+
+    return { ok: true, receipt, status };
+  });
+
+/** Recent payments log. */
+export const listPayments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("payments")
+      .select("id, receipt_number, amount, method, paid_at, transaction_id, customers(full_name, customer_code)")
+      .order("paid_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
