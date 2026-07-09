@@ -414,11 +414,23 @@ function PayBillPage() {
                       </Label>
                       <Input
                         value={txnId}
-                        onChange={(e) => setTxnId(e.target.value)}
+                        onChange={(e) => { setTxnId(e.target.value); setFieldErrors((f) => ({ ...f, txnId: undefined })); }}
                         placeholder={lang === "bn" ? "রেফারেন্স নম্বর" : "Reference number"}
-                        className="h-12 text-base"
+                        className={`h-12 text-base ${fieldErrors.txnId ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                        aria-invalid={!!fieldErrors.txnId}
                       />
+                      {fieldErrors.txnId && <p className="text-xs text-destructive">{fieldErrors.txnId}</p>}
                     </div>
+                  </>
+                )}
+
+                {payError && (
+                  <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm">
+                    <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
+                    <div className="text-destructive">{payError}</div>
+                  </div>
+                )}
+
                   </>
                 )}
 
