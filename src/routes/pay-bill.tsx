@@ -154,12 +154,12 @@ function PayBillPage() {
           <div className="flex items-center gap-2">
             <LangToggle />
             <ThemeToggle />
-            <div className="ml-1 flex items-center gap-2">
+            <Link to="/" className="ml-1 flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary shadow-glow">
                 <Wifi className="h-4 w-4 text-primary-foreground" />
               </div>
               <span className="font-bold hidden sm:inline">Net Bill Pro</span>
-            </div>
+            </Link>
           </div>
         </div>
       </header>
