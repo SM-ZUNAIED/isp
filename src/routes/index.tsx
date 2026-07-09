@@ -364,11 +364,20 @@ function LandingPage() {
               </div>
               <div className="glass rounded-2xl p-6">
                 <h3 className="text-xl font-bold">{t("contact.quickInquiry")}</h3>
-                <form className="mt-4 space-y-3">
-                  <input placeholder={t("contact.name")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input placeholder={t("contact.phone")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input placeholder={t("contact.address")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <Button type="button" className="w-full bg-background text-foreground hover:bg-background/90">{t("contact.submit")}</Button>
+                {selectedPkg && (
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {selectedPkg.name}
+                    <button type="button" onClick={() => setSelectedPkg(null)} className="ml-1 opacity-70 hover:opacity-100">×</button>
+                  </div>
+                )}
+                <form onSubmit={handleInquiry} className="mt-4 space-y-3">
+                  <input ref={nameRef} required maxLength={100} placeholder={t("contact.name")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <input ref={phoneRef} required maxLength={11} inputMode="tel" pattern="01[3-9][0-9]{8}" placeholder={t("contact.phone")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <input ref={addressRef} maxLength={300} placeholder={t("contact.address")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <textarea ref={messageRef} maxLength={1000} rows={3} placeholder="Message (optional)" className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30 resize-none" />
+                  <Button type="submit" disabled={submitting} className="w-full bg-background text-foreground hover:bg-background/90">
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("contact.submit")}
+                  </Button>
                 </form>
               </div>
             </div>
