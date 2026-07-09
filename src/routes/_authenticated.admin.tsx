@@ -42,6 +42,7 @@ const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exac
   { to: "/admin/customers", label: "কাস্টমার", icon: Users },
   { to: "/admin/packages", label: "প্যাকেজ", icon: Package },
   { to: "/admin/zones", label: "জোন / এলাকা", icon: Radio },
+  { to: "/admin/address", label: "ঠিকানা (BD)", icon: MapPin, adminOnly: true },
   { to: "/admin/bills", label: "বিল", icon: Receipt },
   { to: "/admin/payments", label: "পেমেন্ট লগ", icon: Wallet },
   { to: "/admin/mikrotik", label: "MikroTik", icon: RouterIcon },
