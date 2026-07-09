@@ -172,6 +172,18 @@ function CustomersPage() {
                             <><Power className="h-4 w-4 mr-1" /> সক্রিয়</>
                           )}
                         </Button>
+                        <CustomerFormDialog
+                          mode="edit"
+                          initial={r as unknown as CustomerRow}
+                          packages={optsQ.data?.packages ?? []}
+                          zones={optsQ.data?.zones ?? []}
+                          onSaved={invalidate}
+                          trigger={
+                            <Button size="sm" variant="ghost">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
