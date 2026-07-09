@@ -77,6 +77,7 @@ export type Database = {
         Row: {
           address: string | null
           alt_mobile: string | null
+          avatar_path: string | null
           connection_date: string | null
           created_at: string
           customer_code: string
@@ -109,6 +110,7 @@ export type Database = {
         Insert: {
           address?: string | null
           alt_mobile?: string | null
+          avatar_path?: string | null
           connection_date?: string | null
           created_at?: string
           customer_code: string
@@ -141,6 +143,7 @@ export type Database = {
         Update: {
           address?: string | null
           alt_mobile?: string | null
+          avatar_path?: string | null
           connection_date?: string | null
           created_at?: string
           customer_code?: string

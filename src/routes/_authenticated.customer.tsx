@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2, LogOut, Receipt, Wifi, User, Wallet, Ticket as TicketIcon,
   ArrowLeft, MapPin, Zap, Calendar, Phone, Mail, Home, ArrowUpCircle,
   MessageCircle, CheckCircle2, Clock, AlertCircle, Send, CreditCard, Pencil, Save, X,
+  Camera, Upload, Trash2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -17,12 +18,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile } from "@/lib/support.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile, updateCustomerAvatar } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/_authenticated/customer")({
   head: () => ({ meta: [{ title: "কাস্টমার পোর্টাল — Net Bill Pro" }] }),
   component: CustomerPortal,
 });
+
 
 const bn = new Intl.NumberFormat("bn-BD");
 const bdt = (n: number) => `৳ ${bn.format(Math.round(Number(n) || 0))}`;
@@ -89,9 +92,7 @@ function CustomerPortal() {
       <header className="bg-gradient-primary text-white shadow-elevated">
         <div className="mx-auto max-w-6xl px-4 py-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/20 backdrop-blur">
-              <User className="h-6 w-6" />
-            </div>
+            <HeaderAvatar path={c.avatar_path} name={c.full_name} />
             <div className="min-w-0">
               <div className="font-bold text-lg truncate">{c.full_name}</div>
               <div className="text-sm opacity-90 truncate">
@@ -104,6 +105,7 @@ function CustomerPortal() {
           </div>
         </div>
       </header>
+
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         {/* Top stat strip */}
@@ -459,6 +461,42 @@ function AreaChangeCard({
   );
 }
 
+/* ============ Avatar helpers ============ */
+
+function useAvatarSignedUrl(path: string | null | undefined) {
+  return useQuery({
+    queryKey: ["avatar-url", path],
+    queryFn: async () => {
+      if (!path) return null;
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(path, 60 * 60);
+      if (error) return null;
+      return data?.signedUrl ?? null;
+    },
+    enabled: !!path,
+    staleTime: 50 * 60 * 1000,
+  });
+}
+
+function initials(name: string) {
+  const parts = (name || "").trim().split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0] || "").join("").toUpperCase() || "?";
+}
+
+function HeaderAvatar({ path, name }: { path: string | null | undefined; name: string }) {
+  const { data: url } = useAvatarSignedUrl(path);
+  return (
+    <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/20 backdrop-blur">
+      {url ? (
+        <img src={url} alt={name} className="h-full w-full object-cover" />
+      ) : (
+        <span className="text-sm font-bold">{initials(name)}</span>
+      )}
+    </div>
+  );
+}
+
 /* ============ ProfileCard (view + edit) ============ */
 
 type CustomerData = {
@@ -467,6 +505,7 @@ type CustomerData = {
   alt_mobile: string | null;
   email: string | null;
   address: string | null;
+  avatar_path: string | null;
   status: string;
   connection_date: string | null;
   expiry_date: string | null;
@@ -476,13 +515,19 @@ type CustomerData = {
 };
 
 function ProfileCard({ customer, onSaved }: { customer: CustomerData; onSaved: () => void }) {
+  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     full_name: customer.full_name ?? "",
-    email: customer.email ?? "",
-    alt_mobile: customer.alt_mobile ?? "",
     address: customer.address ?? "",
   });
+
+  useEffect(() => {
+    setForm({
+      full_name: customer.full_name ?? "",
+      address: customer.address ?? "",
+    });
+  }, [customer.full_name, customer.address]);
 
   const update = useServerFn(updateCustomerProfile);
   const m = useMutation({
@@ -498,8 +543,6 @@ function ProfileCard({ customer, onSaved }: { customer: CustomerData; onSaved: (
   const cancel = () => {
     setForm({
       full_name: customer.full_name ?? "",
-      email: customer.email ?? "",
-      alt_mobile: customer.alt_mobile ?? "",
       address: customer.address ?? "",
     });
     setEditing(false);
@@ -527,49 +570,161 @@ function ProfileCard({ customer, onSaved }: { customer: CustomerData; onSaved: (
         )}
       </CardHeader>
 
-      {!editing ? (
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <InfoRow icon={User} label="নাম" value={customer.full_name} />
-          <InfoRow icon={Phone} label="মোবাইল" value={customer.mobile} />
-          <InfoRow icon={Phone} label="বিকল্প মোবাইল" value={customer.alt_mobile || "—"} />
-          <InfoRow icon={Mail} label="ইমেইল" value={customer.email || "—"} />
-          <InfoRow icon={Home} label="ঠিকানা" value={customer.address ?? "—"} />
-          <InfoRow icon={MapPin} label="এরিয়া / জোন" value={customer.zones?.name ?? "—"} />
-          <InfoRow icon={Wifi} label="প্যাকেজ" value={
-            customer.packages ? `${customer.packages.name} (${customer.packages.download_speed}/${customer.packages.upload_speed} Mbps)` : "—"
-          } />
-          {customer.pppoe_username && <InfoRow icon={Zap} label="PPPoE ইউজার" value={customer.pppoe_username} mono />}
-          <InfoRow icon={Calendar} label="সংযোগ তারিখ" value={customer.connection_date ? new Date(customer.connection_date).toLocaleDateString("bn-BD") : "—"} />
-          <InfoRow icon={Calendar} label="মেয়াদ শেষ" value={expiryDate ? expiryDate.toLocaleDateString("bn-BD") : "—"} />
-          <InfoRow icon={CheckCircle2} label="স্ট্যাটাস" value={customer.status} />
-        </CardContent>
-      ) : (
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label className="text-xs">নাম *</Label>
-            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} maxLength={120} />
+      <CardContent className="space-y-6">
+        <AvatarUploader
+          userId={user?.id}
+          avatarPath={customer.avatar_path}
+          name={customer.full_name}
+          onChanged={onSaved}
+        />
+
+        {!editing ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InfoRow icon={User} label="নাম" value={customer.full_name} />
+            <InfoRow icon={Phone} label="মোবাইল" value={customer.mobile} />
+            <InfoRow icon={Phone} label="বিকল্প মোবাইল" value={customer.alt_mobile || "—"} />
+            <InfoRow icon={Mail} label="ইমেইল" value={customer.email || "—"} />
+            <InfoRow icon={Home} label="ঠিকানা" value={customer.address ?? "—"} />
+            <InfoRow icon={MapPin} label="এরিয়া / জোন" value={customer.zones?.name ?? "—"} />
+            <InfoRow icon={Wifi} label="প্যাকেজ" value={
+              customer.packages ? `${customer.packages.name} (${customer.packages.download_speed}/${customer.packages.upload_speed} Mbps)` : "—"
+            } />
+            {customer.pppoe_username && <InfoRow icon={Zap} label="PPPoE ইউজার" value={customer.pppoe_username} mono />}
+            <InfoRow icon={Calendar} label="সংযোগ তারিখ" value={customer.connection_date ? new Date(customer.connection_date).toLocaleDateString("bn-BD") : "—"} />
+            <InfoRow icon={Calendar} label="মেয়াদ শেষ" value={expiryDate ? expiryDate.toLocaleDateString("bn-BD") : "—"} />
+            <InfoRow icon={CheckCircle2} label="স্ট্যাটাস" value={customer.status} />
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">মোবাইল (পরিবর্তনযোগ্য নয়)</Label>
-            <Input value={customer.mobile} disabled />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">নাম *</Label>
+              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} maxLength={120} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">মোবাইল (পরিবর্তনযোগ্য নয়)</Label>
+              <Input value={customer.mobile} disabled />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">বিকল্প মোবাইল (পরিবর্তনযোগ্য নয়)</Label>
+              <Input value={customer.alt_mobile ?? ""} disabled />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">ইমেইল (পরিবর্তনযোগ্য নয়)</Label>
+              <Input value={customer.email ?? ""} disabled />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label className="text-xs">ঠিকানা</Label>
+              <Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} rows={2} maxLength={500} />
+            </div>
+            <p className="sm:col-span-2 text-xs text-muted-foreground">
+              মোবাইল ও ইমেইল অ্যাডমিন কর্তৃক নিয়ন্ত্রিত — পরিবর্তনের জন্য "রিকোয়েস্ট" ট্যাব ব্যবহার করুন বা অফিসে যোগাযোগ করুন।
+            </p>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">বিকল্প মোবাইল</Label>
-            <Input value={form.alt_mobile} onChange={(e) => setForm({ ...form, alt_mobile: e.target.value })} placeholder="01XXXXXXXXX" maxLength={11} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">ইমেইল</Label>
-            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={255} />
-          </div>
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label className="text-xs">ঠিকানা</Label>
-            <Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} rows={2} maxLength={500} />
-          </div>
-          <p className="sm:col-span-2 text-xs text-muted-foreground">
-            প্যাকেজ, এরিয়া বা মোবাইল পরিবর্তনের জন্য "রিকোয়েস্ট" ট্যাব ব্যবহার করুন।
-          </p>
-        </CardContent>
-      )}
+        )}
+      </CardContent>
     </Card>
   );
 }
+
+/* ============ AvatarUploader ============ */
+
+function AvatarUploader({
+  userId, avatarPath, name, onChanged,
+}: { userId: string | undefined; avatarPath: string | null; name: string; onChanged: () => void }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [busy, setBusy] = useState(false);
+  const { data: url } = useAvatarSignedUrl(avatarPath);
+  const saveAvatar = useServerFn(updateCustomerAvatar);
+
+  const handleFile = async (file: File) => {
+    if (!userId) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("শুধু ছবি আপলোড করা যাবে");
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("সর্বোচ্চ 3MB ছবি আপলোড করা যাবে");
+      return;
+    }
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+
+      // remove the previous file (best-effort)
+      if (avatarPath && avatarPath !== path) {
+        await supabase.storage.from("avatars").remove([avatarPath]);
+      }
+
+      await saveAvatar({ data: { avatar_path: path } });
+      toast.success("ছবি আপডেট হয়েছে");
+      onChanged();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "আপলোড ব্যর্থ");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!avatarPath) return;
+    setBusy(true);
+    try {
+      await supabase.storage.from("avatars").remove([avatarPath]);
+      await saveAvatar({ data: { avatar_path: null } });
+      toast.success("ছবি সরানো হয়েছে");
+      onChanged();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "মুছে ফেলা যায়নি");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-4 rounded-xl border p-4">
+      <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-primary text-white">
+        {url ? (
+          <img src={url} alt={name} className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-xl font-bold">{initials(name)}</span>
+        )}
+        {busy && (
+          <div className="absolute inset-0 grid place-items-center bg-black/40">
+            <Loader2 className="h-5 w-5 animate-spin text-white" />
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold">প্রোফাইল ছবি</div>
+        <p className="text-xs text-muted-foreground">JPG / PNG, সর্বোচ্চ 3MB</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+            }}
+          />
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => inputRef.current?.click()}>
+            <Upload className="mr-2 h-4 w-4" />{avatarPath ? "পরিবর্তন" : "আপলোড"}
+          </Button>
+          {avatarPath && (
+            <Button size="sm" variant="ghost" disabled={busy} onClick={handleRemove} className="text-rose-600 hover:text-rose-700">
+              <Trash2 className="mr-2 h-4 w-4" />সরান
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
