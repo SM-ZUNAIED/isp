@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
@@ -12,18 +12,32 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Menu,
+  UserCog,
+  ShieldAlert,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+
+const getMyRoles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("user_roles").select("role").eq("user_id", context.userId);
+    return (data ?? []).map((r) => r.role as "admin" | "staff" | "customer");
+  });
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean }> = [
+const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
   { to: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard, exact: true },
   { to: "/admin/customers", label: "কাস্টমার", icon: Users },
   { to: "/admin/packages", label: "প্যাকেজ", icon: Package },
@@ -35,19 +49,47 @@ const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exac
   { to: "/admin/accounts", label: "একাউন্টস", icon: Wallet },
   { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
   { to: "/admin/notices", label: "নোটিশ", icon: Bell },
-  { to: "/admin/settings", label: "সেটিংস", icon: SettingsIcon },
+  { to: "/admin/users", label: "ইউজার ও রোল", icon: UserCog, adminOnly: true },
+  { to: "/admin/settings", label: "সেটিংস", icon: SettingsIcon, adminOnly: true },
 ];
 
 function AdminLayout() {
   const [open, setOpen] = useState(false);
+  const fetchRoles = useServerFn(getMyRoles);
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const roles = rolesQ.data ?? [];
+  const isAdmin = roles.includes("admin");
+  const isStaff = roles.includes("staff");
+  const hasAccess = isAdmin || isStaff;
+
+  if (rolesQ.isLoading) {
+    return <div className="grid min-h-screen place-items-center"><div className="text-muted-foreground text-sm">লোড হচ্ছে...</div></div>;
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="grid min-h-screen place-items-center p-6">
+        <div className="max-w-md text-center space-y-4">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-destructive/10">
+            <ShieldAlert className="h-8 w-8 text-destructive" />
+          </div>
+          <h1 className="text-2xl font-bold">অ্যাক্সেস নেই</h1>
+          <p className="text-muted-foreground">এই প্যানেলে প্রবেশের জন্য Admin বা Staff role প্রয়োজন।</p>
+          <div className="flex gap-2 justify-center">
+            <Link to="/customer"><Button variant="outline">কাস্টমার প্যানেলে যান</Button></Link>
+            <Link to="/"><Button className="bg-gradient-primary text-white">হোম</Button></Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r bg-card">
-        <SidebarContent />
+        <SidebarContent isAdmin={isAdmin} />
       </aside>
 
-      {/* Mobile top bar */}
       <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-card px-4 py-3">
         <Link to="/admin" className="flex items-center gap-2 font-bold">
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-white">NB</div>
@@ -58,7 +100,7 @@ function AdminLayout() {
             <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-0">
-            <SidebarContent onNavigate={() => setOpen(false)} />
+            <SidebarContent isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
       </header>
@@ -72,7 +114,7 @@ function AdminLayout() {
   );
 }
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -90,7 +132,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.map((item, i) => {
+        {NAV.filter((n) => !n.adminOnly || isAdmin).map((item, i) => {
           const active = item.exact
             ? location.pathname === item.to
             : location.pathname.startsWith(item.to) && !item.exact;
