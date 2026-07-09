@@ -131,9 +131,16 @@ function LandingPage() {
             <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.contact")}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link to="/auth">{t("nav.login")}</Link>
-            </Button>
+          <div className="flex items-center gap-2">
+            {session ? (
+              <Button onClick={handleLogout} size="sm" className="bg-destructive text-destructive-foreground hover:brightness-110 shadow-glow">
+                <LogOut className="mr-2 h-4 w-4" />লগআউট
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+                <Link to="/auth">{t("nav.login")}</Link>
+              </Button>
+            )}
             <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
               <Link to="/pay-bill">{t("nav.payBill")}</Link>
             </Button>
