@@ -130,7 +130,7 @@ function LandingPage() {
             <a href="#faq" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.faq")}</a>
             <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.contact")}</a>
           </nav>
-          <div className="flex items-center gap-2
+          <div className="flex items-center gap-2">
             {session ? (
               <Button onClick={handleLogout} size="sm" className="bg-destructive text-destructive-foreground hover:brightness-110 shadow-glow">
                 <LogOut className="mr-2 h-4 w-4" />লগআউট
