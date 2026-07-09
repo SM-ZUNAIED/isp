@@ -49,6 +49,7 @@ type Invoice = {
 
 function PayBillPage() {
   const { t, lang } = useI18n();
+  const { session } = useAuth();
   const navigate = useNavigate();
   const [customerId, setCustomerId] = useState("");
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -200,6 +201,16 @@ function PayBillPage() {
           <div className="flex items-center gap-2">
             <LangToggle />
             <ThemeToggle />
+            {session && (
+              <Link
+                to="/customer"
+                title="আমার পোর্টাল"
+                aria-label="আমার পোর্টাল"
+                className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:brightness-110 transition"
+              >
+                <UserCircle2 className="h-5 w-5" />
+              </Link>
+            )}
             <Link to="/" className="ml-1 flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary shadow-glow">
                 <Wifi className="h-4 w-4 text-primary-foreground" />
