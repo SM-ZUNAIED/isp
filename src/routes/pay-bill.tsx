@@ -263,7 +263,9 @@ function PayBillPage() {
               </div>
               <Button type="submit" disabled={loading} className="h-12 px-6 bg-gradient-primary text-primary-foreground shadow-glow">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("pay.search")}
+              </Button>
             </form>
+
 
             {lookupError && !invoice && (
               <div className="mt-4 flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm animate-fade-in-up">
