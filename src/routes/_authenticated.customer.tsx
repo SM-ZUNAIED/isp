@@ -562,6 +562,16 @@ type CustomerData = {
   connection_date: string | null;
   expiry_date: string | null;
   pppoe_username: string | null;
+  division_id: number | null;
+  district_id: number | null;
+  upazila_id: number | null;
+  union_id: string | null;
+  post_office_id: string | null;
+  village_id: string | null;
+  area_id: string | null;
+  road_id: string | null;
+  building_id: string | null;
+  address_line: string | null;
   packages: { name: string; download_speed: number; upload_speed: number } | null;
   zones: { name: string } | null;
 };
