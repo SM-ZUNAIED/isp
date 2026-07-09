@@ -57,7 +57,7 @@ function PackagesPage() {
           <h1 className="text-2xl md:text-3xl font-bold">ইন্টারনেট প্যাকেজ</h1>
           <p className="text-muted-foreground">মোট {bn.format(q.data?.length ?? 0)}টি প্যাকেজ</p>
         </div>
-        <NewPackageDialog onCreated={invalidate} />
+        <PackageFormDialog mode="create" onSaved={invalidate} />
       </div>
 
       {q.isLoading ? (
@@ -88,10 +88,22 @@ function PackagesPage() {
                   <span>ডাউনলোড: <b>{bn.format(p.download_speed)} Mbps</b></span>
                   <span>আপলোড: <b>{bn.format(p.upload_speed)} Mbps</b></span>
                 </div>
-                <Button variant="ghost" size="sm" className="text-destructive w-full"
-                  onClick={() => delMut.mutate(p.id)}>
-                  <Trash2 className="h-4 w-4 mr-1" /> মুছে ফেলুন
-                </Button>
+                <div className="flex gap-2">
+                  <PackageFormDialog
+                    mode="edit"
+                    initial={p as unknown as PackageRow}
+                    onSaved={invalidate}
+                    trigger={
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Pencil className="h-4 w-4 mr-1" /> এডিট
+                      </Button>
+                    }
+                  />
+                  <Button variant="ghost" size="sm" className="text-destructive flex-1"
+                    onClick={() => delMut.mutate(p.id)}>
+                    <Trash2 className="h-4 w-4 mr-1" /> মুছুন
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -101,16 +113,35 @@ function PackagesPage() {
   );
 }
 
-function NewPackageDialog({ onCreated }: { onCreated: () => void }) {
+function PackageFormDialog({
+  mode, initial, onSaved, trigger,
+}: {
+  mode: "create" | "edit";
+  initial?: PackageRow;
+  onSaved: () => void;
+  trigger?: React.ReactNode;
+}) {
   const create = useServerFn(createPackage);
+  const update = useServerFn(updatePackage);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({
+  const empty = {
     name: "", download_speed: "20", upload_speed: "20", monthly_price: "500",
-    setup_charge: "0", description: "", is_popular: false,
-  });
+    setup_charge: "0", description: "", is_popular: false, is_active: true,
+  };
+  const seed = initial ? {
+    name: initial.name,
+    download_speed: String(initial.download_speed),
+    upload_speed: String(initial.upload_speed),
+    monthly_price: String(initial.monthly_price),
+    setup_charge: String(initial.setup_charge ?? "0"),
+    description: initial.description ?? "",
+    is_popular: !!initial.is_popular,
+    is_active: initial.is_active !== false,
+  } : empty;
+  const [f, setF] = useState(seed);
   const mut = useMutation({
-    mutationFn: () => create({
-      data: {
+    mutationFn: async () => {
+      const payload = {
         name: f.name.trim(),
         download_speed: Number(f.download_speed),
         upload_speed: Number(f.upload_speed),
@@ -118,24 +149,28 @@ function NewPackageDialog({ onCreated }: { onCreated: () => void }) {
         setup_charge: Number(f.setup_charge) || null,
         description: f.description || null,
         is_popular: f.is_popular,
-        is_active: true,
-      },
-    }),
+        is_active: f.is_active,
+      };
+      if (mode === "create") await create({ data: payload });
+      else await update({ data: { id: initial!.id, ...payload } });
+    },
     onSuccess: () => {
-      toast.success("প্যাকেজ যুক্ত হয়েছে");
-      setOpen(false); onCreated();
-      setF({ name: "", download_speed: "20", upload_speed: "20", monthly_price: "500", setup_charge: "0", description: "", is_popular: false });
+      toast.success(mode === "create" ? "প্যাকেজ যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      setOpen(false); onSaved();
+      if (mode === "create") setF(empty);
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন প্যাকেজ</Button>
+        {trigger ?? (
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন প্যাকেজ</Button>
+        )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>নতুন প্যাকেজ</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? "নতুন প্যাকেজ" : "প্যাকেজ এডিট"}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="col-span-2 space-y-1.5">
             <Label>নাম *</Label>
