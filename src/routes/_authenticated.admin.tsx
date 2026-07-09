@@ -132,7 +132,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.map((item, i) => {
+        {NAV.filter((n) => !n.adminOnly || isAdmin).map((item, i) => {
           const active = item.exact
             ? location.pathname === item.to
             : location.pathname.startsWith(item.to) && !item.exact;
