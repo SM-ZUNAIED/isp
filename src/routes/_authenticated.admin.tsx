@@ -14,6 +14,7 @@ import {
   Menu,
   UserCog,
   ShieldAlert,
+  MapPin,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
