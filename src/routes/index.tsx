@@ -57,18 +57,20 @@ function LandingPage() {
             <span className="text-xl font-bold">{ispName}</span>
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#packages" className="text-sm font-medium hover:text-primary transition-colors">প্যাকেজ</a>
-            <a href="#coverage" className="text-sm font-medium hover:text-primary transition-colors">কাভারেজ</a>
-            <a href="#about" className="text-sm font-medium hover:text-primary transition-colors">আমাদের সম্পর্কে</a>
-            <a href="#faq" className="text-sm font-medium hover:text-primary transition-colors">প্রশ্ন-উত্তর</a>
-            <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">যোগাযোগ</a>
+            <a href="#packages" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.packages")}</a>
+            <a href="#coverage" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.coverage")}</a>
+            <a href="#about" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.about")}</a>
+            <a href="#faq" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.faq")}</a>
+            <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.contact")}</a>
           </nav>
           <div className="flex items-center gap-2">
+            <LangToggle />
+            <ThemeToggle />
             <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link to="/auth">কাস্টমার লগইন</Link>
+              <Link to="/auth">{t("nav.login")}</Link>
             </Button>
             <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
-              <Link to="/pay-bill">বিল পরিশোধ</Link>
+              <Link to="/pay-bill">{t("nav.payBill")}</Link>
             </Button>
           </div>
         </div>
