@@ -333,8 +333,6 @@ export const updateCustomerProfile = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       full_name: z.string().trim().min(2).max(120),
-      email: z.string().trim().email().max(255).optional().nullable().or(z.literal("")),
-      alt_mobile: z.string().trim().regex(/^01[3-9][0-9]{8}$/, "Invalid mobile").optional().nullable().or(z.literal("")),
       address: z.string().trim().max(500).optional().nullable().or(z.literal("")),
     }).parse(d),
   )
@@ -342,14 +340,29 @@ export const updateCustomerProfile = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const patch = {
       full_name: data.full_name,
-      email: data.email ? data.email : null,
-      alt_mobile: data.alt_mobile ? data.alt_mobile : null,
       address: data.address ? data.address : null,
     };
     // RLS "Customers self update" policy scopes this to the caller's own row.
+    // Note: mobile and email are admin-managed primary identifiers and NOT editable by the customer.
     const { error } = await supabase
       .from("customers").update(patch).eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const updateCustomerAvatar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      avatar_path: z.string().trim().min(1).max(500).nullable(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("customers").update({ avatar_path: data.avatar_path }).eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
