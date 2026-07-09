@@ -50,8 +50,8 @@ export const submitPublicPayment = createServerFn({ method: "POST" })
     const { data: res, error } = await supabase.rpc("public_submit_payment", {
       _bill_id: data.bill_id,
       _method: data.method,
-      _transaction_id: data.transaction_id ?? null,
-      _msisdn: data.msisdn ?? null,
+      _transaction_id: data.transaction_id ?? "",
+      _msisdn: data.msisdn ?? "",
     });
     if (error) throw new Error(error.message);
     return res as { ok: boolean; receipt: string; amount: number; status: string };
