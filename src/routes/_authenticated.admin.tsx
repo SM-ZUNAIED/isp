@@ -114,7 +114,7 @@ function AdminLayout() {
   );
 }
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
