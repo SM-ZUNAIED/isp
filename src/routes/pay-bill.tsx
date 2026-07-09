@@ -47,6 +47,7 @@ type Invoice = {
 
 function PayBillPage() {
   const { t, lang } = useI18n();
+  const navigate = useNavigate();
   const [customerId, setCustomerId] = useState("");
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,9 +56,13 @@ function PayBillPage() {
   const [msisdn, setMsisdn] = useState("");
   const [txnId, setTxnId] = useState("");
   const [success, setSuccess] = useState<null | { receipt: string; amount: number }>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  const [payError, setPayError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ msisdn?: string; txnId?: string }>({});
 
   const lookupFn = useServerFn(lookupPublicBill);
   const payFn = useServerFn(submitPublicPayment);
+
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
