@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedCustomerRouteImport } from './routes/_authenticated.customer'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
+import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.receipt.$receiptNo'
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated.admin.users'
 import { Route as AuthenticatedAdminTicketsRouteImport } from './routes/_authenticated.admin.tickets'
@@ -68,6 +69,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const PayBillReceiptReceiptNoRoute = PayBillReceiptReceiptNoRouteImport.update({
+  id: '/receipt/$receiptNo',
+  path: '/receipt/$receiptNo',
+  getParentRoute: () => PayBillRoute,
 } as any)
 const AuthenticatedAdminZonesRoute = AuthenticatedAdminZonesRouteImport.update({
   id: '/zones',
@@ -141,7 +147,7 @@ const AuthenticatedAdminAccountsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/pay-bill': typeof PayBillRoute
+  '/pay-bill': typeof PayBillRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/customer': typeof AuthenticatedCustomerRoute
@@ -157,12 +163,13 @@ export interface FileRoutesByFullPath {
   '/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
+  '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/pay-bill': typeof PayBillRoute
+  '/pay-bill': typeof PayBillRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/customer': typeof AuthenticatedCustomerRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
+  '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -184,7 +192,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
-  '/pay-bill': typeof PayBillRoute
+  '/pay-bill': typeof PayBillRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/customer': typeof AuthenticatedCustomerRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
+  '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/zones'
+    | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/zones'
+    | '/pay-bill/receipt/$receiptNo'
     | '/admin'
   id:
     | '__root__'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tickets'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/zones'
+    | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -272,7 +284,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
-  PayBillRoute: typeof PayBillRoute
+  PayBillRoute: typeof PayBillRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
@@ -333,6 +345,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/pay-bill/receipt/$receiptNo': {
+      id: '/pay-bill/receipt/$receiptNo'
+      path: '/receipt/$receiptNo'
+      fullPath: '/pay-bill/receipt/$receiptNo'
+      preLoaderRoute: typeof PayBillReceiptReceiptNoRouteImport
+      parentRoute: typeof PayBillRoute
     }
     '/_authenticated/admin/zones': {
       id: '/_authenticated/admin/zones'
@@ -470,11 +489,22 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface PayBillRouteChildren {
+  PayBillReceiptReceiptNoRoute: typeof PayBillReceiptReceiptNoRoute
+}
+
+const PayBillRouteChildren: PayBillRouteChildren = {
+  PayBillReceiptReceiptNoRoute: PayBillReceiptReceiptNoRoute,
+}
+
+const PayBillRouteWithChildren =
+  PayBillRoute._addFileChildren(PayBillRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
-  PayBillRoute: PayBillRoute,
+  PayBillRoute: PayBillRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport

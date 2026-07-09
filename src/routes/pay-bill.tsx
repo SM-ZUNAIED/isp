@@ -1,10 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+
 import {
   ArrowLeft, Wifi, Search, Shield, CheckCircle2, Loader2,
-  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle,
+  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle, AlertCircle,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +48,7 @@ type Invoice = {
 
 function PayBillPage() {
   const { t, lang } = useI18n();
+  const navigate = useNavigate();
   const [customerId, setCustomerId] = useState("");
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(false);
@@ -53,12 +57,17 @@ function PayBillPage() {
   const [msisdn, setMsisdn] = useState("");
   const [txnId, setTxnId] = useState("");
   const [success, setSuccess] = useState<null | { receipt: string; amount: number }>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  const [payError, setPayError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ msisdn?: string; txnId?: string }>({});
 
   const lookupFn = useServerFn(lookupPublicBill);
   const payFn = useServerFn(submitPublicPayment);
 
+
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLookupError(null);
     if (!customerId.trim()) return toast.error(t("pay.err.id"));
     setLoading(true);
     setInvoice(null);
@@ -66,7 +75,7 @@ function PayBillPage() {
     try {
       const res = await lookupFn({ data: { customer_code: customerId.trim() } });
       if (!res.bill) {
-        toast.info(lang === "bn" ? "কোনো বকেয়া বিল নেই" : "No outstanding bill");
+        setLookupError(lang === "bn" ? "এই গ্রাহকের কোনো বকেয়া বিল নেই।" : "No outstanding bill for this customer.");
         setInvoice({
           billId: null,
           number: null,
@@ -89,22 +98,42 @@ function PayBillPage() {
       }
     } catch (err: any) {
       const msg = String(err?.message ?? err);
-      toast.error(
-        msg.includes("NOT_FOUND")
-          ? lang === "bn" ? "গ্রাহক পাওয়া যায়নি" : "Customer not found"
-          : lang === "bn" ? "লুকআপ ব্যর্থ" : "Lookup failed",
-      );
+      const label = msg.includes("NOT_FOUND")
+        ? (lang === "bn" ? "এই কাস্টমার আইডি পাওয়া যায়নি। আইডি চেক করে আবার চেষ্টা করুন।" : "Customer ID not found. Please check and try again.")
+        : (lang === "bn" ? "সার্ভারে সংযোগ ব্যর্থ। কিছুক্ষণ পরে আবার চেষ্টা করুন।" : "Could not reach the server. Please try again shortly.");
+      setLookupError(label);
+      toast.error(label);
     } finally {
       setLoading(false);
     }
   };
 
+  const validatePayForm = (): boolean => {
+    const errs: { msisdn?: string; txnId?: string } = {};
+    if (method === "bkash" || method === "nagad" || method === "rocket") {
+      const m = z.string().regex(/^01[3-9]\d{8}$/, lang === "bn" ? "মোবাইল নম্বর সঠিক নয় (11 সংখ্যা)" : "Enter a valid 11-digit mobile number");
+      const r = m.safeParse(msisdn);
+      if (!r.success) errs.msisdn = r.error.issues[0].message;
+
+      const tx = z.string().trim()
+        .min(6, lang === "bn" ? "TrxID কমপক্ষে ৬ অক্ষর" : "TrxID must be at least 6 characters")
+        .max(30, lang === "bn" ? "TrxID খুব বড়" : "TrxID is too long")
+        .regex(/^[A-Za-z0-9]+$/, lang === "bn" ? "শুধু অক্ষর ও সংখ্যা" : "Letters and digits only");
+      const rt = tx.safeParse(txnId);
+      if (!rt.success) errs.txnId = rt.error.issues[0].message;
+    }
+    if (method === "bank") {
+      if (!txnId.trim()) errs.txnId = lang === "bn" ? "ব্যাংক রেফারেন্স দিন" : "Bank reference required";
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPayError(null);
     if (!invoice?.billId) return;
-    if ((method === "bkash" || method === "nagad" || method === "rocket") && !/^01[3-9]\d{8}$/.test(msisdn)) {
-      return toast.error(t("pay.err.mobile"));
-    }
+    if (!validatePayForm()) return;
     setPaying(true);
     try {
       const res = await payFn({
@@ -117,12 +146,28 @@ function PayBillPage() {
       });
       setSuccess({ receipt: res.receipt, amount: res.amount });
       toast.success(lang === "bn" ? "পেমেন্ট সফল হয়েছে" : "Payment successful");
+      // Navigate to full receipt page
+      setTimeout(() => {
+        navigate({ to: "/pay-bill/receipt/$receiptNo", params: { receiptNo: res.receipt } });
+      }, 600);
     } catch (err: any) {
-      toast.error(String(err?.message ?? err));
+      const raw = String(err?.message ?? err);
+      const label = raw.includes("already paid")
+        ? (lang === "bn" ? "এই বিলটি ইতোমধ্যে পরিশোধিত।" : "This bill has already been paid.")
+        : raw.includes("Nothing to pay")
+        ? (lang === "bn" ? "পরিশোধ করার মতো কোনো বকেয়া নেই।" : "There is nothing left to pay on this bill.")
+        : raw.includes("Invalid mobile")
+        ? (lang === "bn" ? "মোবাইল নম্বর সঠিক নয়।" : "Invalid mobile number.")
+        : (lang === "bn" ? "পেমেন্ট সাবমিট করা যায়নি। আবার চেষ্টা করুন।" : "Could not submit payment. Please try again.");
+      setPayError(label);
+      toast.error(label);
     } finally {
       setPaying(false);
     }
   };
+
+
+
 
   const resetAll = () => {
     setCustomerId("");
@@ -221,6 +266,15 @@ function PayBillPage() {
               </Button>
             </form>
 
+
+            {lookupError && !invoice && (
+              <div className="mt-4 flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm animate-fade-in-up">
+                <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
+                <div className="text-destructive">{lookupError}</div>
+              </div>
+            )}
+
+
             {/* Invoice */}
             {invoice && (
               <div className="mt-6 rounded-2xl border bg-card p-5 animate-fade-in-up">
@@ -316,12 +370,14 @@ function PayBillPage() {
                       </Label>
                       <Input
                         value={msisdn}
-                        onChange={(e) => setMsisdn(e.target.value)}
+                        onChange={(e) => { setMsisdn(e.target.value); setFieldErrors((f) => ({ ...f, msisdn: undefined })); }}
                         inputMode="numeric"
                         maxLength={11}
                         placeholder="01XXXXXXXXX"
-                        className="h-12 text-base tracking-wider"
+                        className={`h-12 text-base tracking-wider ${fieldErrors.msisdn ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                        aria-invalid={!!fieldErrors.msisdn}
                       />
+                      {fieldErrors.msisdn && <p className="text-xs text-destructive">{fieldErrors.msisdn}</p>}
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-medium">
@@ -329,11 +385,14 @@ function PayBillPage() {
                       </Label>
                       <Input
                         value={txnId}
-                        onChange={(e) => setTxnId(e.target.value)}
+                        onChange={(e) => { setTxnId(e.target.value); setFieldErrors((f) => ({ ...f, txnId: undefined })); }}
                         placeholder={lang === "bn" ? "যেমন 8N7A1B2C3D" : "e.g. 8N7A1B2C3D"}
-                        className="h-12 text-base tracking-wider uppercase"
+                        className={`h-12 text-base tracking-wider uppercase ${fieldErrors.txnId ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                        aria-invalid={!!fieldErrors.txnId}
                       />
+                      {fieldErrors.txnId && <p className="text-xs text-destructive">{fieldErrors.txnId}</p>}
                     </div>
+
                   </>
                 )}
                 {method === "card" && (
@@ -355,13 +414,24 @@ function PayBillPage() {
                       </Label>
                       <Input
                         value={txnId}
-                        onChange={(e) => setTxnId(e.target.value)}
+                        onChange={(e) => { setTxnId(e.target.value); setFieldErrors((f) => ({ ...f, txnId: undefined })); }}
                         placeholder={lang === "bn" ? "রেফারেন্স নম্বর" : "Reference number"}
-                        className="h-12 text-base"
+                        className={`h-12 text-base ${fieldErrors.txnId ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                        aria-invalid={!!fieldErrors.txnId}
                       />
+                      {fieldErrors.txnId && <p className="text-xs text-destructive">{fieldErrors.txnId}</p>}
                     </div>
                   </>
                 )}
+
+                {payError && (
+                  <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm">
+                    <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
+                    <div className="text-destructive">{payError}</div>
+                  </div>
+                )}
+
+
 
                 <Button
                   type="submit"
