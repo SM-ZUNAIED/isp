@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import {
   ArrowLeft, Wifi, Search, Shield, CheckCircle2, Loader2,
-  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle, AlertCircle,
+  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle, AlertCircle, UserCircle2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
+import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import { lookupPublicBill, submitPublicPayment } from "@/lib/pay-bill.functions";
 
@@ -48,6 +49,7 @@ type Invoice = {
 
 function PayBillPage() {
   const { t, lang } = useI18n();
+  const { session } = useAuth();
   const navigate = useNavigate();
   const [customerId, setCustomerId] = useState("");
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -199,6 +201,16 @@ function PayBillPage() {
           <div className="flex items-center gap-2">
             <LangToggle />
             <ThemeToggle />
+            {session && (
+              <Link
+                to="/customer"
+                title="আমার পোর্টাল"
+                aria-label="আমার পোর্টাল"
+                className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:brightness-110 transition"
+              >
+                <UserCircle2 className="h-5 w-5" />
+              </Link>
+            )}
             <Link to="/" className="ml-1 flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary shadow-glow">
                 <Wifi className="h-4 w-4 text-primary-foreground" />

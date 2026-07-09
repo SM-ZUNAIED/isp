@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
@@ -6,7 +6,7 @@ import { getLandingData } from "@/lib/landing.functions";
 import { submitInquiry } from "@/lib/inquiry.functions";
 import {
   Wifi, Zap, Shield, Users, Award, Phone, MapPin, Mail, MessageCircle,
-  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2, LogOut,
+  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2, UserCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
@@ -50,13 +50,7 @@ function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
   const { t } = useI18n();
-  const { session, signOut } = useAuth();
-  const navigate = useNavigate();
-  const handleLogout = async () => {
-    await signOut();
-    navigate({ to: "/", replace: true });
-    toast.success("লগআউট সফল");
-  };
+  const { session } = useAuth();
 
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
@@ -132,9 +126,14 @@ function LandingPage() {
           </nav>
           <div className="flex items-center gap-2">
             {session ? (
-              <Button onClick={handleLogout} size="sm" className="bg-destructive text-destructive-foreground hover:brightness-110 shadow-glow">
-                <LogOut className="mr-2 h-4 w-4" />লগআউট
-              </Button>
+              <Link
+                to="/customer"
+                title="আমার পোর্টাল"
+                aria-label="আমার পোর্টাল"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:brightness-110 transition"
+              >
+                <UserCircle2 className="h-5 w-5" />
+              </Link>
             ) : (
               <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
                 <Link to="/auth">{t("nav.login")}</Link>
