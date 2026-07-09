@@ -1,12 +1,23 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, LogOut, Receipt, Wifi, User, Wallet, Ticket as TicketIcon, ArrowLeft } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Loader2, LogOut, Receipt, Wifi, User, Wallet, Ticket as TicketIcon,
+  ArrowLeft, MapPin, Zap, Calendar, Phone, Mail, Home, ArrowUpCircle,
+  MessageCircle, CheckCircle2, Clock, AlertCircle, Send, CreditCard,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getCustomerPortal } from "@/lib/support.functions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { getCustomerPortal, submitCustomerRequest } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/_authenticated/customer")({
   head: () => ({ meta: [{ title: "কাস্টমার পোর্টাল — Net Bill Pro" }] }),
@@ -14,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/customer")({
 });
 
 const bn = new Intl.NumberFormat("bn-BD");
-const bdt = (n: number) => `৳ ${bn.format(Math.round(n))}`;
+const bdt = (n: number) => `৳ ${bn.format(Math.round(Number(n) || 0))}`;
 
 const BILL_STATUS: Record<string, { label: string; tone: string }> = {
   paid: { label: "পরিশোধিত", tone: "bg-emerald-100 text-emerald-700 border-emerald-200" },
@@ -23,13 +34,23 @@ const BILL_STATUS: Record<string, { label: string; tone: string }> = {
   overdue: { label: "মেয়াদোত্তীর্ণ", tone: "bg-slate-200 text-slate-700 border-slate-300" },
 };
 
+const TICKET_STATUS: Record<string, { label: string; tone: string; Icon: typeof Clock }> = {
+  pending: { label: "অপেক্ষমান", tone: "bg-amber-100 text-amber-700 border-amber-200", Icon: Clock },
+  in_progress: { label: "চলমান", tone: "bg-sky-100 text-sky-700 border-sky-200", Icon: Loader2 },
+  solved: { label: "সমাধান হয়েছে", tone: "bg-emerald-100 text-emerald-700 border-emerald-200", Icon: CheckCircle2 },
+  closed: { label: "বন্ধ", tone: "bg-slate-200 text-slate-700 border-slate-300", Icon: CheckCircle2 },
+};
+
 function CustomerPortal() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+
   const handleLogout = async () => {
     await signOut();
     navigate({ to: "/", replace: true });
   };
+
   const get = useServerFn(getCustomerPortal);
   const q = useQuery({ queryKey: ["customer-portal"], queryFn: () => get() });
 
@@ -59,100 +80,246 @@ function CustomerPortal() {
 
   const c = q.data.customer;
   const dueTotal = q.data.bills.reduce((s, b) => s + Number(b.due_amount ?? 0), 0);
+  const nextBill = q.data.bills.find((b) => b.status !== "paid");
+  const expiryDate = c.expiry_date ? new Date(c.expiry_date) : null;
+  const daysToExpiry = expiryDate ? Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <header className="bg-gradient-primary text-white">
-        <div className="mx-auto max-w-5xl px-4 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 backdrop-blur">
+      <header className="bg-gradient-primary text-white shadow-elevated">
+        <div className="mx-auto max-w-6xl px-4 py-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/20 backdrop-blur">
               <User className="h-6 w-6" />
             </div>
-            <div>
-              <div className="font-bold text-lg">{c.full_name}</div>
-              <div className="text-sm opacity-90">কোড: {c.customer_code} • {c.mobile}</div>
+            <div className="min-w-0">
+              <div className="font-bold text-lg truncate">{c.full_name}</div>
+              <div className="text-sm opacity-90 truncate">
+                <span className="font-mono">{c.customer_code}</span> • {c.mobile}
+              </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <Button variant="secondary" size="sm" asChild><Link to="/">হোম</Link></Button>
-            <Button size="sm" onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:brightness-110"><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
+            <Button size="sm" onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:brightness-110">
+              <LogOut className="mr-2 h-4 w-4" />লগআউট
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
+      <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+        {/* Top stat strip */}
+        <div className="grid gap-4 md:grid-cols-4">
           <StatCard label="বর্তমান প্যাকেজ" value={c.packages?.name ?? "—"}
-            sub={c.packages ? `${c.packages.download_speed}/${c.packages.upload_speed} Mbps` : ""} icon={Wifi} />
+            sub={c.packages ? `${c.packages.download_speed}/${c.packages.upload_speed} Mbps` : ""} icon={Wifi} tone="primary" />
           <StatCard label="মাসিক বিল" value={bdt(Number(c.monthly_bill))} icon={Wallet} />
           <StatCard label="মোট বকেয়া" value={bdt(dueTotal)} icon={Receipt}
             tone={dueTotal > 0 ? "rose" : "emerald"} />
+          <StatCard
+            label="মেয়াদ শেষ"
+            value={expiryDate ? expiryDate.toLocaleDateString("bn-BD") : "—"}
+            sub={daysToExpiry != null ? (daysToExpiry >= 0 ? `${daysToExpiry} দিন বাকি` : `${-daysToExpiry} দিন আগে`) : ""}
+            icon={Calendar}
+            tone={daysToExpiry != null && daysToExpiry < 7 ? "rose" : "emerald"}
+          />
         </div>
 
-        <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5" />বিলসমূহ</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            {q.data.bills.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">কোনো বিল নেই।</p>
-            ) : q.data.bills.map((b) => {
-              const st = BILL_STATUS[b.status];
-              return (
-                <div key={b.id} className="flex items-center justify-between rounded-xl border p-3">
-                  <div>
-                    <div className="font-mono text-xs text-muted-foreground">{b.bill_number}</div>
-                    <div className="font-medium">{b.billing_month?.slice(0, 7)}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold">{bdt(Number(b.amount))}</div>
-                    {Number(b.due_amount ?? 0) > 0 && (
-                      <div className="text-xs text-rose-600">বকেয়া: {bdt(Number(b.due_amount))}</div>
-                    )}
-                  </div>
-                  <Badge variant="outline" className={st.tone}>{st.label}</Badge>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+        {/* CTA banner if due */}
+        {nextBill && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-rose-200 bg-rose-50 p-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-rose-600" />
+              <div className="text-sm">
+                <span className="font-semibold text-rose-700">{bdt(Number(nextBill.due_amount))}</span> বকেয়া রয়েছে —
+                বিল নং <span className="font-mono">{nextBill.bill_number}</span>
+              </div>
+            </div>
+            <Button asChild className="bg-gradient-primary text-primary-foreground shadow-glow">
+              <Link to="/pay-bill"><CreditCard className="mr-2 h-4 w-4" />এখনই পরিশোধ করুন</Link>
+            </Button>
+          </div>
+        )}
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><Wallet className="h-5 w-5" />পেমেন্ট ইতিহাস</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              {q.data.payments.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">কোনো পেমেন্ট নেই।</p>
-              ) : q.data.payments.map((p) => (
-                <div key={p.id} className="flex items-center justify-between rounded-xl border p-3">
-                  <div>
-                    <div className="font-mono text-xs">{p.receipt_number}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(p.paid_at).toLocaleDateString("bn-BD")} • {p.method}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto">
+            <TabsTrigger value="overview">ওভারভিউ</TabsTrigger>
+            <TabsTrigger value="bills">বিল</TabsTrigger>
+            <TabsTrigger value="payments">পেমেন্ট</TabsTrigger>
+            <TabsTrigger value="requests">রিকোয়েস্ট</TabsTrigger>
+            <TabsTrigger value="support">সাপোর্ট</TabsTrigger>
+          </TabsList>
+
+          {/* OVERVIEW */}
+          <TabsContent value="overview" className="mt-4 space-y-4">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />প্রোফাইল তথ্য</CardTitle></CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <InfoRow icon={User} label="নাম" value={c.full_name} />
+                <InfoRow icon={Phone} label="মোবাইল" value={c.mobile} />
+                {c.alt_mobile && <InfoRow icon={Phone} label="বিকল্প মোবাইল" value={c.alt_mobile} />}
+                {c.email && <InfoRow icon={Mail} label="ইমেইল" value={c.email} />}
+                <InfoRow icon={Home} label="ঠিকানা" value={c.address ?? "—"} />
+                <InfoRow icon={MapPin} label="এরিয়া / জোন" value={c.zones?.name ?? "—"} />
+                <InfoRow icon={Wifi} label="প্যাকেজ" value={
+                  c.packages ? `${c.packages.name} (${c.packages.download_speed}/${c.packages.upload_speed} Mbps)` : "—"
+                } />
+                {c.pppoe_username && <InfoRow icon={Zap} label="PPPoE ইউজার" value={c.pppoe_username} mono />}
+                <InfoRow icon={Calendar} label="সংযোগ তারিখ" value={c.connection_date ? new Date(c.connection_date).toLocaleDateString("bn-BD") : "—"} />
+                <InfoRow icon={Calendar} label="মেয়াদ শেষ" value={expiryDate ? expiryDate.toLocaleDateString("bn-BD") : "—"} />
+                <InfoRow icon={CheckCircle2} label="স্ট্যাটাস" value={c.status} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* BILLS */}
+          <TabsContent value="bills" className="mt-4">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5" />বিলসমূহ</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {q.data.bills.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">কোনো বিল নেই।</p>
+                ) : q.data.bills.map((b) => {
+                  const st = BILL_STATUS[b.status] ?? BILL_STATUS.unpaid;
+                  return (
+                    <div key={b.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
+                      <div className="min-w-0">
+                        <div className="font-mono text-xs text-muted-foreground">{b.bill_number}</div>
+                        <div className="font-medium">{b.billing_month?.slice(0, 7)}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold">{bdt(Number(b.amount))}</div>
+                        {Number(b.due_amount ?? 0) > 0 && (
+                          <div className="text-xs text-rose-600">বকেয়া: {bdt(Number(b.due_amount))}</div>
+                        )}
+                      </div>
+                      <Badge variant="outline" className={st.tone}>{st.label}</Badge>
                     </div>
-                  </div>
-                  <div className="font-bold">{bdt(Number(p.amount))}</div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><TicketIcon className="h-5 w-5" />সাপোর্ট টিকেট</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              {q.data.tickets.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">কোনো টিকেট নেই।</p>
-              ) : q.data.tickets.map((t) => (
-                <div key={t.id} className="rounded-xl border p-3">
-                  <div className="font-mono text-xs text-muted-foreground">#{t.ticket_number}</div>
-                  <div className="font-medium">{t.subject}</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {new Date(t.created_at).toLocaleString("bn-BD")}
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+          {/* PAYMENTS */}
+          <TabsContent value="payments" className="mt-4">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Wallet className="h-5 w-5" />পেমেন্ট ইতিহাস</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {q.data.payments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">কোনো পেমেন্ট নেই।</p>
+                ) : q.data.payments.map((p) => (
+                  <Link
+                    key={p.id}
+                    to="/pay-bill/receipt/$receiptNo"
+                    params={{ receiptNo: p.receipt_number }}
+                    className="flex items-center justify-between rounded-xl border p-3 hover:border-primary/60 hover:bg-primary/5 transition-colors"
+                  >
+                    <div>
+                      <div className="font-mono text-xs">{p.receipt_number}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(p.paid_at).toLocaleDateString("bn-BD")} • {p.method}
+                      </div>
+                    </div>
+                    <div className="font-bold">{bdt(Number(p.amount))}</div>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* REQUESTS */}
+          <TabsContent value="requests" className="mt-4 space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <PackageChangeCard
+                currentPackageId={c.package_id}
+                packages={q.data.packages}
+                onSubmitted={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
+              />
+              <AreaChangeCard
+                currentZoneId={c.zone_id}
+                currentAddress={c.address ?? ""}
+                zones={q.data.zones}
+                onSubmitted={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
+              />
+            </div>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">আপনার সাম্প্রতিক রিকোয়েস্ট</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {q.data.tickets.filter((t) => t.subject?.startsWith("[")).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">এখনো কোনো রিকোয়েস্ট নেই।</p>
+                ) : q.data.tickets.filter((t) => t.subject?.startsWith("[")).map((t) => {
+                  const st = TICKET_STATUS[t.status] ?? TICKET_STATUS.pending;
+                  return (
+                    <div key={t.id} className="rounded-xl border p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs text-muted-foreground">#{t.ticket_number}</div>
+                          <div className="font-medium">{t.subject}</div>
+                          {t.description && (
+                            <div className="mt-1 whitespace-pre-line text-xs text-muted-foreground">{t.description}</div>
+                          )}
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {new Date(t.created_at).toLocaleString("bn-BD")}
+                          </div>
+                        </div>
+                        <Badge variant="outline" className={st.tone}>{st.label}</Badge>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* SUPPORT */}
+          <TabsContent value="support" className="mt-4">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><TicketIcon className="h-5 w-5" />সাপোর্ট টিকেট</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {q.data.tickets.filter((t) => !t.subject?.startsWith("[")).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">কোনো টিকেট নেই।</p>
+                ) : q.data.tickets.filter((t) => !t.subject?.startsWith("[")).map((t) => {
+                  const st = TICKET_STATUS[t.status] ?? TICKET_STATUS.pending;
+                  return (
+                    <div key={t.id} className="rounded-xl border p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs text-muted-foreground">#{t.ticket_number}</div>
+                          <div className="font-medium">{t.subject}</div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {new Date(t.created_at).toLocaleString("bn-BD")}
+                          </div>
+                        </div>
+                        <Badge variant="outline" className={st.tone}>{st.label}</Badge>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
+    </div>
+  );
+}
+
+/* ============ Sub-components ============ */
+
+function InfoRow({
+  icon: Icon, label, value, mono,
+}: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border p-3">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className={`font-semibold truncate ${mono ? "font-mono text-sm" : ""}`}>{value}</div>
+      </div>
     </div>
   );
 }
@@ -162,22 +329,148 @@ function StatCard({
 }: {
   label: string; value: string; sub?: string;
   icon: React.ComponentType<{ className?: string }>;
-  tone?: "emerald" | "rose";
+  tone?: "primary" | "emerald" | "rose";
 }) {
-  const toneClass = tone === "rose" ? "text-rose-600" : tone === "emerald" ? "text-emerald-600" : "";
+  const toneClass = tone === "rose" ? "text-rose-600" : tone === "emerald" ? "text-emerald-600" : tone === "primary" ? "text-primary" : "";
   return (
     <Card>
       <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
             <div className="text-sm text-muted-foreground">{label}</div>
-            <div className={`mt-1 text-xl font-bold ${toneClass}`}>{value}</div>
-            {sub && <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>}
+            <div className={`mt-1 text-xl font-bold truncate ${toneClass}`}>{value}</div>
+            {sub && <div className="text-xs text-muted-foreground mt-0.5 truncate">{sub}</div>}
           </div>
-          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-primary text-white">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-primary text-white">
             <Icon className="h-5 w-5" />
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+type Pkg = { id: string; name: string; download_speed: number; upload_speed: number; monthly_price: number };
+type Zn = { id: string; name: string };
+
+function PackageChangeCard({
+  currentPackageId, packages, onSubmitted,
+}: { currentPackageId: string | null; packages: Pkg[]; onSubmitted: () => void }) {
+  const submit = useServerFn(submitCustomerRequest);
+  const [targetId, setTargetId] = useState<string>("");
+  const [note, setNote] = useState("");
+
+  const options = useMemo(() => packages.filter((p) => p.id !== currentPackageId), [packages, currentPackageId]);
+
+  const m = useMutation({
+    mutationFn: () => submit({ data: { kind: "package_change", target_package_id: targetId, note: note || null } }),
+    onSuccess: (res) => {
+      toast.success(`রিকোয়েস্ট জমা হয়েছে (${res.ticket_number})`);
+      setTargetId(""); setNote("");
+      onSubmitted();
+    },
+    onError: (e: any) => toast.error(String(e?.message ?? e)),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ArrowUpCircle className="h-5 w-5 text-primary" />
+          প্যাকেজ পরিবর্তনের রিকোয়েস্ট
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs">নতুন প্যাকেজ</Label>
+          <Select value={targetId} onValueChange={setTargetId}>
+            <SelectTrigger><SelectValue placeholder="একটি প্যাকেজ বাছাই করুন" /></SelectTrigger>
+            <SelectContent>
+              {options.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name} — {p.download_speed}/{p.upload_speed} Mbps ({bdt(p.monthly_price)}/মাস)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">অতিরিক্ত মন্তব্য (ঐচ্ছিক)</Label>
+          <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="কেন প্যাকেজ পরিবর্তন করতে চান?" />
+        </div>
+        <Button
+          onClick={() => m.mutate()}
+          disabled={!targetId || m.isPending}
+          className="w-full bg-gradient-primary text-primary-foreground"
+        >
+          {m.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="mr-2 h-4 w-4" />রিকোয়েস্ট পাঠান</>}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AreaChangeCard({
+  currentZoneId, currentAddress, zones, onSubmitted,
+}: { currentZoneId: string | null; currentAddress: string; zones: Zn[]; onSubmitted: () => void }) {
+  const submit = useServerFn(submitCustomerRequest);
+  const [targetId, setTargetId] = useState<string>("");
+  const [newAddress, setNewAddress] = useState("");
+  const [note, setNote] = useState("");
+
+  const options = useMemo(() => zones.filter((z) => z.id !== currentZoneId), [zones, currentZoneId]);
+
+  const m = useMutation({
+    mutationFn: () => submit({ data: {
+      kind: "area_change",
+      target_zone_id: targetId,
+      new_address: newAddress || null,
+      note: note || null,
+    } }),
+    onSuccess: (res) => {
+      toast.success(`রিকোয়েস্ট জমা হয়েছে (${res.ticket_number})`);
+      setTargetId(""); setNewAddress(""); setNote("");
+      onSubmitted();
+    },
+    onError: (e: any) => toast.error(String(e?.message ?? e)),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MapPin className="h-5 w-5 text-primary" />
+          এরিয়া পরিবর্তন / নতুন সংযোগ
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          বর্তমান ঠিকানা: <b>{currentAddress || "—"}</b>
+        </p>
+        <div className="space-y-1.5">
+          <Label className="text-xs">নতুন এরিয়া</Label>
+          <Select value={targetId} onValueChange={setTargetId}>
+            <SelectTrigger><SelectValue placeholder="নতুন এরিয়া বাছাই করুন" /></SelectTrigger>
+            <SelectContent>
+              {options.map((z) => (<SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">নতুন ঠিকানা</Label>
+          <Input value={newAddress} onChange={(e) => setNewAddress(e.target.value)} placeholder="বিস্তারিত ঠিকানা" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">মন্তব্য (ঐচ্ছিক)</Label>
+          <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="যেমন কাঙ্ক্ষিত সংযোগের তারিখ" />
+        </div>
+        <Button
+          onClick={() => m.mutate()}
+          disabled={!targetId || m.isPending}
+          className="w-full bg-gradient-primary text-primary-foreground"
+        >
+          {m.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="mr-2 h-4 w-4" />রিকোয়েস্ট পাঠান</>}
+        </Button>
       </CardContent>
     </Card>
   );
