@@ -60,7 +60,7 @@ function AuthPage() {
 
       {/* Top bar */}
       <header className="relative z-10 flex items-center justify-between px-4 py-4 md:px-8">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
+        <Link to="/" className="inline-flex items-center gap-2 rounded-full bg-success px-4 py-2 text-sm font-semibold text-success-foreground shadow-glow hover:brightness-110 hover:-translate-x-0.5 transition-all">
           <ArrowLeft className="h-4 w-4" /> {bn ? "হোমে ফিরুন" : "Back to home"}
         </Link>
         <div className="flex items-center gap-2">

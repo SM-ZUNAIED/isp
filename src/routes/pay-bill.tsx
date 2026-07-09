@@ -148,7 +148,7 @@ function PayBillPage() {
       {/* Top bar */}
       <header className="sticky top-0 z-40 glass border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
+          <Link to="/" className="inline-flex items-center gap-2 rounded-full bg-success px-4 py-2 text-sm font-semibold text-success-foreground shadow-glow hover:brightness-110 hover:-translate-x-0.5 transition-all">
             <ArrowLeft className="h-4 w-4" /> {t("pay.back")}
           </Link>
           <div className="flex items-center gap-2">
