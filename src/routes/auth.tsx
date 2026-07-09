@@ -72,7 +72,7 @@ function AuthPage() {
       <main className="relative z-10 mx-auto grid min-h-[calc(100vh-72px)] max-w-6xl grid-cols-1 items-center gap-10 px-4 py-8 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-8">
         {/* Brand / features panel */}
         <section className="hidden lg:block animate-fade-in-up">
-          <div className="inline-flex items-center gap-3">
+          <Link to="/" className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-primary shadow-glow">
               <Wifi className="h-7 w-7 text-primary-foreground" />
             </div>
@@ -82,7 +82,7 @@ function AuthPage() {
                 {bn ? "আপনার ISP এর সম্পূর্ণ ম্যানেজমেন্ট" : "Complete ISP management suite"}
               </div>
             </div>
-          </div>
+          </Link>
 
           <h1 className="mt-8 text-4xl xl:text-5xl font-extrabold leading-tight">
             {bn ? (
