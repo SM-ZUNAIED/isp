@@ -1,13 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useRef, useState } from "react";
 import { getLandingData } from "@/lib/landing.functions";
+import { submitInquiry } from "@/lib/inquiry.functions";
 import {
   Wifi, Zap, Shield, Users, Award, Phone, MapPin, Mail, MessageCircle,
-  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp,
+  ChevronRight, CheckCircle2, Star, Signal, Router, Headphones, TrendingUp, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import { toast } from "sonner";
 
 const landingQuery = queryOptions({
   queryKey: ["landing"],
@@ -36,6 +40,11 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
+function scrollToId(id: string) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
@@ -44,6 +53,56 @@ function LandingPage() {
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
   const whatsapp = settings?.whatsapp ?? "01339562416";
+
+  const submitInquiryFn = useServerFn(submitInquiry);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleOrder = (pkg: { id: string; name: string }) => {
+    setSelectedPkg({ id: pkg.id, name: pkg.name });
+    toast.success(`${pkg.name} — ${t("contact.subtitle")}`);
+    setTimeout(() => {
+      scrollToId("contact");
+      messageRef.current?.focus();
+    }, 100);
+  };
+
+  const handleInquiry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = nameRef.current?.value.trim() ?? "";
+    const phone = phoneRef.current?.value.trim() ?? "";
+    const address = addressRef.current?.value.trim() ?? "";
+    const message = messageRef.current?.value.trim() ?? "";
+    if (name.length < 2) return toast.error("নাম দিন / Enter your name");
+    if (!/^01[3-9][0-9]{8}$/.test(phone)) return toast.error("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)");
+    setSubmitting(true);
+    try {
+      await submitInquiryFn({
+        data: {
+          name, phone,
+          address: address || null,
+          package_id: selectedPkg?.id ?? null,
+          package_name: selectedPkg?.name ?? null,
+          message: message || null,
+        },
+      });
+      toast.success("আপনার তথ্য গ্রহণ করা হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।");
+      if (nameRef.current) nameRef.current.value = "";
+      if (phoneRef.current) phoneRef.current.value = "";
+      if (addressRef.current) addressRef.current.value = "";
+      if (messageRef.current) messageRef.current.value = "";
+      setSelectedPkg(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to submit");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-background">
