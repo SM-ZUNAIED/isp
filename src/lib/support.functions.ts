@@ -241,7 +241,7 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: customer } = await supabase
       .from("customers")
-      .select("id, customer_code, full_name, mobile, alt_mobile, email, address, avatar_path, monthly_bill, status, connection_date, expiry_date, pppoe_username, package_id, zone_id, packages(name, download_speed, upload_speed, monthly_price), zones(name)")
+      .select("id, customer_code, full_name, mobile, alt_mobile, email, address, avatar_path, monthly_bill, status, connection_date, expiry_date, pppoe_username, package_id, zone_id, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, address_line, packages(name, download_speed, upload_speed, monthly_price), zones(name)")
       .eq("user_id", userId)
       .maybeSingle();
 
