@@ -165,8 +165,23 @@ function PayBillPage() {
       </header>
 
       <main className="container mx-auto px-4 py-10 md:py-16">
+        {/* Brand banner */}
+        <div className="mx-auto max-w-3xl flex justify-center animate-fade-in-up">
+          <div className="inline-flex items-center gap-3 rounded-2xl glass border px-4 py-2.5 shadow-elevated">
+            <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-primary shadow-glow">
+              <Wifi className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div className="text-left">
+              <div className="text-base font-extrabold tracking-tight leading-tight">Net Bill Pro</div>
+              <div className="text-[11px] text-muted-foreground leading-tight">
+                {lang === "bn" ? "আপনার ISP এর সম্পূর্ণ ম্যানেজমেন্ট" : "Complete ISP management suite"}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Title */}
-        <div className="mx-auto max-w-3xl text-center animate-fade-in-up">
+        <div className="mx-auto max-w-3xl text-center animate-fade-in-up mt-6">
           <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium">
             <Shield className="h-3.5 w-3.5 text-success" />
             <span>{t("pay.secure")}</span>
