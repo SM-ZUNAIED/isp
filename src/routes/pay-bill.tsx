@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import {
   ArrowLeft, Wifi, Search, Shield, CheckCircle2, Loader2,
-  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle, AlertCircle,
+  Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle, AlertCircle, UserCircle2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
+import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import { lookupPublicBill, submitPublicPayment } from "@/lib/pay-bill.functions";
 
