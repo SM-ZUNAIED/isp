@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Loader2, Plus, Trash2, Bell } from "lucide-react";
+import { Loader2, Plus, Trash2, Bell, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +14,15 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  listNoticesAdmin, createNotice, toggleNotice, deleteNotice,
+  listNoticesAdmin, createNotice, updateNotice, toggleNotice, deleteNotice,
 } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/notices")({
   head: () => ({ meta: [{ title: "নোটিশ — Net Bill Pro" }] }),
   component: NoticesPage,
 });
+
+type NoticeRow = { id: string; title: string; body?: string | null; is_active?: boolean | null; created_at: string };
 
 function NoticesPage() {
   const qc = useQueryClient();
@@ -49,7 +51,7 @@ function NoticesPage() {
           <h1 className="text-2xl md:text-3xl font-bold">নোটিশ ও ঘোষণা</h1>
           <p className="text-muted-foreground">হোম পেজে দেখানো নোটিশ ম্যানেজ করুন</p>
         </div>
-        <NewNoticeDialog onCreated={invalidate} />
+        <NoticeFormDialog mode="create" onSaved={invalidate} />
       </div>
 
       {q.isLoading ? (
@@ -74,10 +76,13 @@ function NoticesPage() {
                 <div className="flex flex-col items-end gap-2">
                   <Switch checked={!!n.is_active}
                     onCheckedChange={(v) => toggleMut.mutate({ id: n.id, is_active: v })} />
-                  <Button variant="ghost" size="icon" className="text-destructive"
-                    onClick={() => delMut.mutate(n.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <NoticeFormDialog mode="edit" initial={n as NoticeRow} onSaved={invalidate} />
+                    <Button variant="ghost" size="icon" className="text-destructive"
+                      onClick={() => delMut.mutate(n.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -88,35 +93,57 @@ function NoticesPage() {
   );
 }
 
-function NewNoticeDialog({ onCreated }: { onCreated: () => void }) {
+function NoticeFormDialog({
+  mode, initial, onSaved,
+}: {
+  mode: "create" | "edit";
+  initial?: NoticeRow;
+  onSaved: () => void;
+}) {
   const create = useServerFn(createNotice);
+  const update = useServerFn(updateNotice);
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [body, setBody] = useState(initial?.body ?? "");
+  const [isActive, setIsActive] = useState(initial?.is_active !== false);
+
   const mut = useMutation({
-    mutationFn: () => create({ data: { title: title.trim(), body: body || null, is_active: true } }),
+    mutationFn: async () => {
+      const payload = { title: title.trim(), body: body || null, is_active: isActive };
+      if (mode === "create") await create({ data: payload });
+      else await update({ data: { id: initial!.id, ...payload } });
+    },
     onSuccess: () => {
-      toast.success("নোটিশ যুক্ত হয়েছে");
-      setOpen(false); setTitle(""); setBody(""); onCreated();
+      toast.success(mode === "create" ? "নোটিশ যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      setOpen(false); onSaved();
+      if (mode === "create") { setTitle(""); setBody(""); setIsActive(true); }
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
   });
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => {
+      setOpen(v);
+      if (v && initial) { setTitle(initial.title); setBody(initial.body ?? ""); setIsActive(initial.is_active !== false); }
+    }}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন নোটিশ</Button>
+        {mode === "create"
+          ? <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন নোটিশ</Button>
+          : <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>নতুন নোটিশ</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? "নতুন নোটিশ" : "নোটিশ এডিট"}</DialogTitle></DialogHeader>
         <form onSubmit={(e) => { e.preventDefault(); if (title.trim()) mut.mutate(); }} className="space-y-3">
           <div className="space-y-1.5"><Label>শিরোনাম *</Label>
             <Input required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div className="space-y-1.5"><Label>বিস্তারিত</Label>
             <Textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} /></div>
+          <label className="flex items-center gap-2 text-sm">
+            <Switch checked={isActive} onCheckedChange={setIsActive} /> সক্রিয়
+          </label>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} প্রকাশ করুন
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
             </Button>
           </DialogFooter>
         </form>
