@@ -219,31 +219,43 @@ function CustomersPage() {
   );
 }
 
-function NewCustomerDialog({
-  packages, zones, onCreated,
+function CustomerFormDialog({
+  mode, initial, packages, zones, onSaved, trigger,
 }: {
+  mode: "create" | "edit";
+  initial?: CustomerRow;
   packages: Array<{ id: string; name: string; monthly_price: number }>;
   zones: Array<{ id: string; name: string }>;
-  onCreated: () => void;
+  onSaved: () => void;
+  trigger?: React.ReactNode;
 }) {
   const create = useServerFn(createCustomer);
+  const update = useServerFn(updateCustomer);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    customer_code: "",
-    full_name: "",
-    mobile: "",
-    address: "",
-    package_id: "",
-    zone_id: "",
-    monthly_bill: "0",
-    status: "pending" as "pending" | "active" | "suspended" | "expired",
-    pppoe_username: "",
-    pppoe_password: "",
-  });
+  const empty = {
+    customer_code: "", full_name: "", mobile: "", address: "", package_id: "",
+    zone_id: "", monthly_bill: "0", status: "pending" as CustomerStatus,
+    pppoe_username: "", pppoe_password: "",
+  };
+  const seed = initial
+    ? {
+        customer_code: initial.customer_code ?? "",
+        full_name: initial.full_name ?? "",
+        mobile: initial.mobile ?? "",
+        address: initial.address ?? "",
+        package_id: initial.package_id ?? "",
+        zone_id: initial.zone_id ?? "",
+        monthly_bill: String(initial.monthly_bill ?? "0"),
+        status: (initial.status ?? "pending") as CustomerStatus,
+        pppoe_username: initial.pppoe_username ?? "",
+        pppoe_password: initial.pppoe_password ?? "",
+      }
+    : empty;
+  const [form, setForm] = useState(seed);
 
   const mut = useMutation({
-    mutationFn: () => create({
-      data: {
+    mutationFn: () => {
+      const payload = {
         customer_code: form.customer_code.trim(),
         full_name: form.full_name.trim(),
         mobile: form.mobile.trim(),
@@ -254,30 +266,32 @@ function NewCustomerDialog({
         status: form.status,
         pppoe_username: form.pppoe_username || null,
         pppoe_password: form.pppoe_password || null,
-      },
-    }),
+      };
+      return mode === "create"
+        ? create({ data: payload })
+        : update({ data: { id: initial!.id, ...payload } });
+    },
     onSuccess: () => {
-      toast.success("কাস্টমার যুক্ত হয়েছে");
+      toast.success(mode === "create" ? "কাস্টমার যুক্ত হয়েছে" : "আপডেট হয়েছে");
       setOpen(false);
-      setForm({
-        customer_code: "", full_name: "", mobile: "", address: "", package_id: "",
-        zone_id: "", monthly_bill: "0", status: "pending", pppoe_username: "", pppoe_password: "",
-      });
-      onCreated();
+      if (mode === "create") setForm(empty);
+      onSaved();
     },
     onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setForm(seed); }}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-primary text-white shadow-soft">
-          <Plus className="mr-2 h-4 w-4" /> নতুন কাস্টমার
-        </Button>
+        {trigger ?? (
+          <Button className="bg-gradient-primary text-white shadow-soft">
+            <Plus className="mr-2 h-4 w-4" /> নতুন কাস্টমার
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>নতুন কাস্টমার যোগ করুন</DialogTitle>
+          <DialogTitle>{mode === "create" ? "নতুন কাস্টমার যোগ করুন" : "কাস্টমার এডিট করুন"}</DialogTitle>
         </DialogHeader>
         <form
           className="grid grid-cols-1 sm:grid-cols-2 gap-4"
@@ -330,7 +344,7 @@ function NewCustomerDialog({
               onChange={(e) => setForm({ ...form, pppoe_password: e.target.value })} />
           </Field>
           <Field label="স্ট্যাটাস">
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as typeof form.status })}>
+            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as CustomerStatus })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
