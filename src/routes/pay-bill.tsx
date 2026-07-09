@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, Wifi, Search, Shield, CheckCircle2, Loader2,
   Smartphone, Landmark, Wallet, CreditCard, Receipt, Phone, MessageCircle,
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import { lookupPublicBill, submitPublicPayment } from "@/lib/pay-bill.functions";
 
 export const Route = createFileRoute("/pay-bill")({
   head: () => ({
@@ -31,38 +33,108 @@ const methodDefs: { id: Method; icon: typeof Wallet; tone: string; key: `pay.met
   { id: "bank",   icon: Landmark,   tone: "from-emerald-500 to-teal-600",  key: "pay.method.bank" },
 ];
 
+type Invoice = {
+  billId: string | null;
+  number: string | null;
+  customerName: string;
+  customerCode: string;
+  pkg: string;
+  amount: number;
+  due: string;
+};
+
 function PayBillPage() {
   const { t, lang } = useI18n();
   const [customerId, setCustomerId] = useState("");
-  const [invoice, setInvoice] = useState<null | { id: string; pkg: string; amount: number; due: string }>(null);
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [method, setMethod] = useState<Method>("bkash");
   const [msisdn, setMsisdn] = useState("");
+  const [txnId, setTxnId] = useState("");
+  const [success, setSuccess] = useState<null | { receipt: string; amount: number }>(null);
 
-  const handleLookup = (e: React.FormEvent) => {
+  const lookupFn = useServerFn(lookupPublicBill);
+  const payFn = useServerFn(submitPublicPayment);
+
+  const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerId.trim()) return toast.error(t("pay.err.id"));
     setLoading(true);
-    setTimeout(() => {
-      setInvoice({
-        id: customerId.trim().toUpperCase(),
-        pkg: "Fiber 20 Mbps",
-        amount: 800,
-        due: new Date(Date.now() + 5 * 864e5).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-GB"),
-      });
+    setInvoice(null);
+    setSuccess(null);
+    try {
+      const res = await lookupFn({ data: { customer_code: customerId.trim() } });
+      if (!res.bill) {
+        toast.info(lang === "bn" ? "কোনো বকেয়া বিল নেই" : "No outstanding bill");
+        setInvoice({
+          billId: null,
+          number: null,
+          customerName: res.customer.name,
+          customerCode: res.customer.code,
+          pkg: res.customer.package ?? "—",
+          amount: 0,
+          due: "—",
+        });
+      } else {
+        setInvoice({
+          billId: res.bill.id,
+          number: res.bill.number,
+          customerName: res.customer.name,
+          customerCode: res.customer.code,
+          pkg: res.customer.package ?? "—",
+          amount: res.bill.due,
+          due: res.bill.due_date ? new Date(res.bill.due_date).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-GB") : "—",
+        });
+      }
+    } catch (err: any) {
+      const msg = String(err?.message ?? err);
+      toast.error(
+        msg.includes("NOT_FOUND")
+          ? lang === "bn" ? "গ্রাহক পাওয়া যায়নি" : "Customer not found"
+          : lang === "bn" ? "লুকআপ ব্যর্থ" : "Lookup failed",
+      );
+    } finally {
       setLoading(false);
-    }, 700);
+    }
   };
 
-  const handlePay = (e: React.FormEvent) => {
+  const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (method !== "card" && method !== "bank" && !/^01[3-9]\d{8}$/.test(msisdn)) {
+    if (!invoice?.billId) return;
+    if ((method === "bkash" || method === "nagad" || method === "rocket") && !/^01[3-9]\d{8}$/.test(msisdn)) {
       return toast.error(t("pay.err.mobile"));
     }
-    toast.success(t("pay.redirect"));
+    setPaying(true);
+    try {
+      const res = await payFn({
+        data: {
+          bill_id: invoice.billId,
+          method,
+          transaction_id: txnId.trim() || null,
+          msisdn: method === "card" || method === "bank" ? null : msisdn,
+        },
+      });
+      setSuccess({ receipt: res.receipt, amount: res.amount });
+      toast.success(lang === "bn" ? "পেমেন্ট সফল হয়েছে" : "Payment successful");
+    } catch (err: any) {
+      toast.error(String(err?.message ?? err));
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const resetAll = () => {
+    setCustomerId("");
+    setInvoice(null);
+    setSuccess(null);
+    setMsisdn("");
+    setTxnId("");
+    setMethod("bkash");
   };
 
   const amtFmt = (n: number) => n.toLocaleString(lang === "bn" ? "bn-BD" : "en-BD");
+
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
@@ -144,7 +216,7 @@ function PayBillPage() {
                     </div>
                     <div>
                       <div className="text-xs text-muted-foreground">{t("pay.customerId")}</div>
-                      <div className="font-bold">{invoice.id}</div>
+                      <div className="font-bold">{invoice.customerCode}</div>
                     </div>
                   </div>
                   <span className="rounded-full bg-warning/15 px-3 py-1 text-xs font-semibold text-warning">
@@ -153,7 +225,7 @@ function PayBillPage() {
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <Field label={t("pay.package")} value={invoice.pkg} />
-                  <Field label={t("pay.name")} value="—" />
+                  <Field label={t("pay.name")} value={invoice.customerName} />
                 </dl>
                 <div className="mt-4 flex items-baseline justify-between border-t pt-4">
                   <span className="text-sm text-muted-foreground">{t("pay.total")}</span>
@@ -162,10 +234,31 @@ function PayBillPage() {
               </div>
             )}
 
+            {/* Success view */}
+            {success && (
+              <div className="mt-6 rounded-2xl border-2 border-success/40 bg-success/5 p-6 animate-fade-in-up">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-8 w-8 text-success" />
+                  <div>
+                    <div className="text-lg font-bold">{lang === "bn" ? "পেমেন্ট সফল" : "Payment Successful"}</div>
+                    <div className="text-xs text-muted-foreground">{lang === "bn" ? "রিসিট নম্বর" : "Receipt No."}: <b>{success.receipt}</b></div>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-baseline justify-between border-t pt-4">
+                  <span className="text-sm text-muted-foreground">{lang === "bn" ? "পরিশোধিত" : "Paid"}</span>
+                  <span className="text-2xl font-extrabold text-success">৳ {amtFmt(success.amount)}</span>
+                </div>
+                <Button onClick={resetAll} variant="outline" className="mt-4 w-full">
+                  {lang === "bn" ? "নতুন পেমেন্ট" : "New Payment"}
+                </Button>
+              </div>
+            )}
+
             {/* Step 2: method */}
-            <div className={`mt-8 ${invoice ? "" : "opacity-50 pointer-events-none"}`}>
+            {!success && (
+            <div className={`mt-8 ${invoice?.billId ? "" : "opacity-50 pointer-events-none"}`}>
               <div className="flex items-center gap-3">
-                <StepBadge n={2} active={!!invoice} />
+                <StepBadge n={2} active={!!invoice?.billId} />
                 <div>
                   <h2 className="font-bold text-lg">{t("pay.step2")}</h2>
                   <p className="text-xs text-muted-foreground">{t("pay.step2.desc")}</p>
@@ -201,19 +294,32 @@ function PayBillPage() {
 
               <form onSubmit={handlePay} className="mt-6 space-y-4">
                 {(method === "bkash" || method === "nagad" || method === "rocket") && (
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium">
-                      {t(`pay.method.${method}` as const)} — {t("pay.wallet")}
-                    </Label>
-                    <Input
-                      value={msisdn}
-                      onChange={(e) => setMsisdn(e.target.value)}
-                      inputMode="numeric"
-                      maxLength={11}
-                      placeholder="01XXXXXXXXX"
-                      className="h-12 text-base tracking-wider"
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">
+                        {t(`pay.method.${method}` as const)} — {t("pay.wallet")}
+                      </Label>
+                      <Input
+                        value={msisdn}
+                        onChange={(e) => setMsisdn(e.target.value)}
+                        inputMode="numeric"
+                        maxLength={11}
+                        placeholder="01XXXXXXXXX"
+                        className="h-12 text-base tracking-wider"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">
+                        {lang === "bn" ? "ট্রানজেকশন আইডি (TrxID)" : "Transaction ID (TrxID)"}
+                      </Label>
+                      <Input
+                        value={txnId}
+                        onChange={(e) => setTxnId(e.target.value)}
+                        placeholder={lang === "bn" ? "যেমন 8N7A1B2C3D" : "e.g. 8N7A1B2C3D"}
+                        className="h-12 text-base tracking-wider uppercase"
+                      />
+                    </div>
+                  </>
                 )}
                 {method === "card" && (
                   <p className="rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground">
@@ -221,23 +327,42 @@ function PayBillPage() {
                   </p>
                 )}
                 {method === "bank" && (
-                  <div className="rounded-xl bg-muted/50 p-4 text-sm space-y-1">
-                    <div><b>Bank:</b> Dutch-Bangla Bank Ltd.</div>
-                    <div><b>A/C Name:</b> Net Bill Pro</div>
-                    <div><b>A/C No:</b> 1234-5678-9012</div>
-                    <div><b>Branch:</b> Dhanmondi</div>
-                  </div>
+                  <>
+                    <div className="rounded-xl bg-muted/50 p-4 text-sm space-y-1">
+                      <div><b>Bank:</b> Dutch-Bangla Bank Ltd.</div>
+                      <div><b>A/C Name:</b> Net Bill Pro</div>
+                      <div><b>A/C No:</b> 1234-5678-9012</div>
+                      <div><b>Branch:</b> Dhanmondi</div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">
+                        {lang === "bn" ? "ব্যাংক রেফারেন্স" : "Bank Reference"}
+                      </Label>
+                      <Input
+                        value={txnId}
+                        onChange={(e) => setTxnId(e.target.value)}
+                        placeholder={lang === "bn" ? "রেফারেন্স নম্বর" : "Reference number"}
+                        className="h-12 text-base"
+                      />
+                    </div>
+                  </>
                 )}
 
                 <Button
                   type="submit"
                   size="lg"
+                  disabled={paying || !invoice?.billId}
                   className="w-full h-14 text-base bg-gradient-primary text-primary-foreground shadow-glow"
                 >
-                  ৳ {amtFmt(invoice?.amount ?? 0)} — {t("pay.now")}
+                  {paying ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <>৳ {amtFmt(invoice?.amount ?? 0)} — {t("pay.now")}</>
+                  )}
                 </Button>
               </form>
             </div>
+            )}
           </div>
 
           {/* Right: help / trust */}
