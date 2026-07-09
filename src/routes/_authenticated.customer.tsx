@@ -25,6 +25,11 @@ const BILL_STATUS: Record<string, { label: string; tone: string }> = {
 
 function CustomerPortal() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/", replace: true });
+  };
   const get = useServerFn(getCustomerPortal);
   const q = useQuery({ queryKey: ["customer-portal"], queryFn: () => get() });
 
