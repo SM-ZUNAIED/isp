@@ -387,11 +387,13 @@ function LandingPage() {
 
       {/* Notices ticker */}
       {notices.length > 0 && (
-        <section className="border-y bg-warning/10 py-4">
+        <section className="border-y bg-warning/10 py-4 overflow-hidden">
           <div className="container mx-auto flex items-center gap-4 px-4">
-            <span className="rounded-full bg-warning px-3 py-1 text-xs font-bold text-warning-foreground">{t("notice")}</span>
+            <span className="shrink-0 rounded-full bg-warning px-3 py-1 text-xs font-bold text-warning-foreground">{t("notice")}</span>
             <div className="flex-1 overflow-hidden">
-              <div className="whitespace-nowrap">{notices.map(n => n.title).join(" • ")}</div>
+              <div className="whitespace-nowrap animate-marquee inline-block">
+                {notices.map(n => n.title).join("  •  ")}  •  {notices.map(n => n.title).join("  •  ")}
+              </div>
             </div>
           </div>
         </section>
