@@ -66,6 +66,7 @@ function PayBillPage() {
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLookupError(null);
     if (!customerId.trim()) return toast.error(t("pay.err.id"));
     setLoading(true);
     setInvoice(null);
@@ -73,7 +74,7 @@ function PayBillPage() {
     try {
       const res = await lookupFn({ data: { customer_code: customerId.trim() } });
       if (!res.bill) {
-        toast.info(lang === "bn" ? "কোনো বকেয়া বিল নেই" : "No outstanding bill");
+        setLookupError(lang === "bn" ? "এই গ্রাহকের কোনো বকেয়া বিল নেই।" : "No outstanding bill for this customer.");
         setInvoice({
           billId: null,
           number: null,
@@ -96,15 +97,74 @@ function PayBillPage() {
       }
     } catch (err: any) {
       const msg = String(err?.message ?? err);
-      toast.error(
-        msg.includes("NOT_FOUND")
-          ? lang === "bn" ? "গ্রাহক পাওয়া যায়নি" : "Customer not found"
-          : lang === "bn" ? "লুকআপ ব্যর্থ" : "Lookup failed",
-      );
+      const label = msg.includes("NOT_FOUND")
+        ? (lang === "bn" ? "এই কাস্টমার আইডি পাওয়া যায়নি। আইডি চেক করে আবার চেষ্টা করুন।" : "Customer ID not found. Please check and try again.")
+        : (lang === "bn" ? "সার্ভারে সংযোগ ব্যর্থ। কিছুক্ষণ পরে আবার চেষ্টা করুন।" : "Could not reach the server. Please try again shortly.");
+      setLookupError(label);
+      toast.error(label);
     } finally {
       setLoading(false);
     }
   };
+
+  const validatePayForm = (): boolean => {
+    const errs: { msisdn?: string; txnId?: string } = {};
+    if (method === "bkash" || method === "nagad" || method === "rocket") {
+      const m = z.string().regex(/^01[3-9]\d{8}$/, lang === "bn" ? "মোবাইল নম্বর সঠিক নয় (11 সংখ্যা)" : "Enter a valid 11-digit mobile number");
+      const r = m.safeParse(msisdn);
+      if (!r.success) errs.msisdn = r.error.issues[0].message;
+
+      const tx = z.string().trim()
+        .min(6, lang === "bn" ? "TrxID কমপক্ষে ৬ অক্ষর" : "TrxID must be at least 6 characters")
+        .max(30, lang === "bn" ? "TrxID খুব বড়" : "TrxID is too long")
+        .regex(/^[A-Za-z0-9]+$/, lang === "bn" ? "শুধু অক্ষর ও সংখ্যা" : "Letters and digits only");
+      const rt = tx.safeParse(txnId);
+      if (!rt.success) errs.txnId = rt.error.issues[0].message;
+    }
+    if (method === "bank") {
+      if (!txnId.trim()) errs.txnId = lang === "bn" ? "ব্যাংক রেফারেন্স দিন" : "Bank reference required";
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPayError(null);
+    if (!invoice?.billId) return;
+    if (!validatePayForm()) return;
+    setPaying(true);
+    try {
+      const res = await payFn({
+        data: {
+          bill_id: invoice.billId,
+          method,
+          transaction_id: txnId.trim() || null,
+          msisdn: method === "card" || method === "bank" ? null : msisdn,
+        },
+      });
+      setSuccess({ receipt: res.receipt, amount: res.amount });
+      toast.success(lang === "bn" ? "পেমেন্ট সফল হয়েছে" : "Payment successful");
+      // Navigate to full receipt page
+      setTimeout(() => {
+        navigate({ to: "/pay-bill/receipt/$receiptNo", params: { receiptNo: res.receipt } });
+      }, 600);
+    } catch (err: any) {
+      const raw = String(err?.message ?? err);
+      const label = raw.includes("already paid")
+        ? (lang === "bn" ? "এই বিলটি ইতোমধ্যে পরিশোধিত।" : "This bill has already been paid.")
+        : raw.includes("Nothing to pay")
+        ? (lang === "bn" ? "পরিশোধ করার মতো কোনো বকেয়া নেই।" : "There is nothing left to pay on this bill.")
+        : raw.includes("Invalid mobile")
+        ? (lang === "bn" ? "মোবাইল নম্বর সঠিক নয়।" : "Invalid mobile number.")
+        : (lang === "bn" ? "পেমেন্ট সাবমিট করা যায়নি। আবার চেষ্টা করুন।" : "Could not submit payment. Please try again.");
+      setPayError(label);
+      toast.error(label);
+    } finally {
+      setPaying(false);
+    }
+  };
+
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
