@@ -83,20 +83,20 @@ function LandingPage() {
           <div className="mx-auto max-w-4xl animate-fade-in-up">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm">
               <Star className="h-4 w-4 fill-current text-warning" />
-              <span>বাংলাদেশের ১ নম্বর ISP সফটওয়্যার</span>
+              <span>{t("hero.badge")}</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-6xl lg:text-7xl">
-              {settings?.hero_title ?? "দ্রুতগতির ফাইবার ইন্টারনেট"}
+              {settings?.hero_title ?? t("hero.title")}
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-lg opacity-90 md:text-xl">
-              {settings?.hero_subtitle ?? "আপনার ঘরে ঘরে পৌঁছে দিচ্ছি বিশ্বমানের ইন্টারনেট সেবা। অসীম ব্যান্ডউইথ, ২৪/৭ সাপোর্ট।"}
+              {settings?.hero_subtitle ?? t("hero.subtitle")}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
-                এখনই কানেকশন নিন <ChevronRight className="ml-2 h-4 w-4" />
+                {t("hero.cta1")} <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20">
-                প্যাকেজ দেখুন
+                {t("hero.cta2")}
               </Button>
             </div>
           </div>
