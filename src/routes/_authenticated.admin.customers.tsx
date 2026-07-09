@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Plus, Search, Loader2, Trash2, Power, PowerOff } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,8 +23,16 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  listCustomers, createCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
+  listCustomers, createCustomer, updateCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
 } from "@/lib/customers.functions";
+
+type CustomerStatus = "pending" | "active" | "suspended" | "expired";
+type CustomerRow = {
+  id: string; customer_code: string; full_name: string; mobile: string;
+  address?: string | null; package_id?: string | null; zone_id?: string | null;
+  monthly_bill: number | string; status: CustomerStatus;
+  pppoe_username?: string | null; pppoe_password?: string | null;
+};
 
 export const Route = createFileRoute("/_authenticated/admin/customers")({
   head: () => ({ meta: [{ title: "কাস্টমার — Net Bill Pro" }] }),
