@@ -171,6 +171,22 @@ export const addExpense = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updateEntry = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    EntryInput.extend({
+      id: z.string().uuid(),
+      kind: z.enum(["income", "expense"]),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { id, kind, ...patch } = data;
+    const table = kind === "income" ? "incomes" : "expenses";
+    const { error } = await context.supabase.from(table).update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteEntry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
