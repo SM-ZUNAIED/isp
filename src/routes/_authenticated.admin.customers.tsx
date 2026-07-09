@@ -254,7 +254,7 @@ function CustomerFormDialog({
   const [form, setForm] = useState(seed);
 
   const mut = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const payload = {
         customer_code: form.customer_code.trim(),
         full_name: form.full_name.trim(),
@@ -267,9 +267,8 @@ function CustomerFormDialog({
         pppoe_username: form.pppoe_username || null,
         pppoe_password: form.pppoe_password || null,
       };
-      return mode === "create"
-        ? create({ data: payload })
-        : update({ data: { id: initial!.id, ...payload } });
+      if (mode === "create") await create({ data: payload });
+      else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
       toast.success(mode === "create" ? "কাস্টমার যুক্ত হয়েছে" : "আপডেট হয়েছে");
