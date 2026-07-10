@@ -148,13 +148,20 @@ function SettingsPage() {
           <TabsContent value="general">
             <Card>
               <CardHeader><CardTitle>{tx("প্রতিষ্ঠান তথ্য", "Organization Info")}</CardTitle></CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <F label={tx("ISP এর নাম", "ISP Name")}><Input value={f.isp_name} onChange={set("isp_name")} /></F>
-                <F label={tx("ওয়েবসাইট", "Website")}><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
-                <F label={tx("হটলাইন", "Hotline")}><Input value={f.hotline} onChange={set("hotline")} /></F>
-                <F label="WhatsApp"><Input value={f.whatsapp} onChange={set("whatsapp")} /></F>
-                <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
-                <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
+              <CardContent className="space-y-6">
+                <LogoUploader
+                  value={f.logo_url}
+                  onChange={(v) => setF((p) => ({ ...p, logo_url: v }))}
+                  tx={tx}
+                />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <F label={tx("ISP এর নাম", "ISP Name")}><Input value={f.isp_name} onChange={set("isp_name")} /></F>
+                  <F label={tx("ওয়েবসাইট", "Website")}><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
+                  <F label={tx("হটলাইন", "Hotline")}><Input value={f.hotline} onChange={set("hotline")} /></F>
+                  <F label="WhatsApp"><Input value={f.whatsapp} onChange={set("whatsapp")} /></F>
+                  <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
+                  <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
