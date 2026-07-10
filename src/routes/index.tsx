@@ -58,6 +58,7 @@ function LandingPage() {
   const pickLang = <B extends string, E extends string>(bn: B | undefined | null, en: E | undefined | null) =>
     (lang === "bn" ? (bn || en || "") : (en || bn || ""));
   const lc = (settings?.landing_content ?? {}) as {
+    hero_badge_bn?: string; hero_badge_en?: string;
     hero_title_en?: string; hero_subtitle_en?: string; about_text_en?: string;
     features?: Array<{ icon: string; title_bn?: string; title_en?: string; desc_bn?: string; desc_en?: string }>;
     about_stats?: Array<{ value: string; label_bn?: string; label_en?: string }>;
@@ -222,7 +223,7 @@ function LandingPage() {
           <div className="mx-auto max-w-4xl animate-fade-in-up">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm">
               <Star className="h-4 w-4 fill-current text-warning" />
-              <span>{t("hero.badge")}</span>
+              <span>{lang === "bn" ? (lc.hero_badge_bn || t("hero.badge")) : (lc.hero_badge_en || t("hero.badge"))}</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-6xl lg:text-7xl">
               {lang === "bn" ? (settings?.hero_title ?? t("hero.title")) : (lc.hero_title_en || t("hero.title"))}

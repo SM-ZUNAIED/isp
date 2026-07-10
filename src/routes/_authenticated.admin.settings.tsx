@@ -28,6 +28,8 @@ type ReviewItem = { name: string; loc_bn: string; loc_en: string; text_bn: strin
 type FaqItem = { q_bn: string; q_en: string; a_bn: string; a_en: string };
 
 type LandingContent = {
+  hero_badge_bn: string;
+  hero_badge_en: string;
   hero_title_en: string;
   hero_subtitle_en: string;
   about_text_en: string;
@@ -57,7 +59,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 const ICON_OPTIONS = Object.keys(ICON_MAP);
 
 
-const EMPTY_LANDING: LandingContent = { hero_title_en: "", hero_subtitle_en: "", about_text_en: "", features: [], about_stats: [], reviews: [], faqs: [] };
+const EMPTY_LANDING: LandingContent = { hero_badge_bn: "", hero_badge_en: "", hero_title_en: "", hero_subtitle_en: "", about_text_en: "", features: [], about_stats: [], reviews: [], faqs: [] };
 
 function SettingsPage() {
   const tx = useTx();
@@ -86,6 +88,8 @@ function SettingsPage() {
         address: q.data.address ?? "",
         website: q.data.website ?? "",
         landing_content: {
+          hero_badge_bn: lc.hero_badge_bn ?? "",
+          hero_badge_en: lc.hero_badge_en ?? "",
           hero_title_en: lc.hero_title_en ?? "",
           hero_subtitle_en: lc.hero_subtitle_en ?? "",
           about_text_en: lc.about_text_en ?? "",
@@ -155,6 +159,12 @@ function SettingsPage() {
             <Card>
               <CardHeader><CardTitle>{tx("হোম পেজ কনটেন্ট", "Home Page Content")}</CardTitle></CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
+                <F label={tx("Hero ব্যাজ (বাংলা)", "Hero Badge (Bangla)")}>
+                  <Input value={f.landing_content.hero_badge_bn ?? ""} onChange={(e) => setLC({ hero_badge_bn: e.target.value })} placeholder="বাংলাদেশের ১ নম্বর ISP সফটওয়্যার" />
+                </F>
+                <F label={tx("Hero ব্যাজ (English)", "Hero Badge (English)")}>
+                  <Input value={f.landing_content.hero_badge_en ?? ""} onChange={(e) => setLC({ hero_badge_en: e.target.value })} placeholder="Bangladesh's #1 ISP Software" />
+                </F>
                 <F label={tx("Hero শিরোনাম (বাংলা)", "Hero Title (Bangla)")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
                 <F label={tx("Hero শিরোনাম (English)", "Hero Title (English)")}>
                   <Input value={f.landing_content.hero_title_en ?? ""} onChange={(e) => setLC({ hero_title_en: e.target.value })} />
