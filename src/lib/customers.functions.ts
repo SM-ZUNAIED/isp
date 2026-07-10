@@ -105,7 +105,7 @@ export const getCustomerDetail = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { supabase } = context;
     const { data: c, error } = await supabase.from("customers").select(
-      "id, customer_code, full_name, mobile, address, address_line, status, monthly_bill, expiry_date, created_at, pppoe_username, pppoe_password, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, packages(name, monthly_price), zones(name)",
+      "id, customer_code, full_name, mobile, alt_mobile, address, address_line, status, monthly_bill, expiry_date, created_at, pppoe_username, pppoe_password, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, packages(name, monthly_price), zones(name)",
     ).eq("id", data.id).maybeSingle();
     if (error) throw new Error(error.message);
     if (!c) throw new Error("কাস্টমার পাওয়া যায়নি");
