@@ -156,31 +156,33 @@ function UserRowView({
   onAssign: (r: Role) => void; onRemove: (r: Role) => void;
   onReset: (pw: string) => void; onDelete: () => void;
 }) {
+  const tx = useTx();
+  const { lang } = useFmt();
   const available = ALL_ROLES.filter((r) => !u.roles.includes(r));
   return (
     <TableRow>
       <TableCell>
-        <div className="font-medium">{u.full_name || "—"} {isMe && <span className="text-xs text-primary">(আপনি)</span>}</div>
+        <div className="font-medium">{u.full_name || "—"} {isMe && <span className="text-xs text-primary">({tx("আপনি", "You")})</span>}</div>
         <div className="text-xs text-muted-foreground">{u.email}</div>
       </TableCell>
       <TableCell className="text-sm">{u.mobile || "—"}</TableCell>
       <TableCell>
         <div className="flex flex-wrap gap-1">
-          {u.roles.length === 0 && <span className="text-xs text-muted-foreground">কোনো role নেই</span>}
+          {u.roles.length === 0 && <span className="text-xs text-muted-foreground">{tx("কোনো role নেই", "No role")}</span>}
           {u.roles.map((r) => (
             <Badge key={r} variant="outline" className={ROLE_COLOR[r]}>
               {ROLE_LABEL[r]}
               <button
                 onClick={() => onRemove(r)}
                 className="ml-1.5 hover:text-destructive"
-                title="Role সরান"
+                title={tx("Role সরান", "Remove role")}
               >×</button>
             </Badge>
           ))}
         </div>
       </TableCell>
       <TableCell className="text-xs text-muted-foreground">
-        {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString("bn-BD") : "কখনো না"}
+        {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US") : tx("কখনো না", "Never")}
       </TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-1">
@@ -200,14 +202,14 @@ function UserRowView({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>ইউজার ডিলিট করবেন?</AlertDialogTitle>
+                  <AlertDialogTitle>{tx("ইউজার ডিলিট করবেন?", "Delete user?")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    <strong>{u.email}</strong> — এই কাজটি ফেরানো যাবে না। ইউজারের সমস্ত ডেটা মুছে যাবে।
+                    <strong>{u.email}</strong> — {tx("এই কাজটি ফেরানো যাবে না। ইউজারের সমস্ত ডেটা মুছে যাবে।", "This cannot be undone. All user data will be deleted.")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                  <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground">ডিলিট</AlertDialogAction>
+                  <AlertDialogCancel>{tx("বাতিল", "Cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground">{tx("ডিলিট", "Delete")}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
