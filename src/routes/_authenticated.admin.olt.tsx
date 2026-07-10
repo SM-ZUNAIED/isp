@@ -47,21 +47,22 @@ type OnuRow = {
 
 const BRANDS = [
   { v: "vsol", l: "VSOL" }, { v: "cdata", l: "C-Data" }, { v: "huawei", l: "Huawei" },
-  { v: "bdcom", l: "BDCOM" }, { v: "zte", l: "ZTE" }, { v: "other", l: "অন্যান্য" },
-];
+  { v: "bdcom", l: "BDCOM" }, { v: "zte", l: "ZTE" }, { v: "other", l_bn: "অন্যান্য", l_en: "Other" },
+] as Array<{ v: string; l?: string; l_bn?: string; l_en?: string }>;
 
 function OltPage() {
+  const tx = useTx();
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">OLT ও ONU ব্যবস্থাপনা</h1>
-        <p className="text-muted-foreground">PON নেটওয়ার্ক ডিভাইস কনফিগার ও মনিটর করুন</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("OLT ও ONU ব্যবস্থাপনা", "OLT & ONU Management")}</h1>
+        <p className="text-muted-foreground">{tx("PON নেটওয়ার্ক ডিভাইস কনফিগার ও মনিটর করুন", "Configure and monitor PON network devices")}</p>
       </div>
 
       <Tabs defaultValue="olt">
         <TabsList>
-          <TabsTrigger value="olt">OLT ডিভাইস</TabsTrigger>
-          <TabsTrigger value="onu">ONU ডিভাইস</TabsTrigger>
+          <TabsTrigger value="olt">{tx("OLT ডিভাইস", "OLT Devices")}</TabsTrigger>
+          <TabsTrigger value="onu">{tx("ONU ডিভাইস", "ONU Devices")}</TabsTrigger>
         </TabsList>
         <TabsContent value="olt" className="mt-4"><OltList /></TabsContent>
         <TabsContent value="onu" className="mt-4"><OnuList /></TabsContent>
