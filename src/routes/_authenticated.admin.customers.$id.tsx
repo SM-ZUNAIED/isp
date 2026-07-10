@@ -94,10 +94,10 @@ function CustomerDetailPage() {
               <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{c.mobile}</span>
               {c.alt_mobile && (
                 <span className="flex items-center gap-1 text-xs">
-                  <Phone className="h-3 w-3" />বিকল্প: {c.alt_mobile}
+                  <Phone className="h-3 w-3" />{tx("বিকল্প", "Alt")}: {c.alt_mobile}
                 </span>
               )}
-              <Badge variant="outline" className={STATUS_TONE[c.status]}>{STATUS[c.status] ?? c.status}</Badge>
+              <Badge variant="outline" className={STATUS_TONE[c.status]}>{STATUS[c.status] ? tx(STATUS[c.status].bn, STATUS[c.status].en) : c.status}</Badge>
             </div>
           </div>
         </div>
@@ -106,13 +106,13 @@ function CustomerDetailPage() {
       {/* Summary strip */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={<PackageIcon className="h-5 w-5" />} tone="from-blue-500 to-indigo-600"
-          label="প্যাকেজ" value={c.packages?.name ?? "—"} sub={c.packages?.monthly_price ? bdt(c.packages.monthly_price) + "/মাস" : undefined} />
+          label={tx("প্যাকেজ", "Package")} value={c.packages?.name ?? "—"} sub={c.packages?.monthly_price ? bdt(Number(c.packages.monthly_price)) + tx("/মাস", "/month") : undefined} />
         <StatCard icon={<Wallet className="h-5 w-5" />} tone="from-emerald-500 to-teal-600"
-          label="মাসিক বিল" value={bdt(c.monthly_bill)} sub={c.expiry_date ? `মেয়াদ: ${fmtDate(c.expiry_date)}` : undefined} />
+          label={tx("মাসিক বিল", "Monthly Bill")} value={bdt(Number(c.monthly_bill ?? 0))} sub={c.expiry_date ? `${tx("মেয়াদ", "Expiry")}: ${fmtDate(c.expiry_date)}` : undefined} />
         <StatCard icon={<Receipt className="h-5 w-5" />} tone="from-purple-500 to-fuchsia-600"
-          label="মোট বিলিং" value={bdt(totalBilled)} sub={`${bn.format(bills.length)} টি বিল`} />
+          label={tx("মোট বিলিং", "Total Billed")} value={bdt(totalBilled)} sub={`${nfmt(bills.length)} ${tx("টি বিল", "bills")}`} />
         <StatCard icon={<Wallet className="h-5 w-5" />} tone="from-rose-500 to-orange-500"
-          label="বকেয়া" value={bdt(totalDue)} sub={`${bdt(totalPaid)} পরিশোধিত`} />
+          label={tx("বকেয়া", "Due")} value={bdt(totalDue)} sub={`${bdt(totalPaid)} ${tx("পরিশোধিত", "paid")}`} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
