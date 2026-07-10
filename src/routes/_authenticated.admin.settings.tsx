@@ -88,6 +88,8 @@ function SettingsPage() {
         address: q.data.address ?? "",
         website: q.data.website ?? "",
         landing_content: {
+          hero_badge_bn: lc.hero_badge_bn ?? "",
+          hero_badge_en: lc.hero_badge_en ?? "",
           hero_title_en: lc.hero_title_en ?? "",
           hero_subtitle_en: lc.hero_subtitle_en ?? "",
           about_text_en: lc.about_text_en ?? "",
