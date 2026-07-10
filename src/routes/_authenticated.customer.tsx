@@ -245,9 +245,9 @@ function CustomerPortal() {
             <Card>
               <CardHeader><CardTitle className="text-base">আপনার সাম্প্রতিক রিকোয়েস্ট</CardTitle></CardHeader>
               <CardContent className="space-y-2">
-                {q.data.tickets.filter((t) => t.subject?.startsWith("[")).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">এখনো কোনো রিকোয়েস্ট নেই।</p>
-                ) : q.data.tickets.filter((t) => t.subject?.startsWith("[")).map((t) => {
+                {q.data.tickets.filter((t) => t.subject?.startsWith("[") && t.status !== "solved" && t.status !== "closed").length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">এখনো কোনো চলমান রিকোয়েস্ট নেই।</p>
+                ) : q.data.tickets.filter((t) => t.subject?.startsWith("[") && t.status !== "solved" && t.status !== "closed").map((t) => {
                   const st = TICKET_STATUS[t.status] ?? TICKET_STATUS.pending;
                   return (
                     <div key={t.id} className="rounded-xl border p-3">
@@ -276,9 +276,9 @@ function CustomerPortal() {
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><TicketIcon className="h-5 w-5" />সাপোর্ট টিকেট</CardTitle></CardHeader>
               <CardContent className="space-y-2">
-                {q.data.tickets.filter((t) => !t.subject?.startsWith("[")).length === 0 ? (
+                {q.data.tickets.filter((t) => !t.subject?.startsWith("[") || t.status === "solved" || t.status === "closed").length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-6">কোনো টিকেট নেই।</p>
-                ) : q.data.tickets.filter((t) => !t.subject?.startsWith("[")).map((t) => {
+                ) : q.data.tickets.filter((t) => !t.subject?.startsWith("[") || t.status === "solved" || t.status === "closed").map((t) => {
                   const st = TICKET_STATUS[t.status] ?? TICKET_STATUS.pending;
                   return (
                     <div key={t.id} className="rounded-xl border p-3">
