@@ -358,6 +358,7 @@ const dict = {
     // Admin nav
     "admin.nav.dashboard": "Dashboard",
     "admin.nav.customers": "Customers",
+    "admin.nav.staff": "Staff",
     "admin.nav.packages": "Packages",
     "admin.nav.zones": "Zones / Areas",
     "admin.nav.address": "Address (BD)",
