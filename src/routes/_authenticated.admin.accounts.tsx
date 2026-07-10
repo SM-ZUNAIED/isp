@@ -149,17 +149,22 @@ function EntrySection({
       <Card>
         <CardContent className="p-4">
           <form onSubmit={(e) => { e.preventDefault(); if (amount && category.trim()) addMut.mutate(); }}
-            className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            className="grid grid-cols-1 md:grid-cols-6 gap-3">
             <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
               <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
             <div className="space-y-1"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
               <Input required value={category} onChange={(e) => setCategory(e.target.value)}
                 placeholder={kind === "income" ? tx("কানেকশন ফি", "Connection Fee") : tx("বিদ্যুৎ বিল", "Electricity Bill")} /></div>
+            <div className="space-y-1"><Label className="text-xs">
+              {kind === "income" ? tx("ইউজার / প্রদানকারী", "User / Payer") : tx("ইউজার / প্রাপক", "User / Payee")}
+            </Label>
+              <Input value={partyName} onChange={(e) => setPartyName(e.target.value)}
+                placeholder={tx("নাম", "Name")} /></div>
             <div className="space-y-1 md:col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
               <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
             <div className="space-y-1"><Label className="text-xs">{tx("তারিখ", "Date")}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-            <Button type="submit" disabled={addMut.isPending} className="bg-gradient-primary text-white md:col-span-5">
+            <Button type="submit" disabled={addMut.isPending} className="bg-gradient-primary text-white md:col-span-6">
               {addMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
               {tx("যোগ করুন", "Add")}
             </Button>
@@ -175,6 +180,7 @@ function EntrySection({
                 <TableRow>
                   <TableHead>{tx("তারিখ", "Date")}</TableHead>
                   <TableHead>{tx("বিভাগ", "Category")}</TableHead>
+                  <TableHead>{tx("ইউজার", "User")}</TableHead>
                   <TableHead>{tx("বর্ণনা", "Description")}</TableHead>
                   <TableHead className="text-right">{tx("পরিমাণ (৳)", "Amount (BDT)")}</TableHead>
                   <TableHead></TableHead>
