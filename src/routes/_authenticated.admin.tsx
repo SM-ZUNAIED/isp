@@ -152,6 +152,7 @@ function TopBarActions() {
 
 function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
   const { user, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -162,7 +163,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary text-white font-bold">NB</div>
           <div>
             <div className="font-bold leading-tight">Net Bill Pro</div>
-            <div className="text-xs text-muted-foreground">ISP অ্যাডমিন প্যানেল</div>
+            <div className="text-xs text-muted-foreground">{t("admin.brand.sub")}</div>
           </div>
         </Link>
       </div>
@@ -190,8 +191,8 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
               )}
             >
               <Icon className="h-4 w-4" />
-              <span className="flex-1 text-left">{item.label}</span>
-              {item.disabled && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5">শীঘ্রই</span>}
+              <span className="flex-1 text-left">{t(item.labelKey)}</span>
+              {item.disabled && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5">{t("admin.soon")}</span>}
             </button>
           );
         })}
@@ -206,7 +207,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
             navigate({ to: "/", replace: true });
           }}
         >
-          <LogOut className="mr-2 h-4 w-4" /> লগআউট
+          <LogOut className="mr-2 h-4 w-4" /> {t("admin.logout")}
         </Button>
       </div>
     </div>
