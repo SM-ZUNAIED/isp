@@ -86,6 +86,9 @@ function SettingsPage() {
         address: q.data.address ?? "",
         website: q.data.website ?? "",
         landing_content: {
+          hero_title_en: lc.hero_title_en ?? "",
+          hero_subtitle_en: lc.hero_subtitle_en ?? "",
+          about_text_en: lc.about_text_en ?? "",
           features: lc.features ?? [],
           about_stats: lc.about_stats ?? [],
           reviews: lc.reviews ?? [],
