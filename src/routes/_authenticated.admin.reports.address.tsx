@@ -18,25 +18,27 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { getAddressRevenue } from "@/lib/reports.functions";
+import { useTx, useFmt, useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/reports/address")({
-  head: () => ({ meta: [{ title: "ঠিকানা-ভিত্তিক আয় — Net Bill Pro" }] }),
+  head: () => ({ meta: [{ title: "Address-based Revenue — Net Bill Pro" }] }),
   component: AddressReportsPage,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const bdt = (n: number) => `৳ ${bn.format(Math.round(n))}`;
-
 type GroupBy = "division" | "district" | "upazila" | "union" | "area";
-const GROUPS: { value: GroupBy; label: string }[] = [
-  { value: "division", label: "বিভাগ অনুযায়ী" },
-  { value: "district", label: "জেলা অনুযায়ী" },
-  { value: "upazila", label: "উপজেলা অনুযায়ী" },
-  { value: "union", label: "ইউনিয়ন অনুযায়ী" },
-  { value: "area", label: "এরিয়া/মহল্লা অনুযায়ী" },
-];
 
 function AddressReportsPage() {
+  const tx = useTx();
+  const { lang } = useI18n();
+  const { n, bdt } = useFmt();
+  const GROUPS: { value: GroupBy; label: string }[] = [
+    { value: "division", label: tx("বিভাগ অনুযায়ী", "By Division") },
+    { value: "district", label: tx("জেলা অনুযায়ী", "By District") },
+    { value: "upazila", label: tx("উপজেলা অনুযায়ী", "By Upazila") },
+    { value: "union", label: tx("ইউনিয়ন অনুযায়ী", "By Union") },
+    { value: "area", label: tx("এরিয়া/মহল্লা অনুযায়ী", "By Area/Mohalla") },
+  ];
+
   const [groupBy, setGroupBy] = useState<GroupBy>("district");
   const [divisionId, setDivisionId] = useState<number | null>(null);
   const [districtId, setDistrictId] = useState<number | null>(null);
@@ -100,6 +102,8 @@ function AddressReportsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const currentGroupLabel = GROUPS.find((g) => g.value === groupBy)?.label ?? "";
+
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
@@ -107,9 +111,12 @@ function AddressReportsPage() {
           <BarChart3 className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">ঠিকানা-ভিত্তিক আয় বিশ্লেষণ</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("ঠিকানা-ভিত্তিক আয় বিশ্লেষণ", "Address-based Revenue Analysis")}</h1>
           <p className="text-muted-foreground text-sm">
-            জোন-নিরপেক্ষ, সম্পূর্ণ ঠিকানা স্তর অনুযায়ী বিলিং, কালেকশন ও বকেয়া রিপোর্ট।
+            {tx(
+              "জোন-নিরপেক্ষ, সম্পূর্ণ ঠিকানা স্তর অনুযায়ী বিলিং, কালেকশন ও বকেয়া রিপোর্ট।",
+              "Zone-agnostic billing, collection, and due report by full address hierarchy.",
+            )}
           </p>
         </div>
       </div>
@@ -117,7 +124,7 @@ function AddressReportsPage() {
       <Card>
         <CardContent className="p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <div className="space-y-1.5">
-            <Label className="text-xs">গ্রুপিং</Label>
+            <Label className="text-xs">{tx("গ্রুপিং", "Grouping")}</Label>
             <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -125,19 +132,19 @@ function AddressReportsPage() {
               </SelectContent>
             </Select>
           </div>
-          <FilterCombo label="বিভাগ" rows={divQ.data ?? []} value={divisionId}
+          <FilterCombo label={tx("বিভাগ", "Division")} rows={divQ.data ?? []} value={divisionId} lang={lang}
             onChange={(v) => { setDivisionId(v); setDistrictId(null); setUpazilaId(null); }} />
-          <FilterCombo label="জেলা" rows={disQ.data ?? []} value={districtId}
+          <FilterCombo label={tx("জেলা", "District")} rows={disQ.data ?? []} value={districtId} lang={lang}
             disabled={divisionId == null}
             onChange={(v) => { setDistrictId(v); setUpazilaId(null); }} />
-          <FilterCombo label="উপজেলা" rows={upzQ.data ?? []} value={upazilaId}
+          <FilterCombo label={tx("উপজেলা", "Upazila")} rows={upzQ.data ?? []} value={upazilaId} lang={lang}
             disabled={districtId == null} onChange={setUpazilaId} />
           <div className="space-y-1.5">
-            <Label className="text-xs">From (billing month)</Label>
+            <Label className="text-xs">{tx("শুরু (বিলিং মাস)", "From (billing month)")}</Label>
             <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">To</Label>
+            <Label className="text-xs">{tx("শেষ", "To")}</Label>
             <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
           </div>
         </CardContent>
@@ -145,53 +152,58 @@ function AddressReportsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={<Wallet className="h-5 w-5" />} tone="from-blue-500 to-indigo-600"
-          label="মোট বিলিং" value={bdt(totals.billed)} sub={`${bn.format(rows.length)} টি ${GROUPS.find(g => g.value === groupBy)?.label ?? ""}`} />
+          label={tx("মোট বিলিং", "Total Billed")} value={bdt(totals.billed)}
+          sub={tx(`${n(rows.length)} টি ${currentGroupLabel}`, `${n(rows.length)} ${currentGroupLabel.toLowerCase()}`)} />
         <StatCard icon={<TrendingUp className="h-5 w-5" />} tone="from-emerald-500 to-teal-600"
-          label="মোট কালেকশন" value={bdt(totals.collected)} sub={`${bn.format(Math.round(collectionRate))}% আদায়`} />
+          label={tx("মোট কালেকশন", "Total Collected")} value={bdt(totals.collected)}
+          sub={tx(`${n(Math.round(collectionRate))}% আদায়`, `${n(Math.round(collectionRate))}% collected`)} />
         <StatCard icon={<AlertTriangle className="h-5 w-5" />} tone="from-rose-500 to-orange-500"
-          label="বকেয়া" value={bdt(totals.due)} sub={totals.due > 0 ? "অ্যাকশন প্রয়োজন" : "সব ক্লিয়ার"} />
+          label={tx("বকেয়া", "Due")} value={bdt(totals.due)}
+          sub={totals.due > 0 ? tx("অ্যাকশন প্রয়োজন", "Action needed") : tx("সব ক্লিয়ার", "All clear")} />
         <StatCard icon={<Users className="h-5 w-5" />} tone="from-purple-500 to-fuchsia-600"
-          label="কাস্টমার" value={bn.format(totals.customers)} sub="এই ফিল্টারে" />
+          label={tx("কাস্টমার", "Customers")} value={n(totals.customers)} sub={tx("এই ফিল্টারে", "In this filter")} />
       </div>
 
       <Card>
         <CardContent className="p-4 space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="text-sm font-semibold">
-              {GROUPS.find(g => g.value === groupBy)?.label} — বিস্তারিত
+              {currentGroupLabel} — {tx("বিস্তারিত", "Details")}
             </div>
             <Button variant="outline" size="sm" onClick={exportCsv} disabled={rows.length === 0}>
-              <Download className="h-4 w-4 mr-1" /> CSV এক্সপোর্ট
+              <Download className="h-4 w-4 mr-1" /> {tx("CSV এক্সপোর্ট", "Export CSV")}
             </Button>
           </div>
 
           {reportQ.isLoading ? (
             <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
           ) : rows.length === 0 ? (
-            <div className="py-16 text-center text-sm text-muted-foreground">এই ফিল্টারে কোনো ডেটা নেই।</div>
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              {tx("এই ফিল্টারে কোনো ডেটা নেই।", "No data for this filter.")}
+            </div>
           ) : (
             <div className="rounded-xl border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ঠিকানা</TableHead>
-                    <TableHead className="text-right">কাস্টমার</TableHead>
-                    <TableHead className="text-right">বিল</TableHead>
-                    <TableHead className="text-right">বিলিং (৳)</TableHead>
-                    <TableHead className="text-right">কালেকশন (৳)</TableHead>
-                    <TableHead className="text-right">বকেয়া (৳)</TableHead>
-                    <TableHead className="min-w-[160px]">আদায় হার</TableHead>
+                    <TableHead>{tx("ঠিকানা", "Address")}</TableHead>
+                    <TableHead className="text-right">{tx("কাস্টমার", "Customers")}</TableHead>
+                    <TableHead className="text-right">{tx("বিল", "Bills")}</TableHead>
+                    <TableHead className="text-right">{tx("বিলিং (৳)", "Billed (BDT)")}</TableHead>
+                    <TableHead className="text-right">{tx("কালেকশন (৳)", "Collected (BDT)")}</TableHead>
+                    <TableHead className="text-right">{tx("বকেয়া (৳)", "Due (BDT)")}</TableHead>
+                    <TableHead className="min-w-[160px]">{tx("আদায় হার", "Collection Rate")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rows.map((r) => (
                     <TableRow key={r.key}>
                       <TableCell className="font-medium">{r.label}</TableCell>
-                      <TableCell className="text-right">{bn.format(r.customers)}</TableCell>
-                      <TableCell className="text-right">{bn.format(r.bills)}</TableCell>
+                      <TableCell className="text-right">{n(r.customers)}</TableCell>
+                      <TableCell className="text-right">{n(r.bills)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex flex-col items-end gap-1">
-                          <span>{bn.format(Math.round(r.billed))}</span>
+                          <span>{n(Math.round(r.billed))}</span>
                           <div className="h-1 w-24 rounded-full bg-muted overflow-hidden">
                             <div className="h-full bg-gradient-primary"
                               style={{ width: `${maxBilled > 0 ? (r.billed / maxBilled) * 100 : 0}%` }} />
@@ -199,10 +211,10 @@ function AddressReportsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right text-emerald-600 font-medium">
-                        {bn.format(Math.round(r.collected))}
+                        {n(Math.round(r.collected))}
                       </TableCell>
                       <TableCell className="text-right text-rose-600 font-medium">
-                        {bn.format(Math.round(r.due))}
+                        {n(Math.round(r.due))}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -242,13 +254,14 @@ function StatCard({ icon, label, value, sub, tone }: {
 }
 
 function FilterCombo({
-  label, rows, value, onChange, disabled,
+  label, rows, value, onChange, disabled, lang,
 }: {
   label: string;
   rows: Array<{ id: number | string; name: string; bn_name: string | null }>;
   value: number | null;
   onChange: (v: number | null) => void;
   disabled?: boolean;
+  lang: "bn" | "en";
 }) {
   return (
     <div className="space-y-1.5">
@@ -256,11 +269,15 @@ function FilterCombo({
       <Select disabled={disabled}
         value={value == null ? "__all__" : String(value)}
         onValueChange={(v) => onChange(v === "__all__" ? null : Number(v))}>
-        <SelectTrigger><SelectValue placeholder={disabled ? "নিষ্ক্রিয়" : "সব"} /></SelectTrigger>
+        <SelectTrigger>
+          <SelectValue placeholder={disabled ? (lang === "bn" ? "নিষ্ক্রিয়" : "Disabled") : (lang === "bn" ? "সব" : "All")} />
+        </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__all__">সব {label}</SelectItem>
+          <SelectItem value="__all__">{lang === "bn" ? "সব " : "All "}{label}</SelectItem>
           {rows.map((r) => (
-            <SelectItem key={String(r.id)} value={String(r.id)}>{r.bn_name || r.name}</SelectItem>
+            <SelectItem key={String(r.id)} value={String(r.id)}>
+              {lang === "bn" ? (r.bn_name || r.name) : (r.name || r.bn_name)}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
