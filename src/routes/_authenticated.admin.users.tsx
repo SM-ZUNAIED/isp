@@ -221,20 +221,21 @@ function UserRowView({
 }
 
 function CreateUserDialog({ onSubmit, pending }: { onSubmit: (v: { email: string; password: string; full_name: string; mobile: string; role: Role }) => void; pending: boolean }) {
+  const tx = useTx();
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ email: "", password: "", full_name: "", mobile: "", role: "staff" as Role });
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-primary text-white"><Plus className="h-4 w-4 mr-1" /> নতুন ইউজার</Button>
+        <Button className="bg-gradient-primary text-white"><Plus className="h-4 w-4 mr-1" /> {tx("নতুন ইউজার", "New User")}</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>নতুন ইউজার তৈরি</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("নতুন ইউজার তৈরি", "Create New User")}</DialogTitle></DialogHeader>
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(f); setOpen(false); setF({ email: "", password: "", full_name: "", mobile: "", role: "staff" }); }} className="space-y-3">
-          <div className="grid gap-1.5"><Label>পূর্ণ নাম</Label><Input value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} /></div>
-          <div className="grid gap-1.5"><Label>ইমেইল *</Label><Input type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-          <div className="grid gap-1.5"><Label>পাসওয়ার্ড * (min 6)</Label><Input type="text" required minLength={6} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-          <div className="grid gap-1.5"><Label>মোবাইল</Label><Input value={f.mobile} onChange={(e) => setF({ ...f, mobile: e.target.value })} /></div>
+          <div className="grid gap-1.5"><Label>{tx("পূর্ণ নাম", "Full Name")}</Label><Input value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} /></div>
+          <div className="grid gap-1.5"><Label>{tx("ইমেইল", "Email")} *</Label><Input type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
+          <div className="grid gap-1.5"><Label>{tx("পাসওয়ার্ড", "Password")} * (min 6)</Label><Input type="text" required minLength={6} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
+          <div className="grid gap-1.5"><Label>{tx("মোবাইল", "Mobile")}</Label><Input value={f.mobile} onChange={(e) => setF({ ...f, mobile: e.target.value })} /></div>
           <div className="grid gap-1.5">
             <Label>Role *</Label>
             <Select value={f.role} onValueChange={(v) => setF({ ...f, role: v as Role })}>
@@ -245,9 +246,9 @@ function CreateUserDialog({ onSubmit, pending }: { onSubmit: (v: { email: string
             </Select>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={pending} className="bg-gradient-primary text-white">
-              {pending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />} তৈরি করুন
+              {pending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />} {tx("তৈরি করুন", "Create")}
             </Button>
           </DialogFooter>
         </form>
@@ -257,20 +258,21 @@ function CreateUserDialog({ onSubmit, pending }: { onSubmit: (v: { email: string
 }
 
 function ResetPasswordDialog({ onSubmit }: { onSubmit: (pw: string) => void }) {
+  const tx = useTx();
   const [open, setOpen] = useState(false);
   const [pw, setPw] = useState("");
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="h-8 w-8" title="পাসওয়ার্ড রিসেট"><KeyRound className="h-4 w-4" /></Button>
+        <Button size="icon" variant="ghost" className="h-8 w-8" title={tx("পাসওয়ার্ড রিসেট", "Reset password")}><KeyRound className="h-4 w-4" /></Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>পাসওয়ার্ড রিসেট</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("পাসওয়ার্ড রিসেট", "Reset Password")}</DialogTitle></DialogHeader>
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(pw); setOpen(false); setPw(""); }} className="space-y-3">
-          <div className="grid gap-1.5"><Label>নতুন পাসওয়ার্ড (min 6)</Label><Input type="text" required minLength={6} value={pw} onChange={(e) => setPw(e.target.value)} /></div>
+          <div className="grid gap-1.5"><Label>{tx("নতুন পাসওয়ার্ড (min 6)", "New password (min 6)")}</Label><Input type="text" required minLength={6} value={pw} onChange={(e) => setPw(e.target.value)} /></div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
-            <Button type="submit" className="bg-gradient-primary text-white">রিসেট</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
+            <Button type="submit" className="bg-gradient-primary text-white">{tx("রিসেট", "Reset")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
