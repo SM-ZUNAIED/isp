@@ -21,14 +21,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Subscribe first, then read existing session (avoids race).
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    let validated = false;
+    // Subscribe first, then validate. Ignore INITIAL_SESSION until we confirm
+    // the token with the Auth server — otherwise a stale/expired refresh
+    // token in localStorage flips session→truthy and downstream server fns
+    // 401 before we can sign out.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === "INITIAL_SESSION" && !validated) return;
       setSession(s);
       setLoading(false);
     });
-    // Validate against the Auth server: a stale/deleted-user token in
-    // localStorage otherwise sticks around and every server fn 401s.
     supabase.auth.getUser().then(async ({ data, error }) => {
+      validated = true;
       if (error || !data?.user) {
         await supabase.auth.signOut().catch(() => {});
         setSession(null);
