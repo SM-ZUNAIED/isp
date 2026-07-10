@@ -17,6 +17,7 @@ import {
   MapPin,
   BarChart3,
   UserCircle2,
+  Users2,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
