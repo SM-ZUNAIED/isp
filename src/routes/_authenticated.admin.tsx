@@ -247,7 +247,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
 function BrandLogo({ size = 10 }: { size?: number }) {
   const fetchSettings = useServerFn(getSettings);
   const q = useQuery({
-    queryKey: ["settings", "brand"],
+    queryKey: ["settings"],
     queryFn: () => fetchSettings(),
     staleTime: 5 * 60 * 1000,
   });
