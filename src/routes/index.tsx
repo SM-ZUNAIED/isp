@@ -12,6 +12,10 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOut, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 
 const landingQuery = queryOptions({
