@@ -211,6 +211,38 @@ export const getSettings = createServerFn({ method: "GET" })
     return data;
   });
 
+const FeatureItem = z.object({
+  icon: z.string().default("zap"),
+  title_bn: z.string().default(""),
+  title_en: z.string().default(""),
+  desc_bn: z.string().default(""),
+  desc_en: z.string().default(""),
+});
+const AboutStat = z.object({
+  value: z.string().default(""),
+  label_bn: z.string().default(""),
+  label_en: z.string().default(""),
+});
+const ReviewItem = z.object({
+  name: z.string().default(""),
+  loc_bn: z.string().default(""),
+  loc_en: z.string().default(""),
+  text_bn: z.string().default(""),
+  text_en: z.string().default(""),
+});
+const FaqItem = z.object({
+  q_bn: z.string().default(""),
+  q_en: z.string().default(""),
+  a_bn: z.string().default(""),
+  a_en: z.string().default(""),
+});
+const LandingContent = z.object({
+  features: z.array(FeatureItem).default([]),
+  about_stats: z.array(AboutStat).default([]),
+  reviews: z.array(ReviewItem).default([]),
+  faqs: z.array(FaqItem).default([]),
+}).partial();
+
 const SettingsInput = z.object({
   isp_name: z.string().optional().nullable(),
   hero_title: z.string().optional().nullable(),
@@ -221,6 +253,7 @@ const SettingsInput = z.object({
   email: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   website: z.string().optional().nullable(),
+  landing_content: LandingContent.optional().nullable(),
 });
 
 export const updateSettings = createServerFn({ method: "POST" })
