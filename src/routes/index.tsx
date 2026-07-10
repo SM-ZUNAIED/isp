@@ -427,13 +427,19 @@ function LandingPage() {
             <h2 className="text-3xl font-bold md:text-4xl">{t("faq.title")}</h2>
           </div>
           <div className="mt-12 space-y-4">
-            {([1, 2, 3, 4] as const).map((i) => (
+            {(lc.faqs && lc.faqs.length > 0
+              ? lc.faqs.map((it) => ({ q: pickLang(it.q_bn, it.q_en), a: pickLang(it.a_bn, it.a_en) }))
+              : ([1, 2, 3, 4] as const).map((i) => ({
+                  q: t(`faq.${i}.q` as const),
+                  a: t(`faq.${i}.a` as const),
+                }))
+            ).map((it, i) => (
               <details key={i} className="group rounded-2xl border bg-card p-5 shadow-soft">
                 <summary className="flex cursor-pointer items-center justify-between font-semibold">
-                  {t(`faq.${i}.q` as const)}
+                  {it.q}
                   <ChevronRight className="h-5 w-5 transition-transform group-open:rotate-90" />
                 </summary>
-                <p className="mt-3 text-muted-foreground">{t(`faq.${i}.a` as const)}</p>
+                <p className="mt-3 text-muted-foreground">{it.a}</p>
               </details>
             ))}
           </div>
