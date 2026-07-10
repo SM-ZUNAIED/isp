@@ -361,7 +361,9 @@ function LandingPage() {
           <div>
             <h2 className="text-3xl font-bold md:text-4xl">{t("about.title")}</h2>
             <p className="mt-4 text-muted-foreground">
-              {settings?.about_text ?? `${ispName} — ${t("about.default")}`}
+              {lang === "bn"
+                ? (settings?.about_text ?? `${ispName} — ${t("about.default")}`)
+                : (lc.about_text_en || `${ispName} — ${t("about.default")}`)}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
               {(lc.about_stats && lc.about_stats.length > 0
