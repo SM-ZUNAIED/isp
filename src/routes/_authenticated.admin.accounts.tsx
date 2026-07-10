@@ -196,6 +196,7 @@ function EditEntryDialog({
   row: EntryRow;
   onSaved: () => void;
 }) {
+  const tx = useTx();
   const update = useServerFn(updateEntry);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(String(row.amount));
@@ -210,8 +211,8 @@ function EditEntryDialog({
         description: description || null, entry_date: date,
       },
     }),
-    onSuccess: () => { toast.success("আপডেট হয়েছে"); setOpen(false); onSaved(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("আপডেট হয়েছে", "Updated")); setOpen(false); onSaved(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => {
@@ -222,20 +223,20 @@ function EditEntryDialog({
         <Button size="sm" variant="ghost"><Pencil className="h-4 w-4" /></Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>এন্ট্রি এডিট</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("এন্ট্রি এডিট", "Edit Entry")}</DialogTitle></DialogHeader>
         <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="grid grid-cols-2 gap-3">
-          <div className="space-y-1"><Label className="text-xs">টাকা (৳)</Label>
+          <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
             <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
-          <div className="space-y-1"><Label className="text-xs">তারিখ</Label>
+          <div className="space-y-1"><Label className="text-xs">{tx("তারিখ", "Date")}</Label>
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-          <div className="space-y-1 col-span-2"><Label className="text-xs">বিভাগ</Label>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
             <Input required value={category} onChange={(e) => setCategory(e.target.value)} /></div>
-          <div className="space-y-1 col-span-2"><Label className="text-xs">বর্ণনা</Label>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
