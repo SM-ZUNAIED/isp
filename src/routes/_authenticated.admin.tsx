@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
+import { getSettings } from "@/lib/support.functions";
+import { useLogoUrl } from "@/hooks/use-logo";
 
 const getMyRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -138,7 +140,7 @@ function AdminLayout() {
 
       <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-card px-4 py-3">
         <Link to="/" className="flex items-center gap-2 font-bold">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-white">NB</div>
+          <BrandLogo size={9} />
           <span>Net Bill Pro</span>
         </Link>
         <div className="flex items-center gap-2">
@@ -188,7 +190,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
     <div className="flex h-full flex-col">
       <div className="border-b p-5">
         <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary text-white font-bold">NB</div>
+          <BrandLogo size={10} />
           <div>
             <div className="font-bold leading-tight">Net Bill Pro</div>
             <div className="text-xs text-muted-foreground">{t("admin.brand.sub")}</div>
@@ -238,6 +240,22 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           <LogOut className="mr-2 h-4 w-4" /> {t("admin.logout")}
         </Button>
       </div>
+    </div>
+  );
+}
+
+function BrandLogo({ size = 10 }: { size?: number }) {
+  const fetchSettings = useServerFn(getSettings);
+  const q = useQuery({
+    queryKey: ["settings"],
+    queryFn: () => fetchSettings(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: url } = useLogoUrl(q.data?.logo_url ?? null);
+  const cls = `grid place-items-center rounded-xl bg-gradient-primary text-white font-bold overflow-hidden h-${size} w-${size}`;
+  return (
+    <div className={cls} style={{ height: `${size * 0.25}rem`, width: `${size * 0.25}rem` }}>
+      {url ? <img src={url} alt="logo" className="h-full w-full object-contain" /> : "NB"}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { Loader2, Save, Plus, Trash2, Zap, Shield, Signal, Router, Headphones, Award, Wifi, Star, Phone, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Save, Plus, Trash2, Zap, Shield, Signal, Router, Headphones, Award, Wifi, Star, Phone, Users, Upload, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { getSettings, updateSettings } from "@/lib/support.functions";
 import { useTx } from "@/hooks/use-i18n";
+import { useLogoUrl } from "@/hooks/use-logo";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   head: () => ({ meta: [{ title: "সেটিংস — Net Bill Pro" }] }),
@@ -41,6 +43,7 @@ type LandingContent = {
 
 type SettingsForm = {
   isp_name: string;
+  logo_url: string;
   hero_title: string;
   hero_subtitle: string;
   about_text: string;
@@ -69,7 +72,7 @@ function SettingsPage() {
   const q = useQuery({ queryKey: ["settings"], queryFn: () => get() });
 
   const [f, setF] = useState<SettingsForm>({
-    isp_name: "", hero_title: "", hero_subtitle: "", about_text: "",
+    isp_name: "", logo_url: "", hero_title: "", hero_subtitle: "", about_text: "",
     hotline: "", whatsapp: "", email: "", address: "", website: "",
     landing_content: EMPTY_LANDING,
   });
@@ -79,6 +82,7 @@ function SettingsPage() {
       const lc = (q.data.landing_content ?? {}) as Partial<LandingContent>;
       setF({
         isp_name: q.data.isp_name ?? "",
+        logo_url: q.data.logo_url ?? "",
         hero_title: q.data.hero_title ?? "",
         hero_subtitle: q.data.hero_subtitle ?? "",
         about_text: q.data.about_text ?? "",
@@ -144,13 +148,20 @@ function SettingsPage() {
           <TabsContent value="general">
             <Card>
               <CardHeader><CardTitle>{tx("প্রতিষ্ঠান তথ্য", "Organization Info")}</CardTitle></CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <F label={tx("ISP এর নাম", "ISP Name")}><Input value={f.isp_name} onChange={set("isp_name")} /></F>
-                <F label={tx("ওয়েবসাইট", "Website")}><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
-                <F label={tx("হটলাইন", "Hotline")}><Input value={f.hotline} onChange={set("hotline")} /></F>
-                <F label="WhatsApp"><Input value={f.whatsapp} onChange={set("whatsapp")} /></F>
-                <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
-                <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
+              <CardContent className="space-y-6">
+                <LogoUploader
+                  value={f.logo_url}
+                  onChange={(v) => setF((p) => ({ ...p, logo_url: v }))}
+                  tx={tx}
+                />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <F label={tx("ISP এর নাম", "ISP Name")}><Input value={f.isp_name} onChange={set("isp_name")} /></F>
+                  <F label={tx("ওয়েবসাইট", "Website")}><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
+                  <F label={tx("হটলাইন", "Hotline")}><Input value={f.hotline} onChange={set("hotline")} /></F>
+                  <F label="WhatsApp"><Input value={f.whatsapp} onChange={set("whatsapp")} /></F>
+                  <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
+                  <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -323,4 +334,98 @@ function SettingsPage() {
 
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="space-y-1.5"><Label className="text-xs font-medium">{label}</Label>{children}</div>;
+}
+
+function LogoUploader({
+  value,
+  onChange,
+  tx,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  tx: (bn: string, en: string) => string;
+}) {
+  const { data: url } = useLogoUrl(value);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handlePick = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error(tx("শুধু ছবি আপলোড করুন", "Only images allowed"));
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(tx("সর্বোচ্চ আকার ২ MB", "Max size 2 MB"));
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("logos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      // Delete previous stored logo if any (best-effort)
+      if (value && !/^https?:\/\//i.test(value) && value !== path) {
+        await supabase.storage.from("logos").remove([value]).catch(() => {});
+      }
+      onChange(path);
+      toast.success(tx("লোগো আপলোড হয়েছে — সেভ করুন", "Logo uploaded — click Save"));
+    } catch (e) {
+      toast.error(tx("আপলোড ব্যর্থ", "Upload failed"), { description: (e as Error).message });
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const handleRemove = async () => {
+    if (value && !/^https?:\/\//i.test(value)) {
+      await supabase.storage.from("logos").remove([value]).catch(() => {});
+    }
+    onChange("");
+    toast.success(tx("লোগো সরানো হয়েছে — সেভ করুন", "Logo removed — click Save"));
+  };
+
+  return (
+    <div className="space-y-3">
+      <Label className="text-xs font-medium">{tx("লোগো", "Logo")}</Label>
+      <div className="flex items-center gap-4 rounded-xl border p-4">
+        <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-primary text-white">
+          {url ? (
+            <img src={url} alt="logo" className="h-full w-full object-contain" />
+          ) : (
+            <span className="text-lg font-bold">LOGO</span>
+          )}
+        </div>
+        <div className="flex-1 space-y-2">
+          <p className="text-xs text-muted-foreground">
+            {tx("PNG/JPG/SVG · সর্বোচ্চ ২ MB · বর্গাকৃতি বাঞ্ছনীয়", "PNG/JPG/SVG · max 2 MB · square recommended")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handlePick(file);
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileRef.current?.click()}>
+              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              {value ? tx("পরিবর্তন করুন", "Change") : tx("আপলোড করুন", "Upload")}
+            </Button>
+            {value && (
+              <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={handleRemove}>
+                <X className="mr-1 h-4 w-4" /> {tx("সরান", "Remove")}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

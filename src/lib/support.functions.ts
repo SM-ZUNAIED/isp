@@ -250,6 +250,7 @@ const LandingContent = z.object({
 
 const SettingsInput = z.object({
   isp_name: z.string().optional().nullable(),
+  logo_url: z.string().optional().nullable(),
   hero_title: z.string().optional().nullable(),
   hero_subtitle: z.string().optional().nullable(),
   about_text: z.string().optional().nullable(),
