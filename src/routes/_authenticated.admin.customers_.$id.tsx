@@ -1,17 +1,22 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, MapPin, User, Phone, Wifi, Package as PackageIcon,
   Receipt, Wallet, Building2, Milestone, Landmark, ExternalLink, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { getCustomerDetail } from "@/lib/customers.functions";
+import { updateBillStatus } from "@/lib/billing.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/customers_/$id")({
