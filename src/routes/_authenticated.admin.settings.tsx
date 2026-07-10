@@ -30,6 +30,7 @@ type SettingsForm = {
 };
 
 function SettingsPage() {
+  const tx = useTx();
   const get = useServerFn(getSettings);
   const update = useServerFn(updateSettings);
   const q = useQuery({ queryKey: ["settings"], queryFn: () => get() });
