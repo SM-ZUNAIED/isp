@@ -27,6 +27,8 @@ type NoticeRow = { id: string; title: string; body?: string | null; is_active?: 
 
 function NoticesPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { lang } = useFmt();
   const list = useServerFn(listNoticesAdmin);
   const toggle = useServerFn(toggleNotice);
   const del = useServerFn(deleteNotice);
@@ -37,20 +39,20 @@ function NoticesPage() {
   const toggleMut = useMutation({
     mutationFn: (v: { id: string; is_active: boolean }) => toggle({ data: v }),
     onSuccess: invalidate,
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">নোটিশ ও ঘোষণা</h1>
-          <p className="text-muted-foreground">হোম পেজে দেখানো নোটিশ ম্যানেজ করুন</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("নোটিশ ও ঘোষণা", "Notices & Announcements")}</h1>
+          <p className="text-muted-foreground">{tx("হোম পেজে দেখানো নোটিশ ম্যানেজ করুন", "Manage notices shown on the home page")}</p>
         </div>
         <NoticeFormDialog mode="create" onSaved={invalidate} />
       </div>
@@ -58,7 +60,7 @@ function NoticesPage() {
       {q.isLoading ? (
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
-        <Card><CardContent className="p-10 text-center text-muted-foreground">কোনো নোটিশ নেই।</CardContent></Card>
+        <Card><CardContent className="p-10 text-center text-muted-foreground">{tx("কোনো নোটিশ নেই।", "No notices.")}</CardContent></Card>
       ) : (
         <div className="grid gap-3">
           {(q.data ?? []).map((n) => (
@@ -71,7 +73,7 @@ function NoticesPage() {
                   <div className="font-semibold">{n.title}</div>
                   <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{n.body || "—"}</p>
                   <div className="text-xs text-muted-foreground mt-2">
-                    {new Date(n.created_at).toLocaleString("bn-BD")}
+                    {new Date(n.created_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
