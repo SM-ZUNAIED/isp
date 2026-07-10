@@ -31,6 +31,8 @@ type MtRow = {
 
 function MikrotikPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { lang } = useFmt();
   const list = useServerFn(listMikrotiks);
   const ping = useServerFn(pingMikrotik);
   const del = useServerFn(deleteMikrotik);
@@ -40,13 +42,13 @@ function MikrotikPage() {
 
   const pingMut = useMutation({
     mutationFn: (id: string) => ping({ data: { id } }),
-    onSuccess: (r) => { toast[r.online ? "success" : "error"](r.online ? "অনলাইন" : "অফলাইন"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: (r) => { toast[r.online ? "success" : "error"](r.online ? tx("অনলাইন", "Online") : tx("অফলাইন", "Offline")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
