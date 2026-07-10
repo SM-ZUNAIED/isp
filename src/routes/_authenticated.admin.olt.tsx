@@ -346,6 +346,7 @@ function OnuFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createOnu);
   const update = useServerFn(updateOnu);
   const [open, setOpen] = useState(false);
@@ -373,39 +374,39 @@ function OnuFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "ONU যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("ONU যুক্ত হয়েছে", "ONU added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") setF(empty);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন ONU</Button>
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন ONU", "New ONU")}</Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "ONU যোগ করুন" : "ONU এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("ONU যোগ করুন", "Add ONU") : tx("ONU এডিট", "Edit ONU")}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="col-span-2 space-y-1.5"><Label>Serial *</Label>
             <Input required value={f.serial_number} onChange={(e) => setF({ ...f, serial_number: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>MAC</Label>
             <Input value={f.mac_address} onChange={(e) => setF({ ...f, mac_address: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>PON পোর্ট</Label>
+          <div className="space-y-1.5"><Label>{tx("PON পোর্ট", "PON Port")}</Label>
             <Input value={f.pon_port} onChange={(e) => setF({ ...f, pon_port: e.target.value })} placeholder="1/1" /></div>
           <div className="space-y-1.5"><Label>OLT</Label>
             <Select value={f.olt_id} onValueChange={(v) => setF({ ...f, olt_id: v })}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={tx("নির্বাচন করুন", "Select")} /></SelectTrigger>
               <SelectContent>{olts.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5"><Label>সিগন্যাল (dBm)</Label>
+          <div className="space-y-1.5"><Label>{tx("সিগন্যাল (dBm)", "Signal (dBm)")}</Label>
             <Input type="number" step="0.1" value={f.signal_strength} onChange={(e) => setF({ ...f, signal_strength: e.target.value })} placeholder="-24" /></div>
-          <div className="col-span-2 space-y-1.5"><Label>কাস্টমার</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("কাস্টমার", "Customer")}</Label>
             <Select value={f.customer_id} onValueChange={(v) => setF({ ...f, customer_id: v })}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={tx("নির্বাচন করুন", "Select")} /></SelectTrigger>
               <SelectContent>
                 {customers.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.full_name} ({c.customer_code})</SelectItem>
@@ -414,9 +415,9 @@ function OnuFormDialog({
             </Select>
           </div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
