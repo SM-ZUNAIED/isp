@@ -103,6 +103,7 @@ function NoticeFormDialog({
   initial?: NoticeRow;
   onSaved: () => void;
 }) {
+  const tx = useTx();
   const create = useServerFn(createNotice);
   const update = useServerFn(updateNotice);
   const [open, setOpen] = useState(false);
@@ -117,11 +118,11 @@ function NoticeFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "নোটিশ যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("নোটিশ যুক্ত হয়েছে", "Notice added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") { setTitle(""); setBody(""); setIsActive(true); }
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => {
@@ -130,23 +131,23 @@ function NoticeFormDialog({
     }}>
       <DialogTrigger asChild>
         {mode === "create"
-          ? <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন নোটিশ</Button>
+          ? <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন নোটিশ", "New Notice")}</Button>
           : <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "নতুন নোটিশ" : "নোটিশ এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("নতুন নোটিশ", "New Notice") : tx("নোটিশ এডিট", "Edit Notice")}</DialogTitle></DialogHeader>
         <form onSubmit={(e) => { e.preventDefault(); if (title.trim()) mut.mutate(); }} className="space-y-3">
-          <div className="space-y-1.5"><Label>শিরোনাম *</Label>
+          <div className="space-y-1.5"><Label>{tx("শিরোনাম", "Title")} *</Label>
             <Input required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label>বিস্তারিত</Label>
+          <div className="space-y-1.5"><Label>{tx("বিস্তারিত", "Details")}</Label>
             <Textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} /></div>
           <label className="flex items-center gap-2 text-sm">
-            <Switch checked={isActive} onCheckedChange={setIsActive} /> সক্রিয়
+            <Switch checked={isActive} onCheckedChange={setIsActive} /> {tx("সক্রিয়", "Active")}
           </label>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
