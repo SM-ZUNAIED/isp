@@ -225,10 +225,10 @@ function LandingPage() {
               <span>{t("hero.badge")}</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-6xl lg:text-7xl">
-              {lang === "bn" ? (settings?.hero_title ?? t("hero.title")) : t("hero.title")}
+              {lang === "bn" ? (settings?.hero_title ?? t("hero.title")) : (lc.hero_title_en || t("hero.title"))}
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-lg opacity-90 md:text-xl">
-              {lang === "bn" ? (settings?.hero_subtitle ?? t("hero.subtitle")) : t("hero.subtitle")}
+              {lang === "bn" ? (settings?.hero_subtitle ?? t("hero.subtitle")) : (lc.hero_subtitle_en || t("hero.subtitle"))}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => scrollToId("contact")} className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
