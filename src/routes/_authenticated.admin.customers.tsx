@@ -27,6 +27,7 @@ import {
   listCustomers, createCustomer, updateCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
 } from "@/lib/customers.functions";
 import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 type CustomerStatus = "pending" | "active" | "suspended" | "expired";
 type CustomerRow = {
@@ -42,14 +43,10 @@ type CustomerRow = {
 };
 
 export const Route = createFileRoute("/_authenticated/admin/customers")({
-  head: () => ({ meta: [{ title: "কাস্টমার — Net Bill Pro" }] }),
+  head: () => ({ meta: [{ title: "Customers — Net Bill Pro" }] }),
   component: CustomersPage,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const STATUS_LABEL: Record<string, string> = {
-  active: "সক্রিয়", pending: "অপেক্ষমাণ", suspended: "স্থগিত", expired: "মেয়াদ শেষ",
-};
 const STATUS_TONE: Record<string, string> = {
   active: "bg-emerald-100 text-emerald-700 border-emerald-200",
   pending: "bg-amber-100 text-amber-700 border-amber-200",
@@ -59,6 +56,14 @@ const STATUS_TONE: Record<string, string> = {
 
 function CustomersPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { n } = useFmt();
+  const STATUS_LABEL: Record<string, string> = {
+    active: tx("সক্রিয়", "Active"),
+    pending: tx("অপেক্ষমাণ", "Pending"),
+    suspended: tx("স্থগিত", "Suspended"),
+    expired: tx("মেয়াদ শেষ", "Expired"),
+  };
   const list = useServerFn(listCustomers);
   const opts = useServerFn(listPackagesAndZones);
   const setStatus = useServerFn(updateCustomerStatus);
@@ -106,13 +111,13 @@ function CustomersPage() {
   const statusMut = useMutation({
     mutationFn: (v: { id: string; status: "active" | "pending" | "suspended" | "expired" }) =>
       setStatus({ data: v }),
-    onSuccess: () => { toast.success("স্ট্যাটাস আপডেট হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("স্ট্যাটাস আপডেট হয়েছে", "Status updated")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const deleteMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   const rows = useMemo(() => {
@@ -139,8 +144,10 @@ function CustomersPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">কাস্টমার ব্যবস্থাপনা</h1>
-          <p className="text-muted-foreground">মোট {bn.format(customersQ.data?.length ?? 0)} জন কাস্টমার</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("কাস্টমার ব্যবস্থাপনা", "Customer Management")}</h1>
+          <p className="text-muted-foreground">
+            {tx(`মোট ${n(customersQ.data?.length ?? 0)} জন কাস্টমার`, `Total ${n(customersQ.data?.length ?? 0)} customers`)}
+          </p>
         </div>
         <CustomerFormDialog
           mode="create"
@@ -155,67 +162,70 @@ function CustomersPage() {
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-1.5">
-                <Label className="text-xs">খুঁজুন</Label>
+                <Label className="text-xs">{tx("খুঁজুন", "Search")}</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    placeholder="নাম, কোড, মোবাইল, ঠিকানা..."
+                    placeholder={tx("নাম, কোড, মোবাইল, ঠিকানা...", "Name, code, mobile, address...")}
                     className="pl-9"
                   />
                 </div>
               </div>
               <FilterSelect
-                label="বিভাগ"
+                label={tx("বিভাগ", "Division")}
                 loading={divisionsQ.isLoading}
                 rows={divisionsQ.data ?? []}
                 value={divisionId}
                 onChange={(v) => { setDivisionId(v as number | null); setDistrictId(null); setUpazilaId(null); }}
               />
               <FilterSelect
-                label="জেলা"
+                label={tx("জেলা", "District")}
                 loading={districtsQ.isFetching}
                 rows={districtsQ.data ?? []}
                 value={districtId}
                 disabled={divisionId == null}
-                depHint="প্রথমে বিভাগ"
+                depHint={tx("প্রথমে বিভাগ", "Division first")}
                 onChange={(v) => { setDistrictId(v as number | null); setUpazilaId(null); }}
               />
               <FilterSelect
-                label="উপজেলা"
+                label={tx("উপজেলা", "Upazila")}
                 loading={upazilasQ.isFetching}
                 rows={upazilasQ.data ?? []}
                 value={upazilaId}
                 disabled={districtId == null}
-                depHint="প্রথমে জেলা"
+                depHint={tx("প্রথমে জেলা", "District first")}
                 onChange={(v) => setUpazilaId(v as number | null)}
               />
             </div>
             {hasFilter && (
               <Button variant="outline" size="sm" onClick={() => { setQ(""); clearFilters(); }} className="lg:mb-0.5">
-                <X className="h-4 w-4 mr-1" /> ফিল্টার ক্লিয়ার
+                <X className="h-4 w-4 mr-1" /> {tx("ফিল্টার ক্লিয়ার", "Clear filters")}
               </Button>
             )}
           </div>
 
           <div className="text-xs text-muted-foreground">
-            দেখানো হচ্ছে {bn.format(rows.length)} / {bn.format(customersQ.data?.length ?? 0)} জন
+            {tx(
+              `দেখানো হচ্ছে ${n(rows.length)} / ${n(customersQ.data?.length ?? 0)} জন`,
+              `Showing ${n(rows.length)} / ${n(customersQ.data?.length ?? 0)}`,
+            )}
           </div>
 
           <div className="rounded-xl border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>কোড</TableHead>
-                  <TableHead>নাম</TableHead>
-                  <TableHead>মোবাইল</TableHead>
-                  <TableHead>ঠিকানা</TableHead>
-                  <TableHead>প্যাকেজ</TableHead>
-                  <TableHead>জোন</TableHead>
-                  <TableHead className="text-right">বিল (৳)</TableHead>
-                  <TableHead>স্ট্যাটাস</TableHead>
-                  <TableHead className="text-right">অ্যাকশন</TableHead>
+                  <TableHead>{tx("কোড", "Code")}</TableHead>
+                  <TableHead>{tx("নাম", "Name")}</TableHead>
+                  <TableHead>{tx("মোবাইল", "Mobile")}</TableHead>
+                  <TableHead>{tx("ঠিকানা", "Address")}</TableHead>
+                  <TableHead>{tx("প্যাকেজ", "Package")}</TableHead>
+                  <TableHead>{tx("জোন", "Zone")}</TableHead>
+                  <TableHead className="text-right">{tx("বিল (৳)", "Bill (BDT)")}</TableHead>
+                  <TableHead>{tx("স্ট্যাটাস", "Status")}</TableHead>
+                  <TableHead className="text-right">{tx("অ্যাকশন", "Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -226,7 +236,7 @@ function CustomersPage() {
                 )}
                 {!customersQ.isLoading && rows.length === 0 && (
                   <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
-                    কোনো কাস্টমার নেই।
+                    {tx("কোনো কাস্টমার নেই।", "No customers found.")}
                   </TableCell></TableRow>
                 )}
                 {rows.map((r) => {
@@ -244,7 +254,7 @@ function CustomersPage() {
                       </TableCell>
                       <TableCell>{r.packages?.name ?? "—"}</TableCell>
                       <TableCell>{r.zones?.name ?? "—"}</TableCell>
-                      <TableCell className="text-right">{bn.format(Number(r.monthly_bill ?? 0))}</TableCell>
+                      <TableCell className="text-right">{n(Number(r.monthly_bill ?? 0))}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={STATUS_TONE[r.status]}>
                           {STATUS_LABEL[r.status]}
@@ -263,12 +273,12 @@ function CustomersPage() {
                           disabled={statusMut.isPending}
                         >
                           {isActive ? (
-                            <><PowerOff className="h-4 w-4 mr-1" /> স্থগিত</>
+                            <><PowerOff className="h-4 w-4 mr-1" /> {tx("স্থগিত", "Suspend")}</>
                           ) : (
-                            <><Power className="h-4 w-4 mr-1" /> সক্রিয়</>
+                            <><Power className="h-4 w-4 mr-1" /> {tx("সক্রিয়", "Activate")}</>
                           )}
                         </Button>
-                        <Button size="sm" variant="ghost" asChild title="বিস্তারিত দেখুন">
+                        <Button size="sm" variant="ghost" asChild title={tx("বিস্তারিত দেখুন", "View details")}>
                           <Link to="/admin/customers/$id" params={{ id: r.id }}>
                             <Eye className="h-4 w-4" />
                           </Link>
@@ -293,15 +303,18 @@ function CustomersPage() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>মুছে ফেলবেন?</AlertDialogTitle>
+                              <AlertDialogTitle>{tx("মুছে ফেলবেন?", "Delete?")}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                "{r.full_name}" এর সব তথ্য মুছে যাবে। এটি ফেরানো যাবে না।
+                                {tx(
+                                  `"${r.full_name}" এর সব তথ্য মুছে যাবে। এটি ফেরানো যাবে না।`,
+                                  `All data for "${r.full_name}" will be removed. This cannot be undone.`,
+                                )}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                              <AlertDialogCancel>{tx("বাতিল", "Cancel")}</AlertDialogCancel>
                               <AlertDialogAction onClick={() => deleteMut.mutate(r.id)}>
-                                মুছে ফেলুন
+                                {tx("মুছে ফেলুন", "Delete")}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -329,6 +342,7 @@ function CustomerFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createCustomer);
   const update = useServerFn(updateCustomer);
   const [open, setOpen] = useState(false);
@@ -405,12 +419,12 @@ function CustomerFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "কাস্টমার যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("কাস্টমার যুক্ত হয়েছে", "Customer added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false);
       if (mode === "create") { setForm(empty); setAddr(emptyAddress); }
       onSaved();
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
@@ -418,28 +432,30 @@ function CustomerFormDialog({
       <DialogTrigger asChild>
         {trigger ?? (
           <Button className="bg-gradient-primary text-white shadow-soft">
-            <Plus className="mr-2 h-4 w-4" /> নতুন কাস্টমার
+            <Plus className="mr-2 h-4 w-4" /> {tx("নতুন কাস্টমার", "New Customer")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{mode === "create" ? "নতুন কাস্টমার যোগ করুন" : "কাস্টমার এডিট করুন"}</DialogTitle>
+          <DialogTitle>
+            {mode === "create" ? tx("নতুন কাস্টমার যোগ করুন", "Add New Customer") : tx("কাস্টমার এডিট করুন", "Edit Customer")}
+          </DialogTitle>
         </DialogHeader>
         <form
           className="space-y-5"
           onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="কাস্টমার কোড *">
+            <Field label={tx("কাস্টমার কোড *", "Customer Code *")}>
               <Input required value={form.customer_code}
                 onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
             </Field>
-            <Field label="পূর্ণ নাম *">
+            <Field label={tx("পূর্ণ নাম *", "Full Name *")}>
               <Input required value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
             </Field>
-            <Field label={mode === "edit" ? "মোবাইল (পরিবর্তনযোগ্য নয়)" : "মোবাইল *"}>
+            <Field label={mode === "edit" ? tx("মোবাইল (পরিবর্তনযোগ্য নয়)", "Mobile (not editable)") : tx("মোবাইল *", "Mobile *")}>
               <Input
                 required
                 value={form.mobile}
@@ -450,24 +466,24 @@ function CustomerFormDialog({
                 className={mode === "edit" ? "bg-muted cursor-not-allowed" : ""}
               />
             </Field>
-            <Field label="বিকল্প মোবাইল">
+            <Field label={tx("বিকল্প মোবাইল", "Alternate Mobile")}>
               <Input
                 value={form.alt_mobile}
                 onChange={(e) => setForm({ ...form, alt_mobile: e.target.value })}
                 placeholder="01XXXXXXXXX"
               />
             </Field>
-            <Field label="মাসিক বিল (৳)">
+            <Field label={tx("মাসিক বিল (৳)", "Monthly Bill (BDT)")}>
               <Input type="number" min={0} value={form.monthly_bill}
                 onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
             </Field>
-            <Field label="প্যাকেজ">
+            <Field label={tx("প্যাকেজ", "Package")}>
               <Select value={form.package_id}
                 onValueChange={(v) => {
                   const p = packages.find((x) => x.id === v);
                   setForm({ ...form, package_id: v, monthly_bill: p ? String(p.monthly_price) : form.monthly_bill });
                 }}>
-                <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={tx("নির্বাচন করুন", "Select")} /></SelectTrigger>
                 <SelectContent>
                   {packages.map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.name} — ৳{p.monthly_price}</SelectItem>
@@ -475,9 +491,9 @@ function CustomerFormDialog({
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="জোন">
+            <Field label={tx("জোন", "Zone")}>
               <Select value={form.zone_id} onValueChange={(v) => setForm({ ...form, zone_id: v })}>
-                <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={tx("নির্বাচন করুন", "Select")} /></SelectTrigger>
                 <SelectContent>
                   {zones.map((z) => (<SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>))}
                 </SelectContent>
@@ -491,29 +507,29 @@ function CustomerFormDialog({
               <Input value={form.pppoe_password}
                 onChange={(e) => setForm({ ...form, pppoe_password: e.target.value })} />
             </Field>
-            <Field label="স্ট্যাটাস">
+            <Field label={tx("স্ট্যাটাস", "Status")}>
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as CustomerStatus })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
-                  <SelectItem value="active">সক্রিয়</SelectItem>
-                  <SelectItem value="suspended">স্থগিত</SelectItem>
-                  <SelectItem value="expired">মেয়াদ শেষ</SelectItem>
+                  <SelectItem value="pending">{tx("অপেক্ষমাণ", "Pending")}</SelectItem>
+                  <SelectItem value="active">{tx("সক্রিয়", "Active")}</SelectItem>
+                  <SelectItem value="suspended">{tx("স্থগিত", "Suspended")}</SelectItem>
+                  <SelectItem value="expired">{tx("মেয়াদ শেষ", "Expired")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
           </div>
 
           <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
-            <div className="text-sm font-semibold">ঠিকানা (ক্যাসকেডিং)</div>
+            <div className="text-sm font-semibold">{tx("ঠিকানা (ক্যাসকেডিং)", "Address (Cascading)")}</div>
             <AddressSelector value={addr} onChange={setAddr} />
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
               {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              সংরক্ষণ করুন
+              {tx("সংরক্ষণ করুন", "Save")}
             </Button>
           </DialogFooter>
         </form>
@@ -542,6 +558,8 @@ function FilterSelect({
   disabled?: boolean;
   depHint?: string;
 }) {
+  const tx = useTx();
+  const { lang } = useFmt();
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">{label}</Label>
@@ -555,13 +573,13 @@ function FilterSelect({
         }}
       >
         <SelectTrigger>
-          <SelectValue placeholder={disabled ? (depHint ?? "নিষ্ক্রিয়") : (loading ? "লোড হচ্ছে..." : "সব")} />
+          <SelectValue placeholder={disabled ? (depHint ?? tx("নিষ্ক্রিয়", "Disabled")) : (loading ? tx("লোড হচ্ছে...", "Loading...") : tx("সব", "All"))} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__all__">সব {label}</SelectItem>
+          <SelectItem value="__all__">{tx("সব", "All")} {label}</SelectItem>
           {rows.map((r) => (
             <SelectItem key={String(r.id)} value={String(r.id)}>
-              {r.bn_name || r.name}
+              {lang === "bn" ? (r.bn_name || r.name) : (r.name || r.bn_name)}
             </SelectItem>
           ))}
         </SelectContent>
