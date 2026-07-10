@@ -9,7 +9,7 @@ export const listCustomers = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("customers")
-      .select("id, customer_code, full_name, mobile, alt_mobile, address, address_line, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, mohalla, road_name, holding_no, status, monthly_bill, package_id, zone_id, expiry_date, created_at, packages(name), zones(name)")
+      .select("id, customer_code, full_name, mobile, alt_mobile, email, address, address_line, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, mohalla, road_name, holding_no, status, monthly_bill, package_id, zone_id, expiry_date, created_at, packages(name), zones(name)")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw new Error(error.message);
@@ -31,6 +31,7 @@ const CreateInput = z.object({
   full_name: z.string().min(1),
   mobile: z.string().min(1),
   alt_mobile: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable().or(z.literal("").transform(() => null)),
   address: z.string().optional().nullable(),
   address_line: z.string().optional().nullable(),
   division_id: z.number().int().optional().nullable(),

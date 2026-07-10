@@ -32,6 +32,7 @@ import { useTx, useFmt } from "@/hooks/use-i18n";
 type CustomerStatus = "pending" | "active" | "suspended" | "expired";
 type CustomerRow = {
   id: string; customer_code: string; full_name: string; mobile: string; alt_mobile?: string | null;
+  email?: string | null;
   address?: string | null; address_line?: string | null;
   division_id?: number | null; district_id?: number | null; upazila_id?: number | null;
   union_id?: string | null; post_office_id?: string | null; village_id?: string | null;
@@ -347,7 +348,7 @@ function CustomerFormDialog({
   const update = useServerFn(updateCustomer);
   const [open, setOpen] = useState(false);
   const empty = {
-    customer_code: "", full_name: "", mobile: "", alt_mobile: "", address: "", package_id: "",
+    customer_code: "", full_name: "", mobile: "", alt_mobile: "", email: "", address: "", package_id: "",
     zone_id: "", monthly_bill: "0", status: "pending" as CustomerStatus,
     pppoe_username: "", pppoe_password: "",
   };
@@ -357,6 +358,7 @@ function CustomerFormDialog({
         full_name: initial.full_name ?? "",
         mobile: initial.mobile ?? "",
         alt_mobile: initial.alt_mobile ?? "",
+        email: initial.email ?? "",
         address: initial.address ?? "",
         package_id: initial.package_id ?? "",
         zone_id: initial.zone_id ?? "",
@@ -394,6 +396,7 @@ function CustomerFormDialog({
         full_name: form.full_name.trim(),
         mobile: form.mobile.trim(),
         alt_mobile: form.alt_mobile.trim() || null,
+        email: form.email.trim() || null,
         address: addr.address_line || form.address || null,
         address_line: addr.address_line || null,
         division_id: addr.division_id,
@@ -473,6 +476,15 @@ function CustomerFormDialog({
                 placeholder="01XXXXXXXXX"
               />
             </Field>
+            <Field label={tx("ইমেইল", "Email")}>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="name@example.com"
+              />
+            </Field>
+
             <Field label={tx("মাসিক বিল (৳)", "Monthly Bill (BDT)")}>
               <Input type="number" min={0} value={form.monthly_bill}
                 onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
