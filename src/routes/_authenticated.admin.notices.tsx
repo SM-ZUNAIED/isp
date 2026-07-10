@@ -16,6 +16,7 @@ import {
 import {
   listNoticesAdmin, createNotice, updateNotice, toggleNotice, deleteNotice,
 } from "@/lib/support.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/notices")({
   head: () => ({ meta: [{ title: "নোটিশ — Net Bill Pro" }] }),
