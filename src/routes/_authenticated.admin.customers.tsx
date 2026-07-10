@@ -30,7 +30,7 @@ import { AddressSelector, emptyAddress, type AddressValue } from "@/components/a
 
 type CustomerStatus = "pending" | "active" | "suspended" | "expired";
 type CustomerRow = {
-  id: string; customer_code: string; full_name: string; mobile: string;
+  id: string; customer_code: string; full_name: string; mobile: string; alt_mobile?: string | null;
   address?: string | null; address_line?: string | null;
   division_id?: number | null; district_id?: number | null; upazila_id?: number | null;
   union_id?: string | null; post_office_id?: string | null; village_id?: string | null;
