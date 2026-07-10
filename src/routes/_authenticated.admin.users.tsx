@@ -45,6 +45,7 @@ const ROLE_COLOR: Record<Role, string> = {
 
 function UsersPage() {
   const { user: me } = useAuth();
+  const tx = useTx();
   const qc = useQueryClient();
   const list = useServerFn(listUsers);
   const create = useServerFn(createUser);
@@ -59,36 +60,36 @@ function UsersPage() {
   const createMut = useMutation({
     mutationFn: (d: { email: string; password: string; full_name: string; mobile: string; role: Role }) =>
       create({ data: d }),
-    onSuccess: () => { toast.success("ইউজার তৈরি হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("ইউজার তৈরি হয়েছে", "User created")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   const assignMut = useMutation({
     mutationFn: (d: { user_id: string; role: Role }) => assign({ data: d }),
-    onSuccess: () => { toast.success("Role যোগ হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("Role যোগ হয়েছে", "Role added")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   const removeMut = useMutation({
     mutationFn: (d: { user_id: string; role: Role }) => remove({ data: d }),
-    onSuccess: () => { toast.success("Role সরানো হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("Role সরানো হয়েছে", "Role removed")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   const resetMut = useMutation({
     mutationFn: (d: { user_id: string; password: string }) => reset({ data: d }),
-    onSuccess: () => toast.success("পাসওয়ার্ড রিসেট হয়েছে"),
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => toast.success(tx("পাসওয়ার্ড রিসেট হয়েছে", "Password reset")),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { user_id: id } }),
-    onSuccess: () => { toast.success("ইউজার ডিলিট হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("ইউজার ডিলিট হয়েছে", "User deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   if (q.isLoading) return <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
-  if (q.error) return <div className="text-destructive">লোড ব্যর্থ: {(q.error as Error).message}</div>;
+  if (q.error) return <div className="text-destructive">{tx("লোড ব্যর্থ", "Load failed")}: {(q.error as Error).message}</div>;
 
   const users = q.data ?? [];
 
@@ -96,8 +97,8 @@ function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2"><UserCog className="h-7 w-7" /> ইউজার ও রোল</h1>
-          <p className="text-muted-foreground">সিস্টেমের ইউজার এবং তাদের অ্যাক্সেস রোল ব্যবস্থাপনা</p>
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2"><UserCog className="h-7 w-7" /> {tx("ইউজার ও রোল", "Users & Roles")}</h1>
+          <p className="text-muted-foreground">{tx("সিস্টেমের ইউজার এবং তাদের অ্যাক্সেস রোল ব্যবস্থাপনা", "Manage system users and their access roles")}</p>
         </div>
         <CreateUserDialog onSubmit={(v) => createMut.mutate(v)} pending={createMut.isPending} />
       </div>
@@ -108,16 +109,16 @@ function UsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>নাম / ইমেইল</TableHead>
-                  <TableHead>মোবাইল</TableHead>
+                  <TableHead>{tx("নাম / ইমেইল", "Name / Email")}</TableHead>
+                  <TableHead>{tx("মোবাইল", "Mobile")}</TableHead>
                   <TableHead>Roles</TableHead>
-                  <TableHead>শেষ লগইন</TableHead>
-                  <TableHead className="text-right">অ্যাকশন</TableHead>
+                  <TableHead>{tx("শেষ লগইন", "Last Login")}</TableHead>
+                  <TableHead className="text-right">{tx("অ্যাকশন", "Action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">কোনো ইউজার নেই</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">{tx("কোনো ইউজার নেই", "No users")}</TableCell></TableRow>
                 )}
                 {users.map((u) => (
                   <UserRowView
@@ -140,7 +141,7 @@ function UsersPage() {
         <CardContent className="p-4 text-sm text-muted-foreground flex gap-3">
           <Shield className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div>
-            <strong className="text-foreground">রোল সিস্টেম:</strong> Admin — সম্পূর্ণ কন্ট্রোল; Staff — অপারেশনাল অ্যাক্সেস; Customer — নিজের বিল ও তথ্য। একজন ইউজারের একাধিক role থাকতে পারে। শেষ Admin এর role সরানো যাবে না।
+            <strong className="text-foreground">{tx("রোল সিস্টেম:", "Role system:")}</strong> {tx("Admin — সম্পূর্ণ কন্ট্রোল; Staff — অপারেশনাল অ্যাক্সেস; Customer — নিজের বিল ও তথ্য। একজন ইউজারের একাধিক role থাকতে পারে। শেষ Admin এর role সরানো যাবে না।", "Admin — full control; Staff — operational access; Customer — own bills and info. A user can have multiple roles. The last Admin's role cannot be removed.")}
           </div>
         </CardContent>
       </Card>
