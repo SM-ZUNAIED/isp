@@ -165,12 +165,16 @@ function LandingPage() {
                         <DropdownMenuSeparator />
                       </>
                     )}
-                    <DropdownMenuItem asChild>
-                      <Link to="/customer" className="cursor-pointer">
-                        <LayoutDashboard className="h-4 w-4 mr-2" /> আমার পোর্টাল
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    {!isPrivileged && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/customer" className="cursor-pointer">
+                            <LayoutDashboard className="h-4 w-4 mr-2" /> আমার পোর্টাল
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     <DropdownMenuItem
                       onClick={async () => {
                         await signOut();
