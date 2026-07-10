@@ -43,6 +43,7 @@ type LandingContent = {
 
 type SettingsForm = {
   isp_name: string;
+  logo_url: string;
   hero_title: string;
   hero_subtitle: string;
   about_text: string;
