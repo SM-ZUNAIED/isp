@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -266,6 +266,11 @@ function CustomersPage() {
                           ) : (
                             <><Power className="h-4 w-4 mr-1" /> সক্রিয়</>
                           )}
+                        </Button>
+                        <Button size="sm" variant="ghost" asChild title="বিস্তারিত দেখুন">
+                          <Link to="/admin/customers/$id" params={{ id: r.id }}>
+                            <Eye className="h-4 w-4" />
+                          </Link>
                         </Button>
                         <CustomerFormDialog
                           mode="edit"
