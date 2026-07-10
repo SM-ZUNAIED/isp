@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { sendSms, type SmsConfig } from "@/routes/api/public/cron/run";
 
 const Input = z.object({
   message: z.string().min(1).max(1000),
@@ -15,6 +14,8 @@ export const broadcastSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ context, data }) => {
+    const { sendSms } = await import("@/lib/sms.server");
+    type SmsConfig = import("@/lib/sms.server").SmsConfig;
     const { supabase } = context;
 
     const { data: setRow } = await supabase
