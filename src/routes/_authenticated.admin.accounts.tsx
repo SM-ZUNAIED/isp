@@ -17,6 +17,9 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
@@ -24,7 +27,10 @@ import {
 import {
   listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
+import { listCustomers } from "@/lib/customers.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
+
+type CustomerOpt = { id: string; full_name: string; customer_code: string };
 
 type EntryRow = {
   id: string; amount: number; category: string;
