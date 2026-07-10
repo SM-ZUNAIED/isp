@@ -64,9 +64,41 @@ function CustomersPage() {
   const del = useServerFn(deleteCustomer);
 
   const [q, setQ] = useState("");
+  const [divisionId, setDivisionId] = useState<number | null>(null);
+  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [upazilaId, setUpazilaId] = useState<number | null>(null);
 
   const customersQ = useQuery({ queryKey: ["customers"], queryFn: () => list() });
   const optsQ = useQuery({ queryKey: ["catalog", "customers-opts"], queryFn: () => opts() });
+
+  const divisionsQ = useQuery({
+    queryKey: ["addr", "divisions"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("divisions").select("id,name,bn_name").order("name");
+      if (error) throw error; return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
+  const districtsQ = useQuery({
+    queryKey: ["addr", "districts", divisionId],
+    enabled: divisionId != null,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("districts")
+        .select("id,name,bn_name").eq("division_id", divisionId!).order("name");
+      if (error) throw error; return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
+  const upazilasQ = useQuery({
+    queryKey: ["addr", "upazilas", districtId],
+    enabled: districtId != null,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("upazilas")
+        .select("id,name,bn_name").eq("district_id", districtId!).order("name");
+      if (error) throw error; return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["customers"] });
 
@@ -83,16 +115,24 @@ function CustomersPage() {
   });
 
   const rows = useMemo(() => {
-    const all = customersQ.data ?? [];
+    let all = customersQ.data ?? [];
+    if (divisionId != null) all = all.filter((r) => r.division_id === divisionId);
+    if (districtId != null) all = all.filter((r) => r.district_id === districtId);
+    if (upazilaId != null) all = all.filter((r) => r.upazila_id === upazilaId);
     if (!q.trim()) return all;
     const s = q.toLowerCase();
     return all.filter(
       (r) =>
         r.full_name?.toLowerCase().includes(s) ||
         r.customer_code?.toLowerCase().includes(s) ||
-        r.mobile?.toLowerCase().includes(s),
+        r.mobile?.toLowerCase().includes(s) ||
+        r.address_line?.toLowerCase().includes(s) ||
+        r.address?.toLowerCase().includes(s),
     );
-  }, [customersQ.data, q]);
+  }, [customersQ.data, q, divisionId, districtId, upazilaId]);
+
+  const clearFilters = () => { setDivisionId(null); setDistrictId(null); setUpazilaId(null); };
+  const hasFilter = divisionId != null || districtId != null || upazilaId != null || q.trim() !== "";
 
   return (
     <div className="space-y-6">
