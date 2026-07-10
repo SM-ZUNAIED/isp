@@ -61,6 +61,20 @@ function CustomerPortal() {
   const get = useServerFn(getCustomerPortal);
   const q = useQuery({ queryKey: ["customer-portal"], queryFn: () => get() });
 
+  // Realtime: auto-sync when admin updates customer/profile/bills
+  useEffect(() => {
+    if (!user?.id) return;
+    const invalidate = () => qc.invalidateQueries({ queryKey: ["customer-portal"] });
+    const ch = supabase
+      .channel(`portal-sync-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "customers", filter: `user_id=eq.${user.id}` }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles", filter: `id=eq.${user.id}` }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${user.id}` }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "bills" }, invalidate)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.id, qc]);
+
   if (q.isLoading) {
     return <div className="min-h-screen grid place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
