@@ -365,6 +365,9 @@ function CustomerFormDialog({
           area_id: initial.area_id ?? null,
           road_id: initial.road_id ?? null,
           building_id: initial.building_id ?? null,
+          mohalla: initial.mohalla ?? null,
+          road_name: initial.road_name ?? null,
+          holding_no: initial.holding_no ?? null,
           address_line: initial.address_line ?? initial.address ?? null,
         }
       : emptyAddress,
