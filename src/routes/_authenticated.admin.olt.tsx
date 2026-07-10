@@ -225,6 +225,7 @@ function OltFormDialog({
 
 function OnuList() {
   const qc = useQueryClient();
+  const tx = useTx();
   const list = useServerFn(listOnus);
   const toggle = useServerFn(toggleOnu);
   const del = useServerFn(deleteOnu);
@@ -237,12 +238,12 @@ function OnuList() {
   const toggleMut = useMutation({
     mutationFn: (v: { id: string; is_enabled: boolean }) => toggle({ data: v }),
     onSuccess: invalidate,
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
@@ -265,10 +266,10 @@ function OnuList() {
                   <TableHead>Serial</TableHead>
                   <TableHead>MAC</TableHead>
                   <TableHead>OLT / PON</TableHead>
-                  <TableHead>কাস্টমার</TableHead>
-                  <TableHead className="text-right">সিগন্যাল</TableHead>
-                  <TableHead>স্ট্যাটাস</TableHead>
-                  <TableHead>সক্রিয়</TableHead>
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
+                  <TableHead className="text-right">{tx("সিগন্যাল", "Signal")}</TableHead>
+                  <TableHead>{tx("স্ট্যাটাস", "Status")}</TableHead>
+                  <TableHead>{tx("সক্রিয়", "Active")}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -280,7 +281,7 @@ function OnuList() {
                 )}
                 {!q.isLoading && (q.data ?? []).length === 0 && (
                   <TableRow><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
-                    কোনো ONU নেই।
+                    {tx("কোনো ONU নেই।", "No ONU found.")}
                   </TableCell></TableRow>
                 )}
                 {(q.data ?? []).map((o) => (
@@ -301,9 +302,9 @@ function OnuList() {
                     </TableCell>
                     <TableCell>
                       {o.is_online ? (
-                        <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />অনলাইন</Badge>
+                        <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />{tx("অনলাইন", "Online")}</Badge>
                       ) : (
-                        <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />অফলাইন</Badge>
+                        <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />{tx("অফলাইন", "Offline")}</Badge>
                       )}
                     </TableCell>
                     <TableCell>
