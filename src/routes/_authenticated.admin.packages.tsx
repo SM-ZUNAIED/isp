@@ -16,6 +16,7 @@ import {
 import {
   listPackages, createPackage, updatePackage, togglePackage, deletePackage,
 } from "@/lib/catalog.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 type PackageRow = {
   id: string; name: string; download_speed: number; upload_speed: number;
@@ -24,14 +25,14 @@ type PackageRow = {
 };
 
 export const Route = createFileRoute("/_authenticated/admin/packages")({
-  head: () => ({ meta: [{ title: "প্যাকেজ — Net Bill Pro" }] }),
+  head: () => ({ meta: [{ title: "Packages — Net Bill Pro" }] }),
   component: PackagesPage,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-
 function PackagesPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { n, bdt } = useFmt();
   const list = useServerFn(listPackages);
   const toggle = useServerFn(togglePackage);
   const del = useServerFn(deletePackage);
@@ -42,20 +43,22 @@ function PackagesPage() {
   const toggleMut = useMutation({
     mutationFn: (v: { id: string; is_active: boolean }) => toggle({ data: v }),
     onSuccess: invalidate,
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">ইন্টারনেট প্যাকেজ</h1>
-          <p className="text-muted-foreground">মোট {bn.format(q.data?.length ?? 0)}টি প্যাকেজ</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("ইন্টারনেট প্যাকেজ", "Internet Packages")}</h1>
+          <p className="text-muted-foreground">
+            {tx(`মোট ${n(q.data?.length ?? 0)}টি প্যাকেজ`, `Total ${n(q.data?.length ?? 0)} packages`)}
+          </p>
         </div>
         <PackageFormDialog mode="create" onSaved={invalidate} />
       </div>
@@ -71,7 +74,11 @@ function PackagesPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-lg">{p.name}</h3>
-                      {p.is_popular && <Badge className="bg-amber-500 text-white"><Star className="h-3 w-3 mr-1" />জনপ্রিয়</Badge>}
+                      {p.is_popular && (
+                        <Badge className="bg-amber-500 text-white">
+                          <Star className="h-3 w-3 mr-1" />{tx("জনপ্রিয়", "Popular")}
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">{p.description || "—"}</p>
                   </div>
@@ -81,12 +88,12 @@ function PackagesPage() {
                   />
                 </div>
                 <div className="rounded-xl bg-gradient-primary p-4 text-white">
-                  <div className="text-3xl font-bold">৳ {bn.format(Number(p.monthly_price))}</div>
-                  <div className="text-xs opacity-90">প্রতি মাসে</div>
+                  <div className="text-3xl font-bold">{bdt(Number(p.monthly_price))}</div>
+                  <div className="text-xs opacity-90">{tx("প্রতি মাসে", "per month")}</div>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>ডাউনলোড: <b>{bn.format(p.download_speed)} Mbps</b></span>
-                  <span>আপলোড: <b>{bn.format(p.upload_speed)} Mbps</b></span>
+                  <span>{tx("ডাউনলোড", "Download")}: <b>{n(p.download_speed)} Mbps</b></span>
+                  <span>{tx("আপলোড", "Upload")}: <b>{n(p.upload_speed)} Mbps</b></span>
                 </div>
                 <div className="flex gap-2">
                   <PackageFormDialog
@@ -95,13 +102,13 @@ function PackagesPage() {
                     onSaved={invalidate}
                     trigger={
                       <Button variant="outline" size="sm" className="flex-1">
-                        <Pencil className="h-4 w-4 mr-1" /> এডিট
+                        <Pencil className="h-4 w-4 mr-1" /> {tx("এডিট", "Edit")}
                       </Button>
                     }
                   />
                   <Button variant="ghost" size="sm" className="text-destructive flex-1"
                     onClick={() => delMut.mutate(p.id)}>
-                    <Trash2 className="h-4 w-4 mr-1" /> মুছুন
+                    <Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Delete")}
                   </Button>
                 </div>
               </CardContent>
@@ -121,6 +128,7 @@ function PackageFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createPackage);
   const update = useServerFn(updatePackage);
   const [open, setOpen] = useState(false);
@@ -155,47 +163,51 @@ function PackageFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "প্যাকেজ যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("প্যাকেজ যুক্ত হয়েছে", "Package added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") setF(empty);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন প্যাকেজ</Button>
+          <Button className="bg-gradient-primary text-white">
+            <Plus className="mr-2 h-4 w-4" />{tx("নতুন প্যাকেজ", "New Package")}
+          </Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "নতুন প্যাকেজ" : "প্যাকেজ এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{mode === "create" ? tx("নতুন প্যাকেজ", "New Package") : tx("প্যাকেজ এডিট", "Edit Package")}</DialogTitle>
+        </DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="col-span-2 space-y-1.5">
-            <Label>নাম *</Label>
+            <Label>{tx("নাম *", "Name *")}</Label>
             <Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           </div>
-          <div className="space-y-1.5"><Label>ডাউনলোড (Mbps)</Label>
+          <div className="space-y-1.5"><Label>{tx("ডাউনলোড (Mbps)", "Download (Mbps)")}</Label>
             <Input type="number" value={f.download_speed} onChange={(e) => setF({ ...f, download_speed: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>আপলোড (Mbps)</Label>
+          <div className="space-y-1.5"><Label>{tx("আপলোড (Mbps)", "Upload (Mbps)")}</Label>
             <Input type="number" value={f.upload_speed} onChange={(e) => setF({ ...f, upload_speed: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>মাসিক দাম (৳)</Label>
+          <div className="space-y-1.5"><Label>{tx("মাসিক দাম (৳)", "Monthly Price (BDT)")}</Label>
             <Input type="number" value={f.monthly_price} onChange={(e) => setF({ ...f, monthly_price: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>Setup চার্জ</Label>
+          <div className="space-y-1.5"><Label>{tx("Setup চার্জ", "Setup Charge")}</Label>
             <Input type="number" value={f.setup_charge} onChange={(e) => setF({ ...f, setup_charge: e.target.value })} /></div>
           <div className="col-span-2 space-y-1.5">
-            <Label>বর্ণনা</Label>
+            <Label>{tx("বর্ণনা", "Description")}</Label>
             <Input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
           </div>
           <label className="col-span-2 flex items-center gap-2 text-sm">
             <Switch checked={f.is_popular} onCheckedChange={(v) => setF({ ...f, is_popular: v })} />
-            জনপ্রিয় হিসেবে দেখান
+            {tx("জনপ্রিয় হিসেবে দেখান", "Show as Popular")}
           </label>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" className="bg-gradient-primary text-white" disabled={mut.isPending}>
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
