@@ -135,9 +135,14 @@ function TopBarActions() {
   const navigate = useNavigate();
   return (
     <div className="flex items-center gap-2">
-      <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
-        <Link to="/pay-bill">বিল পরিশোধ</Link>
-      </Button>
+      <Link
+        to="/pay-bill"
+        aria-label="বিল পরিশোধ"
+        title="বিল পরিশোধ"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary text-white shadow-glow hover:brightness-110 transition"
+      >
+        <Receipt className="h-4 w-4" />
+      </Link>
       <LangToggle />
       <ThemeToggle />
       <DropdownMenu>
