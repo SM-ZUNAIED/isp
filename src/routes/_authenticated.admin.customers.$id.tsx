@@ -12,6 +12,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { getCustomerDetail } from "@/lib/customers.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/customers/$id")({
   head: () => ({ meta: [{ title: "কাস্টমার বিস্তারিত — Net Bill Pro" }] }),
@@ -19,18 +20,18 @@ export const Route = createFileRoute("/_authenticated/admin/customers/$id")({
   errorComponent: ({ error }) => (
     <div className="p-8 text-center space-y-3">
       <p className="text-destructive font-medium">{error.message}</p>
-      <Button asChild variant="outline"><Link to="/admin/customers">ফিরে যান</Link></Button>
+      <Button asChild variant="outline"><Link to="/admin/customers">Back</Link></Button>
     </div>
   ),
-  notFoundComponent: () => <div className="p-8 text-center">কাস্টমার নেই।</div>,
+  notFoundComponent: () => <div className="p-8 text-center">Customer not found.</div>,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const bdt = (n: number | string | null | undefined) => `৳ ${bn.format(Math.round(Number(n ?? 0)))}`;
-const fmtDate = (s: string | null | undefined) =>
-  s ? new Date(s).toLocaleDateString("bn-BD", { year: "numeric", month: "short", day: "numeric" }) : "—";
-
-const STATUS: Record<string, string> = { active: "সক্রিয়", pending: "অপেক্ষমাণ", suspended: "স্থগিত", expired: "মেয়াদ শেষ" };
+const STATUS: Record<string, { bn: string; en: string }> = {
+  active: { bn: "সক্রিয়", en: "Active" },
+  pending: { bn: "অপেক্ষমাণ", en: "Pending" },
+  suspended: { bn: "স্থগিত", en: "Suspended" },
+  expired: { bn: "মেয়াদ শেষ", en: "Expired" },
+};
 const STATUS_TONE: Record<string, string> = {
   active: "bg-emerald-100 text-emerald-700 border-emerald-200",
   pending: "bg-amber-100 text-amber-700 border-amber-200",
