@@ -12,6 +12,9 @@ const AddressInput = z.object({
   area_id: z.string().uuid().nullable(),
   road_id: z.string().uuid().nullable(),
   building_id: z.string().uuid().nullable(),
+  mohalla: z.string().trim().max(200).nullable().optional(),
+  road_name: z.string().trim().max(200).nullable().optional(),
+  holding_no: z.string().trim().max(200).nullable().optional(),
   address_line: z.string().trim().max(500).nullable(),
 });
 
@@ -32,6 +35,9 @@ export const updateMyAddress = createServerFn({ method: "POST" })
         area_id: data.area_id,
         road_id: data.road_id,
         building_id: data.building_id,
+        mohalla: data.mohalla ?? null,
+        road_name: data.road_name ?? null,
+        holding_no: data.holding_no ?? null,
         address_line: data.address_line,
         address: data.address_line, // keep legacy field in sync for older reports
       })

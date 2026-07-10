@@ -484,6 +484,9 @@ function PresentAddressCard({
     area_id: customer.area_id ?? null,
     road_id: customer.road_id ?? null,
     building_id: customer.building_id ?? null,
+    mohalla: (customer as any).mohalla ?? null,
+    road_name: (customer as any).road_name ?? null,
+    holding_no: (customer as any).holding_no ?? null,
     address_line: customer.address_line ?? customer.address ?? null,
   });
 

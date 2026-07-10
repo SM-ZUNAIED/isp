@@ -35,6 +35,7 @@ type CustomerRow = {
   division_id?: number | null; district_id?: number | null; upazila_id?: number | null;
   union_id?: string | null; post_office_id?: string | null; village_id?: string | null;
   area_id?: string | null; road_id?: string | null; building_id?: string | null;
+  mohalla?: string | null; road_name?: string | null; holding_no?: string | null;
   package_id?: string | null; zone_id?: string | null;
   monthly_bill: number | string; status: CustomerStatus;
   pppoe_username?: string | null; pppoe_password?: string | null;
@@ -364,6 +365,9 @@ function CustomerFormDialog({
           area_id: initial.area_id ?? null,
           road_id: initial.road_id ?? null,
           building_id: initial.building_id ?? null,
+          mohalla: initial.mohalla ?? null,
+          road_name: initial.road_name ?? null,
+          holding_no: initial.holding_no ?? null,
           address_line: initial.address_line ?? initial.address ?? null,
         }
       : emptyAddress,
@@ -387,6 +391,9 @@ function CustomerFormDialog({
         area_id: addr.area_id,
         road_id: addr.road_id,
         building_id: addr.building_id,
+        mohalla: addr.mohalla,
+        road_name: addr.road_name,
+        holding_no: addr.holding_no,
         package_id: form.package_id || null,
         zone_id: form.zone_id || null,
         monthly_bill: Number(form.monthly_bill) || 0,

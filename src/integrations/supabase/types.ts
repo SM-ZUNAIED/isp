@@ -186,10 +186,12 @@ export type Database = {
           email: string | null
           expiry_date: string | null
           full_name: string
+          holding_no: string | null
           id: string
           ip_address: string | null
           mikrotik_id: string | null
           mobile: string
+          mohalla: string | null
           monthly_bill: number
           nid_number: string | null
           nid_url: string | null
@@ -204,6 +206,7 @@ export type Database = {
           pppoe_password: string | null
           pppoe_username: string | null
           road_id: string | null
+          road_name: string | null
           router_info: string | null
           splitter_info: string | null
           status: Database["public"]["Enums"]["customer_status"]
@@ -229,10 +232,12 @@ export type Database = {
           email?: string | null
           expiry_date?: string | null
           full_name: string
+          holding_no?: string | null
           id?: string
           ip_address?: string | null
           mikrotik_id?: string | null
           mobile: string
+          mohalla?: string | null
           monthly_bill?: number
           nid_number?: string | null
           nid_url?: string | null
@@ -247,6 +252,7 @@ export type Database = {
           pppoe_password?: string | null
           pppoe_username?: string | null
           road_id?: string | null
+          road_name?: string | null
           router_info?: string | null
           splitter_info?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
@@ -272,10 +278,12 @@ export type Database = {
           email?: string | null
           expiry_date?: string | null
           full_name?: string
+          holding_no?: string | null
           id?: string
           ip_address?: string | null
           mikrotik_id?: string | null
           mobile?: string
+          mohalla?: string | null
           monthly_bill?: number
           nid_number?: string | null
           nid_url?: string | null
@@ -290,6 +298,7 @@ export type Database = {
           pppoe_password?: string | null
           pppoe_username?: string | null
           road_id?: string | null
+          road_name?: string | null
           router_info?: string | null
           splitter_info?: string | null
           status?: Database["public"]["Enums"]["customer_status"]

@@ -9,7 +9,7 @@ export const listCustomers = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("customers")
-      .select("id, customer_code, full_name, mobile, alt_mobile, address, address_line, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, status, monthly_bill, package_id, zone_id, expiry_date, created_at, packages(name), zones(name)")
+      .select("id, customer_code, full_name, mobile, alt_mobile, address, address_line, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, mohalla, road_name, holding_no, status, monthly_bill, package_id, zone_id, expiry_date, created_at, packages(name), zones(name)")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw new Error(error.message);
@@ -42,6 +42,9 @@ const CreateInput = z.object({
   area_id: z.string().uuid().optional().nullable(),
   road_id: z.string().uuid().optional().nullable(),
   building_id: z.string().uuid().optional().nullable(),
+  mohalla: z.string().optional().nullable(),
+  road_name: z.string().optional().nullable(),
+  holding_no: z.string().optional().nullable(),
   package_id: z.string().uuid().optional().nullable(),
   zone_id: z.string().uuid().optional().nullable(),
   monthly_bill: z.number().nonnegative().default(0),
@@ -105,7 +108,7 @@ export const getCustomerDetail = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { supabase } = context;
     const { data: c, error } = await supabase.from("customers").select(
-      "id, customer_code, full_name, mobile, alt_mobile, address, address_line, status, monthly_bill, expiry_date, created_at, pppoe_username, pppoe_password, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, packages(name, monthly_price), zones(name)",
+      "id, customer_code, full_name, mobile, alt_mobile, address, address_line, status, monthly_bill, expiry_date, created_at, pppoe_username, pppoe_password, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, mohalla, road_name, holding_no, packages(name, monthly_price), zones(name)",
     ).eq("id", data.id).maybeSingle();
     if (error) throw new Error(error.message);
     if (!c) throw new Error("কাস্টমার পাওয়া যায়নি");
