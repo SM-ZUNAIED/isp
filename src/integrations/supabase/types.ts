@@ -1107,6 +1107,66 @@ export type Database = {
         }
         Relationships: []
       }
+      staff: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          created_at: string
+          department: string | null
+          designation: string | null
+          email: string | null
+          full_name: string
+          id: string
+          joining_date: string | null
+          mobile: string | null
+          nid: string | null
+          notes: string | null
+          salary: number | null
+          staff_code: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          joining_date?: string | null
+          mobile?: string | null
+          nid?: string | null
+          notes?: string | null
+          salary?: number | null
+          staff_code: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          joining_date?: string | null
+          mobile?: string | null
+          nid?: string | null
+          notes?: string | null
+          salary?: number | null
+          staff_code?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ticket_replies: {
         Row: {
           created_at: string
