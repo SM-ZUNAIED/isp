@@ -123,7 +123,21 @@ function CustomerDetailPage() {
                   <Phone className="h-3 w-3" />{tx("বিকল্প", "Alt")}: {c.alt_mobile}
                 </span>
               )}
-              <Badge variant="outline" className={STATUS_TONE[c.status]}>{STATUS[c.status] ? tx(STATUS[c.status].bn, STATUS[c.status].en) : c.status}</Badge>
+              <Select
+                value={c.status}
+                onValueChange={(v) => custStatusMut.mutate({ id: c.id, status: v as "active" | "pending" | "suspended" | "expired" })}
+                disabled={custStatusMut.isPending}
+              >
+                <SelectTrigger className={`h-7 w-auto px-2 py-0 text-xs gap-1 ${STATUS_TONE[c.status] ?? ""}`}>
+                  <SelectValue>{STATUS[c.status] ? tx(STATUS[c.status].bn, STATUS[c.status].en) : c.status}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{tx("সক্রিয়", "Active")}</SelectItem>
+                  <SelectItem value="pending">{tx("অপেক্ষমাণ", "Pending")}</SelectItem>
+                  <SelectItem value="suspended">{tx("স্থগিত", "Suspended")}</SelectItem>
+                  <SelectItem value="expired">{tx("মেয়াদ শেষ", "Expired")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
