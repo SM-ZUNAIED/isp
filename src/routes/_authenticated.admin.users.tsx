@@ -158,12 +158,14 @@ function UsersPage() {
   );
 }
 
+type UserPatch = { email?: string; full_name?: string; mobile?: string };
+
 function UserRowView({
-  u, isMe, onAssign, onRemove, onReset, onDelete,
+  u, isMe, onAssign, onRemove, onReset, onUpdate, onDelete,
 }: {
   u: UserRow; isMe: boolean;
   onAssign: (r: Role) => void; onRemove: (r: Role) => void;
-  onReset: (pw: string) => void; onDelete: () => void;
+  onReset: (pw: string) => void; onUpdate: (patch: UserPatch) => void; onDelete: () => void;
 }) {
   const tx = useTx();
   const { lang } = useFmt();
