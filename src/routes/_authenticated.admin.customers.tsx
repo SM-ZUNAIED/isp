@@ -151,14 +151,55 @@ function CustomersPage() {
 
       <Card>
         <CardContent className="p-4 space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="নাম, কোড বা মোবাইল দিয়ে খুঁজুন..."
-              className="pl-9"
-            />
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">খুঁজুন</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="নাম, কোড, মোবাইল, ঠিকানা..."
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              <FilterSelect
+                label="বিভাগ"
+                loading={divisionsQ.isLoading}
+                rows={divisionsQ.data ?? []}
+                value={divisionId}
+                onChange={(v) => { setDivisionId(v as number | null); setDistrictId(null); setUpazilaId(null); }}
+              />
+              <FilterSelect
+                label="জেলা"
+                loading={districtsQ.isFetching}
+                rows={districtsQ.data ?? []}
+                value={districtId}
+                disabled={divisionId == null}
+                depHint="প্রথমে বিভাগ"
+                onChange={(v) => { setDistrictId(v as number | null); setUpazilaId(null); }}
+              />
+              <FilterSelect
+                label="উপজেলা"
+                loading={upazilasQ.isFetching}
+                rows={upazilasQ.data ?? []}
+                value={upazilaId}
+                disabled={districtId == null}
+                depHint="প্রথমে জেলা"
+                onChange={(v) => setUpazilaId(v as number | null)}
+              />
+            </div>
+            {hasFilter && (
+              <Button variant="outline" size="sm" onClick={() => { setQ(""); clearFilters(); }} className="lg:mb-0.5">
+                <X className="h-4 w-4 mr-1" /> ফিল্টার ক্লিয়ার
+              </Button>
+            )}
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            দেখানো হচ্ছে {bn.format(rows.length)} / {bn.format(customersQ.data?.length ?? 0)} জন
           </div>
 
           <div className="rounded-xl border overflow-x-auto">
@@ -168,6 +209,7 @@ function CustomersPage() {
                   <TableHead>কোড</TableHead>
                   <TableHead>নাম</TableHead>
                   <TableHead>মোবাইল</TableHead>
+                  <TableHead>ঠিকানা</TableHead>
                   <TableHead>প্যাকেজ</TableHead>
                   <TableHead>জোন</TableHead>
                   <TableHead className="text-right">বিল (৳)</TableHead>
@@ -177,13 +219,13 @@ function CustomersPage() {
               </TableHeader>
               <TableBody>
                 {customersQ.isLoading && (
-                  <TableRow><TableCell colSpan={8} className="py-10 text-center">
+                  <TableRow><TableCell colSpan={9} className="py-10 text-center">
                     <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
                   </TableCell></TableRow>
                 )}
                 {!customersQ.isLoading && rows.length === 0 && (
-                  <TableRow><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
-                    কোনো কাস্টমার নেই। উপরে "নতুন কাস্টমার" বাটনে ক্লিক করে যোগ করুন।
+                  <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
+                    কোনো কাস্টমার নেই।
                   </TableCell></TableRow>
                 )}
                 {rows.map((r) => {
@@ -193,6 +235,12 @@ function CustomersPage() {
                       <TableCell className="font-mono text-xs">{r.customer_code}</TableCell>
                       <TableCell className="font-medium">{r.full_name}</TableCell>
                       <TableCell>{r.mobile}</TableCell>
+                      <TableCell className="max-w-[240px]">
+                        <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                          {(r.address_line || r.address) && <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />}
+                          <span className="line-clamp-2">{r.address_line || r.address || "—"}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>{r.packages?.name ?? "—"}</TableCell>
                       <TableCell>{r.zones?.name ?? "—"}</TableCell>
                       <TableCell className="text-right">{bn.format(Number(r.monthly_bill ?? 0))}</TableCell>
