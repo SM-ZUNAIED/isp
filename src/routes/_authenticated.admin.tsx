@@ -73,18 +73,27 @@ const NAV: Array<{ to: string; labelKey: NavKey; icon: typeof LayoutDashboard; e
 function AdminLayout() {
   const [open, setOpen] = useState(false);
   const { t } = useI18n();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const fetchRoles = useServerFn(getMyRoles);
-  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const rolesQ = useQuery({
+    queryKey: ["my-roles", user?.id],
+    queryFn: () => fetchRoles(),
+    enabled: !!user?.id,
+    retry: 1,
+    staleTime: 0,
+  });
   const roles = rolesQ.data ?? [];
   const isAdmin = roles.includes("admin");
   const isStaff = roles.includes("staff");
   const hasAccess = isAdmin || isStaff;
 
-  if (rolesQ.isLoading) {
+  if (rolesQ.isLoading || rolesQ.isFetching && !rolesQ.data) {
     return <div className="grid min-h-screen place-items-center"><div className="text-muted-foreground text-sm">{t("admin.loading")}</div></div>;
   }
 
   if (!hasAccess) {
+    const errMsg = rolesQ.error ? (rolesQ.error as Error).message : null;
     return (
       <div className="grid min-h-screen place-items-center p-6">
         <div className="max-w-md text-center space-y-4">
@@ -93,8 +102,25 @@ function AdminLayout() {
           </div>
           <h1 className="text-2xl font-bold">{t("admin.noAccess.title")}</h1>
           <p className="text-muted-foreground">{t("admin.noAccess.desc")}</p>
-          <div className="flex gap-2 justify-center">
-            <Link to="/customer"><Button variant="outline">{t("admin.noAccess.customer")}</Button></Link>
+          {user?.email && (
+            <p className="text-xs text-muted-foreground">
+              Signed in as <span className="font-medium">{user.email}</span>
+            </p>
+          )}
+          {errMsg && (
+            <p className="text-xs text-destructive break-words">{errMsg}</p>
+          )}
+          <div className="flex gap-2 justify-center flex-wrap">
+            <Button variant="outline" onClick={() => rolesQ.refetch()}>Retry</Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                await signOut();
+                navigate({ to: "/auth", replace: true });
+              }}
+            >
+              Sign out & login again
+            </Button>
             <Link to="/"><Button className="bg-gradient-primary text-white">{t("admin.noAccess.home")}</Button></Link>
           </div>
         </div>
