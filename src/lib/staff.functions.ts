@@ -136,7 +136,7 @@ export const updateStaff = createServerFn({ method: "POST" })
       if (v !== undefined) patch[k] = v === "" ? null : v;
     });
 
-    const { error } = await supabaseAdmin.from("staff").update(patch).eq("id", id);
+    const { error } = await supabaseAdmin.from("staff").update(patch as never).eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
