@@ -17,25 +17,26 @@ import {
 import {
   listTickets, updateTicketStatus, listTicketReplies, addTicketReply,
 } from "@/lib/support.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/tickets")({
   head: () => ({ meta: [{ title: "সাপোর্ট টিকেট — Net Bill Pro" }] }),
   component: TicketsPage,
 });
 
-const STATUS: Record<string, { label: string; tone: string }> = {
-  pending: { label: "অপেক্ষমাণ", tone: "bg-amber-100 text-amber-700 border-amber-200" },
-  in_progress: { label: "চলমান", tone: "bg-indigo-100 text-indigo-700 border-indigo-200" },
-  solved: { label: "সমাধান", tone: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  closed: { label: "বন্ধ", tone: "bg-slate-200 text-slate-700 border-slate-300" },
+const STATUS: Record<string, { bn: string; en: string; tone: string }> = {
+  pending: { bn: "অপেক্ষমাণ", en: "Pending", tone: "bg-amber-100 text-amber-700 border-amber-200" },
+  in_progress: { bn: "চলমান", en: "In progress", tone: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+  solved: { bn: "সমাধান", en: "Solved", tone: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  closed: { bn: "বন্ধ", en: "Closed", tone: "bg-slate-200 text-slate-700 border-slate-300" },
 };
-const CATEGORY: Record<string, string> = {
-  no_internet: "ইন্টারনেট নেই",
-  slow_speed: "স্লো স্পিড",
-  payment_issue: "পেমেন্ট সমস্যা",
-  router_issue: "রাউটার সমস্যা",
-  onu_issue: "ONU সমস্যা",
-  other: "অন্যান্য",
+const CATEGORY: Record<string, { bn: string; en: string }> = {
+  no_internet: { bn: "ইন্টারনেট নেই", en: "No internet" },
+  slow_speed: { bn: "স্লো স্পিড", en: "Slow speed" },
+  payment_issue: { bn: "পেমেন্ট সমস্যা", en: "Payment issue" },
+  router_issue: { bn: "রাউটার সমস্যা", en: "Router issue" },
+  onu_issue: { bn: "ONU সমস্যা", en: "ONU issue" },
+  other: { bn: "অন্যান্য", en: "Other" },
 };
 
 function TicketsPage() {
