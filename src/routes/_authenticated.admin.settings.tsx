@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { Loader2, Save, Plus, Trash2, Zap, Shield, Signal, Router, Headphones, Award, Wifi, Star, Phone, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Save, Plus, Trash2, Zap, Shield, Signal, Router, Headphones, Award, Wifi, Star, Phone, Users, Upload, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { getSettings, updateSettings } from "@/lib/support.functions";
 import { useTx } from "@/hooks/use-i18n";
+import { useLogoUrl } from "@/hooks/use-logo";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   head: () => ({ meta: [{ title: "সেটিংস — Net Bill Pro" }] }),
