@@ -104,18 +104,34 @@ function TicketsPage() {
         </div>
       )}
 
-      <TicketDialog id={openId} onClose={() => setOpenId(null)} />
+      <TicketDialog
+        ticket={(q.data ?? []).find((t) => t.id === openId) ?? null}
+        onClose={() => setOpenId(null)}
+      />
     </div>
   );
 }
 
-function TicketDialog({ id, onClose }: { id: string | null; onClose: () => void }) {
+type TicketRow = {
+  id: string;
+  ticket_number: string;
+  subject: string;
+  description: string | null;
+  category: string;
+  status: string;
+  created_at: string;
+  customers: { full_name: string | null; customer_code: string | null; mobile: string | null } | null;
+};
+
+function TicketDialog({ ticket, onClose }: { ticket: TicketRow | null; onClose: () => void }) {
   const tx = useTx();
   const { lang } = useFmt();
   const list = useServerFn(listTicketReplies);
   const add = useServerFn(addTicketReply);
+  const setStatus = useServerFn(updateTicketStatus);
   const qc = useQueryClient();
   const [msg, setMsg] = useState("");
+  const id = ticket?.id ?? null;
 
   const q = useQuery({
     queryKey: ["ticket-replies", id],
@@ -124,15 +140,66 @@ function TicketDialog({ id, onClose }: { id: string | null; onClose: () => void 
   });
   const mut = useMutation({
     mutationFn: () => add({ data: { ticket_id: id!, message: msg.trim() } }),
-    onSuccess: () => { setMsg(""); qc.invalidateQueries({ queryKey: ["ticket-replies", id] }); qc.invalidateQueries({ queryKey: ["tickets"] }); },
+    onSuccess: () => {
+      setMsg("");
+      toast.success(tx("উত্তর পাঠানো হয়েছে", "Reply sent"));
+      qc.invalidateQueries({ queryKey: ["ticket-replies", id] });
+      qc.invalidateQueries({ queryKey: ["tickets"] });
+    },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
+  const statusMut = useMutation({
+    mutationFn: (status: "pending" | "in_progress" | "solved" | "closed") =>
+      setStatus({ data: { id: id!, status } }),
+    onSuccess: () => {
+      toast.success(tx("স্ট্যাটাস আপডেট", "Status updated"));
+      qc.invalidateQueries({ queryKey: ["tickets"] });
+    },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
+  const st = ticket ? STATUS[ticket.status] : null;
+  const cat = ticket ? CATEGORY[ticket.category] : null;
 
   return (
     <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader><DialogTitle>{tx("টিকেটের কথোপকথন", "Ticket Conversation")}</DialogTitle></DialogHeader>
-        <div className="space-y-3 max-h-96 overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 flex-wrap">
+            <span>{ticket?.subject ?? tx("টিকেট", "Ticket")}</span>
+            {st && <Badge variant="outline" className={st.tone}>{tx(st.bn, st.en)}</Badge>}
+          </DialogTitle>
+        </DialogHeader>
+
+        {ticket && (
+          <div className="rounded-lg border bg-muted/40 p-3 space-y-2 text-sm">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span>#{ticket.ticket_number}</span>
+              <span>{ticket.customers?.full_name ?? "—"} ({ticket.customers?.mobile ?? "—"})</span>
+              {ticket.customers?.customer_code && <span className="font-mono">{ticket.customers.customer_code}</span>}
+              <span>{cat ? tx(cat.bn, cat.en) : ticket.category}</span>
+              <span>{new Date(ticket.created_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}</span>
+            </div>
+            {ticket.description && (
+              <p className="text-sm whitespace-pre-wrap">{ticket.description}</p>
+            )}
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-xs text-muted-foreground">{tx("স্ট্যাটাস পরিবর্তন:", "Change status:")}</span>
+              <Select
+                value={ticket.status}
+                onValueChange={(v) => statusMut.mutate(v as "pending" | "in_progress" | "solved" | "closed")}
+                disabled={statusMut.isPending}
+              >
+                <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(STATUS).map(([k, v]) => <SelectItem key={k} value={k}>{tx(v.bn, v.en)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-3 max-h-80 overflow-y-auto">
           {q.isLoading && <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />}
           {(q.data ?? []).map((r) => (
             <div key={r.id} className={`rounded-xl p-3 ${r.is_staff ? "bg-primary/10 ml-8" : "bg-muted mr-8"}`}>
@@ -143,9 +210,10 @@ function TicketDialog({ id, onClose }: { id: string | null; onClose: () => void 
             </div>
           ))}
           {!q.isLoading && (q.data ?? []).length === 0 && (
-            <p className="text-center text-sm text-muted-foreground py-4">{tx("কোনো উত্তর নেই।", "No replies.")}</p>
+            <p className="text-center text-sm text-muted-foreground py-4">{tx("কোনো উত্তর নেই।", "No replies yet.")}</p>
           )}
         </div>
+
         <form onSubmit={(e) => { e.preventDefault(); if (msg.trim()) mut.mutate(); }} className="flex gap-2 pt-2">
           <Textarea value={msg} onChange={(e) => setMsg(e.target.value)} rows={2} placeholder={tx("উত্তর লিখুন...", "Write reply...")} />
           <Button type="submit" disabled={mut.isPending || !msg.trim()} className="bg-gradient-primary text-white self-end">
@@ -156,3 +224,4 @@ function TicketDialog({ id, onClose }: { id: string | null; onClose: () => void 
     </Dialog>
   );
 }
+
