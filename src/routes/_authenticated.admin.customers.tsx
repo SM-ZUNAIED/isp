@@ -432,9 +432,23 @@ function CustomerFormDialog({
               <Input required value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
             </Field>
-            <Field label="মোবাইল *">
-              <Input required value={form.mobile}
-                onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
+            <Field label={mode === "edit" ? "মোবাইল (পরিবর্তনযোগ্য নয়)" : "মোবাইল *"}>
+              <Input
+                required
+                value={form.mobile}
+                onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+                placeholder="01XXXXXXXXX"
+                readOnly={mode === "edit"}
+                disabled={mode === "edit"}
+                className={mode === "edit" ? "bg-muted cursor-not-allowed" : ""}
+              />
+            </Field>
+            <Field label="বিকল্প মোবাইল">
+              <Input
+                value={form.alt_mobile}
+                onChange={(e) => setForm({ ...form, alt_mobile: e.target.value })}
+                placeholder="01XXXXXXXXX"
+              />
             </Field>
             <Field label="মাসিক বিল (৳)">
               <Input type="number" min={0} value={form.monthly_bill}
