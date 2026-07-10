@@ -199,7 +199,7 @@ function EntrySection({
                 <TableRow>
                   <TableHead>{tx("তারিখ", "Date")}</TableHead>
                   <TableHead>{tx("বিভাগ", "Category")}</TableHead>
-                  <TableHead>{tx("ইউজার", "User")}</TableHead>
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
                   <TableHead>{tx("বর্ণনা", "Description")}</TableHead>
                   <TableHead className="text-right">{tx("পরিমাণ (৳)", "Amount (BDT)")}</TableHead>
                   <TableHead></TableHead>
