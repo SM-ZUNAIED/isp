@@ -123,3 +123,35 @@ export const listPayments = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+/** Admin: manually override a bill's status. */
+export const updateBillStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      bill_id: z.string().uuid(),
+      status: z.enum(["unpaid", "partial", "paid", "overdue"]),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase } = context;
+    const { data: bill, error: bErr } = await supabase
+      .from("bills").select("id, amount, paid_amount").eq("id", data.bill_id).single();
+    if (bErr || !bill) throw new Error(bErr?.message ?? "Bill not found");
+
+    const amount = Number(bill.amount);
+    let paid = Number(bill.paid_amount ?? 0);
+    let due = amount - paid;
+
+    if (data.status === "paid") { paid = amount; due = 0; }
+    else if (data.status === "unpaid") { paid = 0; due = amount; }
+    // "partial" and "overdue" leave paid/due as-is
+
+    const { error } = await supabase
+      .from("bills")
+      .update({ status: data.status, paid_amount: paid, due_amount: Math.max(0, due) })
+      .eq("id", data.bill_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
