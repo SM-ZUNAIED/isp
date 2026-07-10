@@ -23,7 +23,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  listUsers, createUser, assignRole, removeRole, resetPassword, deleteUser,
+  listUsers, createUser, assignRole, removeRole, resetPassword, deleteUser, updateUser,
   type UserRow,
 } from "@/lib/users.functions";
 import { useAuth } from "@/hooks/use-auth";
