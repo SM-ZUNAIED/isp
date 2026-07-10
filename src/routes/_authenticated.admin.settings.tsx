@@ -59,7 +59,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 const ICON_OPTIONS = Object.keys(ICON_MAP);
 
 
-const EMPTY_LANDING: LandingContent = { hero_title_en: "", hero_subtitle_en: "", about_text_en: "", features: [], about_stats: [], reviews: [], faqs: [] };
+const EMPTY_LANDING: LandingContent = { hero_badge_bn: "", hero_badge_en: "", hero_title_en: "", hero_subtitle_en: "", about_text_en: "", features: [], about_stats: [], reviews: [], faqs: [] };
 
 function SettingsPage() {
   const tx = useTx();
