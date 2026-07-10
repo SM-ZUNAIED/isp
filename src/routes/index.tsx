@@ -54,7 +54,7 @@ function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
   const { t } = useI18n();
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
 
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
