@@ -47,9 +47,12 @@ type SettingsForm = {
   landing_content: LandingContent;
 };
 
-const ICON_OPTIONS = [
-  "zap", "shield", "signal", "router", "headphones", "award", "wifi", "star", "phone", "users",
-];
+const ICON_MAP: Record<string, LucideIcon> = {
+  zap: Zap, shield: Shield, signal: Signal, router: Router, headphones: Headphones,
+  award: Award, wifi: Wifi, star: Star, phone: Phone, users: Users,
+};
+const ICON_OPTIONS = Object.keys(ICON_MAP);
+
 
 const EMPTY_LANDING: LandingContent = { features: [], about_stats: [], reviews: [], faqs: [] };
 
