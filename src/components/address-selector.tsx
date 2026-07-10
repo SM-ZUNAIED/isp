@@ -317,15 +317,10 @@ function AddChildDialog({
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [bnName, setBnName] = useState("");
-  const [holding, setHolding] = useState("");
-  const [house, setHouse] = useState("");
 
   const uFn = useServerFn(createUnionFn);
   const pFn = useServerFn(createPostOfficeFn);
   const vFn = useServerFn(createVillageFn);
-  const aFn = useServerFn(createAreaFn);
-  const rFn = useServerFn(createRoadFn);
-  const bFn = useServerFn(createBuildingFn);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["addr"] });
 
@@ -337,14 +332,11 @@ function AddChildDialog({
         case "union":       return uFn({ data: { upazila_id: Number(parentId), name: nm, bn_name: bnName || null } });
         case "post_office": return pFn({ data: { union_id: String(parentId), name: nm, bn_name: bnName || null } });
         case "village":     return vFn({ data: { post_office_id: String(parentId), name: nm, bn_name: bnName || null } });
-        case "area":        return aFn({ data: { village_id: String(parentId), name: nm, bn_name: bnName || null } });
-        case "road":        return rFn({ data: { area_id: String(parentId), name: nm, bn_name: bnName || null } });
-        case "building":    return bFn({ data: { road_id: String(parentId), name: nm, holding_number: holding || null, house_number: house || null } });
       }
     },
     onSuccess: (r) => {
       toast.success(`${label} যোগ হয়েছে`);
-      setName(""); setBnName(""); setHolding(""); setHouse("");
+      setName(""); setBnName("");
       invalidate();
       onCreated(r as Row);
     },
@@ -360,20 +352,10 @@ function AddChildDialog({
             <Label className="text-xs">নাম (English) *</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
           </div>
-          {level !== "building" && (
-            <div className="space-y-1.5">
-              <Label className="text-xs">নাম (বাংলা)</Label>
-              <Input value={bnName} onChange={(e) => setBnName(e.target.value)} />
-            </div>
-          )}
-          {level === "building" && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5"><Label className="text-xs">হোল্ডিং নং</Label>
-                <Input value={holding} onChange={(e) => setHolding(e.target.value)} /></div>
-              <div className="space-y-1.5"><Label className="text-xs">হাউস নং</Label>
-                <Input value={house} onChange={(e) => setHouse(e.target.value)} /></div>
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <Label className="text-xs">নাম (বাংলা)</Label>
+            <Input value={bnName} onChange={(e) => setBnName(e.target.value)} />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>বাতিল</Button>
