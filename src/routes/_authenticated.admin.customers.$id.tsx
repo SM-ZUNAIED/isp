@@ -171,6 +171,7 @@ function CustomerDetailPage() {
               <div className="font-semibold">সংযোগ ও যোগাযোগ</div>
             </div>
             <InfoRow icon={<Phone className="h-4 w-4" />} label="মোবাইল" value={c.mobile} />
+            <InfoRow icon={<Phone className="h-4 w-4" />} label="বিকল্প মোবাইল" value={c.alt_mobile || "—"} />
             <InfoRow icon={<MapPin className="h-4 w-4" />} label="জোন" value={c.zones?.name ?? "—"} />
             <InfoRow icon={<Wifi className="h-4 w-4" />} label="PPPoE User" value={c.pppoe_username || "—"} mono />
             <InfoRow icon={<Wifi className="h-4 w-4" />} label="PPPoE Pass" value={c.pppoe_password || "—"} mono />
