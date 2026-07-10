@@ -15,7 +15,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { getCustomerDetail } from "@/lib/customers.functions";
+import { getCustomerDetail, updateCustomerStatus } from "@/lib/customers.functions";
 import { updateBillStatus } from "@/lib/billing.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
@@ -71,6 +71,16 @@ function CustomerDetailPage() {
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
+  const updCustStatus = useServerFn(updateCustomerStatus);
+  const custStatusMut = useMutation({
+    mutationFn: (v: { id: string; status: "active" | "pending" | "suspended" | "expired" }) => updCustStatus({ data: v }),
+    onSuccess: () => {
+      toast.success(tx("স্ট্যাটাস আপডেট হয়েছে", "Status updated"));
+      qc.invalidateQueries({ queryKey: ["customer-detail", id] });
+    },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
   if (q.isLoading) {
     return <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
@@ -113,7 +123,21 @@ function CustomerDetailPage() {
                   <Phone className="h-3 w-3" />{tx("বিকল্প", "Alt")}: {c.alt_mobile}
                 </span>
               )}
-              <Badge variant="outline" className={STATUS_TONE[c.status]}>{STATUS[c.status] ? tx(STATUS[c.status].bn, STATUS[c.status].en) : c.status}</Badge>
+              <Select
+                value={c.status}
+                onValueChange={(v) => custStatusMut.mutate({ id: c.id, status: v as "active" | "pending" | "suspended" | "expired" })}
+                disabled={custStatusMut.isPending}
+              >
+                <SelectTrigger className={`h-7 w-auto px-2 py-0 text-xs gap-1 ${STATUS_TONE[c.status] ?? ""}`}>
+                  <SelectValue>{STATUS[c.status] ? tx(STATUS[c.status].bn, STATUS[c.status].en) : c.status}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{tx("সক্রিয়", "Active")}</SelectItem>
+                  <SelectItem value="pending">{tx("অপেক্ষমাণ", "Pending")}</SelectItem>
+                  <SelectItem value="suspended">{tx("স্থগিত", "Suspended")}</SelectItem>
+                  <SelectItem value="expired">{tx("মেয়াদ শেষ", "Expired")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
