@@ -30,7 +30,7 @@ import { AddressSelector, emptyAddress, type AddressValue } from "@/components/a
 
 type CustomerStatus = "pending" | "active" | "suspended" | "expired";
 type CustomerRow = {
-  id: string; customer_code: string; full_name: string; mobile: string;
+  id: string; customer_code: string; full_name: string; mobile: string; alt_mobile?: string | null;
   address?: string | null; address_line?: string | null;
   division_id?: number | null; district_id?: number | null; upazila_id?: number | null;
   union_id?: string | null; post_office_id?: string | null; village_id?: string | null;
@@ -332,7 +332,7 @@ function CustomerFormDialog({
   const update = useServerFn(updateCustomer);
   const [open, setOpen] = useState(false);
   const empty = {
-    customer_code: "", full_name: "", mobile: "", address: "", package_id: "",
+    customer_code: "", full_name: "", mobile: "", alt_mobile: "", address: "", package_id: "",
     zone_id: "", monthly_bill: "0", status: "pending" as CustomerStatus,
     pppoe_username: "", pppoe_password: "",
   };
@@ -341,6 +341,7 @@ function CustomerFormDialog({
         customer_code: initial.customer_code ?? "",
         full_name: initial.full_name ?? "",
         mobile: initial.mobile ?? "",
+        alt_mobile: initial.alt_mobile ?? "",
         address: initial.address ?? "",
         package_id: initial.package_id ?? "",
         zone_id: initial.zone_id ?? "",
@@ -374,6 +375,7 @@ function CustomerFormDialog({
         customer_code: form.customer_code.trim(),
         full_name: form.full_name.trim(),
         mobile: form.mobile.trim(),
+        alt_mobile: form.alt_mobile.trim() || null,
         address: addr.address_line || form.address || null,
         address_line: addr.address_line || null,
         division_id: addr.division_id,
@@ -430,9 +432,23 @@ function CustomerFormDialog({
               <Input required value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
             </Field>
-            <Field label="মোবাইল *">
-              <Input required value={form.mobile}
-                onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
+            <Field label={mode === "edit" ? "মোবাইল (পরিবর্তনযোগ্য নয়)" : "মোবাইল *"}>
+              <Input
+                required
+                value={form.mobile}
+                onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+                placeholder="01XXXXXXXXX"
+                readOnly={mode === "edit"}
+                disabled={mode === "edit"}
+                className={mode === "edit" ? "bg-muted cursor-not-allowed" : ""}
+              />
+            </Field>
+            <Field label="বিকল্প মোবাইল">
+              <Input
+                value={form.alt_mobile}
+                onChange={(e) => setForm({ ...form, alt_mobile: e.target.value })}
+                placeholder="01XXXXXXXXX"
+              />
             </Field>
             <Field label="মাসিক বিল (৳)">
               <Input type="number" min={0} value={form.monthly_bill}

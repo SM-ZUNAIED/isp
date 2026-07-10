@@ -79,10 +79,19 @@ function CustomerDetailPage() {
           </Button>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">{c.full_name}</h1>
-            <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-3">
-              <span className="font-mono">{c.customer_code}</span>
-              <span>·</span>
+            <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-2 mt-1">
+              <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/5 px-2 py-0.5 font-mono text-primary">
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">ID</span>
+                <span className="font-semibold">
+                  {(c.customer_code ?? "").slice(0, 5).toUpperCase()}-{c.mobile}
+                </span>
+              </span>
               <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{c.mobile}</span>
+              {c.alt_mobile && (
+                <span className="flex items-center gap-1 text-xs">
+                  <Phone className="h-3 w-3" />বিকল্প: {c.alt_mobile}
+                </span>
+              )}
               <Badge variant="outline" className={STATUS_TONE[c.status]}>{STATUS[c.status] ?? c.status}</Badge>
             </div>
           </div>
@@ -162,6 +171,7 @@ function CustomerDetailPage() {
               <div className="font-semibold">সংযোগ ও যোগাযোগ</div>
             </div>
             <InfoRow icon={<Phone className="h-4 w-4" />} label="মোবাইল" value={c.mobile} />
+            <InfoRow icon={<Phone className="h-4 w-4" />} label="বিকল্প মোবাইল" value={c.alt_mobile || "—"} />
             <InfoRow icon={<MapPin className="h-4 w-4" />} label="জোন" value={c.zones?.name ?? "—"} />
             <InfoRow icon={<Wifi className="h-4 w-4" />} label="PPPoE User" value={c.pppoe_username || "—"} mono />
             <InfoRow icon={<Wifi className="h-4 w-4" />} label="PPPoE Pass" value={c.pppoe_password || "—"} mono />
