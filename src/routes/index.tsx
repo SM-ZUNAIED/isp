@@ -55,6 +55,18 @@ function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
   const { t, lang } = useI18n();
+  const pickLang = <B extends string, E extends string>(bn: B | undefined | null, en: E | undefined | null) =>
+    (lang === "bn" ? (bn || en || "") : (en || bn || ""));
+  const lc = (settings?.landing_content ?? {}) as {
+    features?: Array<{ icon: string; title_bn?: string; title_en?: string; desc_bn?: string; desc_en?: string }>;
+    about_stats?: Array<{ value: string; label_bn?: string; label_en?: string }>;
+    reviews?: Array<{ name: string; loc_bn?: string; loc_en?: string; text_bn?: string; text_en?: string }>;
+    faqs?: Array<{ q_bn?: string; q_en?: string; a_bn?: string; a_en?: string }>;
+  };
+  const ICON_MAP: Record<string, typeof Zap> = {
+    zap: Zap, shield: Shield, signal: Signal, router: Router, headphones: Headphones,
+    award: Award, wifi: Wifi, star: Star, phone: Phone, users: Users,
+  };
   const { session, signOut } = useAuth();
   const rolesQ = useQuery({
     queryKey: ["my-roles", session?.user.id],
