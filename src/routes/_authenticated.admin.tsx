@@ -16,6 +16,7 @@ import {
   ShieldAlert,
   MapPin,
   BarChart3,
+  UserCircle2,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -26,6 +27,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 const getMyRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
