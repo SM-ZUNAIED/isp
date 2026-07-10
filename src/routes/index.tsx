@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useSuspenseQuery, queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
 import { getLandingData } from "@/lib/landing.functions";
@@ -11,11 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 const landingQuery = queryOptions({
@@ -55,6 +56,16 @@ function LandingPage() {
   const { settings, packages, notices } = data;
   const { t } = useI18n();
   const { session, signOut } = useAuth();
+  const rolesQ = useQuery({
+    queryKey: ["my-roles", session?.user.id],
+    enabled: !!session,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_roles").select("role").eq("user_id", session!.user.id);
+      return (data ?? []).map((r) => r.role as "admin" | "staff" | "customer");
+    },
+  });
+  const isPrivileged = (rolesQ.data ?? []).some((r) => r === "admin" || r === "staff");
 
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
@@ -144,6 +155,16 @@ function LandingPage() {
               <DropdownMenuContent align="end" className="w-48">
                 {session ? (
                   <>
+                    {isPrivileged && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer">
+                            <ShieldCheck className="h-4 w-4 mr-2" /> এডমিন প্যানেল
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to="/customer" className="cursor-pointer">
                         <LayoutDashboard className="h-4 w-4 mr-2" /> আমার পোর্টাল
