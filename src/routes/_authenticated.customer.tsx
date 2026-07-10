@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile, updateCustomerAvatar } from "@/lib/support.functions";
+import { useTx } from "@/hooks/use-i18n";
 import { updateMyAddress } from "@/lib/address.functions";
 import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
 
