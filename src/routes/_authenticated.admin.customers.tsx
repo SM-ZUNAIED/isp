@@ -476,6 +476,15 @@ function CustomerFormDialog({
                 placeholder="01XXXXXXXXX"
               />
             </Field>
+            <Field label={tx("ইমেইল", "Email")}>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="name@example.com"
+              />
+            </Field>
+
             <Field label={tx("মাসিক বিল (৳)", "Monthly Bill (BDT)")}>
               <Input type="number" min={0} value={form.monthly_bill}
                 onChange={(e) => setForm({ ...form, monthly_bill: e.target.value })} />
