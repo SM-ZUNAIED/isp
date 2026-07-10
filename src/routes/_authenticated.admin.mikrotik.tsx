@@ -145,6 +145,7 @@ function MikrotikFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createMikrotik);
   const update = useServerFn(updateMikrotik);
   const [open, setOpen] = useState(false);
@@ -168,39 +169,39 @@ function MikrotikFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "MikroTik যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("MikroTik যুক্ত হয়েছে", "MikroTik added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") setF(empty);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন MikroTik</Button>
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন MikroTik", "New MikroTik")}</Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "MikroTik যোগ করুন" : "MikroTik এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("MikroTik যোগ করুন", "Add MikroTik") : tx("MikroTik এডিট", "Edit MikroTik")}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
-          <div className="col-span-2 space-y-1.5"><Label>নাম *</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নাম", "Name")} *</Label>
             <Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Main Router" /></div>
-          <div className="space-y-1.5"><Label>IP অ্যাড্রেস *</Label>
+          <div className="space-y-1.5"><Label>{tx("IP অ্যাড্রেস", "IP Address")} *</Label>
             <Input required value={f.ip_address} onChange={(e) => setF({ ...f, ip_address: e.target.value })} placeholder="192.168.1.1" /></div>
-          <div className="space-y-1.5"><Label>API পোর্ট</Label>
+          <div className="space-y-1.5"><Label>{tx("API পোর্ট", "API Port")}</Label>
             <Input type="number" value={f.api_port} onChange={(e) => setF({ ...f, api_port: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>ইউজারনেম *</Label>
+          <div className="space-y-1.5"><Label>{tx("ইউজারনেম", "Username")} *</Label>
             <Input required value={f.username} onChange={(e) => setF({ ...f, username: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>পাসওয়ার্ড {mode === "create" ? "*" : "(পরিবর্তনে নতুন দিন)"}</Label>
+          <div className="space-y-1.5"><Label>{tx("পাসওয়ার্ড", "Password")} {mode === "create" ? "*" : tx("(পরিবর্তনে নতুন দিন)", "(enter new to change)")}</Label>
             <Input required={mode === "create"} type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-          <div className="col-span-2 space-y-1.5"><Label>নোট</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নোট", "Notes")}</Label>
             <Input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
