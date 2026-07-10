@@ -150,6 +150,7 @@ function OltFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createOlt);
   const update = useServerFn(updateOlt);
   const [open, setOpen] = useState(false);
@@ -176,44 +177,44 @@ function OltFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "OLT যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("OLT যুক্ত হয়েছে", "OLT added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") setF(empty);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন OLT</Button>
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন OLT", "New OLT")}</Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "OLT যোগ করুন" : "OLT এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("OLT যোগ করুন", "Add OLT") : tx("OLT এডিট", "Edit OLT")}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
-          <div className="col-span-2 space-y-1.5"><Label>নাম *</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নাম", "Name")} *</Label>
             <Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>IP *</Label>
             <Input required value={f.ip_address} onChange={(e) => setF({ ...f, ip_address: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>ব্র্যান্ড</Label>
+          <div className="space-y-1.5"><Label>{tx("ব্র্যান্ড", "Brand")}</Label>
             <Select value={f.brand} onValueChange={(v) => setF({ ...f, brand: v as OltBrand })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{BRANDS.map((b) => <SelectItem key={b.v} value={b.v}>{b.l}</SelectItem>)}</SelectContent>
+              <SelectContent>{BRANDS.map((b) => <SelectItem key={b.v} value={b.v}>{b.l ?? tx(b.l_bn!, b.l_en!)}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5"><Label>PON পোর্ট সংখ্যা</Label>
+          <div className="space-y-1.5"><Label>{tx("PON পোর্ট সংখ্যা", "PON Port Count")}</Label>
             <Input type="number" value={f.pon_ports} onChange={(e) => setF({ ...f, pon_ports: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>ইউজারনেম</Label>
+          <div className="space-y-1.5"><Label>{tx("ইউজারনেম", "Username")}</Label>
             <Input value={f.username} onChange={(e) => setF({ ...f, username: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>পাসওয়ার্ড {mode === "edit" && "(পরিবর্তনে নতুন দিন)"}</Label>
+          <div className="space-y-1.5"><Label>{tx("পাসওয়ার্ড", "Password")} {mode === "edit" && tx("(পরিবর্তনে নতুন দিন)", "(enter new to change)")}</Label>
             <Input type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-          <div className="col-span-2 space-y-1.5"><Label>নোট</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নোট", "Notes")}</Label>
             <Input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
