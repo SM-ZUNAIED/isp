@@ -89,6 +89,13 @@ function UsersPage() {
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
+  const updMut = useMutation({
+    mutationFn: (d: { user_id: string; email?: string; full_name?: string; mobile?: string }) =>
+      upd({ data: d }),
+    onSuccess: () => { toast.success(tx("আপডেট হয়েছে", "Updated")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
   if (q.isLoading) return <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (q.error) return <div className="text-destructive">{tx("লোড ব্যর্থ", "Load failed")}: {(q.error as Error).message}</div>;
 
