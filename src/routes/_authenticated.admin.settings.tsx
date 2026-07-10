@@ -154,10 +154,19 @@ function SettingsPage() {
           <TabsContent value="hero">
             <Card>
               <CardHeader><CardTitle>{tx("হোম পেজ কনটেন্ট", "Home Page Content")}</CardTitle></CardHeader>
-              <CardContent className="grid gap-4">
-                <F label={tx("Hero শিরোনাম", "Hero Title")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
-                <F label={tx("Hero সাব-টাইটেল", "Hero Subtitle")}><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
-                <F label={tx("আমাদের সম্পর্কে (About)", "About Us")}><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <F label={tx("Hero শিরোনাম (বাংলা)", "Hero Title (Bangla)")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
+                <F label={tx("Hero শিরোনাম (English)", "Hero Title (English)")}>
+                  <Input value={f.landing_content.hero_title_en ?? ""} onChange={(e) => setLC({ hero_title_en: e.target.value })} />
+                </F>
+                <F label={tx("Hero সাব-টাইটেল (বাংলা)", "Hero Subtitle (Bangla)")}><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
+                <F label={tx("Hero সাব-টাইটেল (English)", "Hero Subtitle (English)")}>
+                  <Textarea rows={2} value={f.landing_content.hero_subtitle_en ?? ""} onChange={(e) => setLC({ hero_subtitle_en: e.target.value })} />
+                </F>
+                <F label={tx("আমাদের সম্পর্কে (বাংলা)", "About Us (Bangla)")}><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
+                <F label={tx("আমাদের সম্পর্কে (English)", "About Us (English)")}>
+                  <Textarea rows={4} value={f.landing_content.about_text_en ?? ""} onChange={(e) => setLC({ about_text_en: e.target.value })} />
+                </F>
               </CardContent>
             </Card>
           </TabsContent>
