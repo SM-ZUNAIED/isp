@@ -396,6 +396,7 @@ function CustomerFormDialog({
         full_name: form.full_name.trim(),
         mobile: form.mobile.trim(),
         alt_mobile: form.alt_mobile.trim() || null,
+        email: form.email.trim() || null,
         address: addr.address_line || form.address || null,
         address_line: addr.address_line || null,
         division_id: addr.division_id,
