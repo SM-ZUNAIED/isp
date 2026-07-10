@@ -154,3 +154,33 @@ export const updateBillStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Admin: delete a payment log entry (linked income row is removed by trigger). */
+export const deletePayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Forbidden: admin only");
+
+    const { data: pay, error: pErr } = await supabase
+      .from("payments").select("id, bill_id, amount").eq("id", data.id).single();
+    if (pErr || !pay) throw new Error(pErr?.message ?? "Payment not found");
+
+    const { error: dErr } = await supabase.from("payments").delete().eq("id", data.id);
+    if (dErr) throw new Error(dErr.message);
+
+    if (pay.bill_id) {
+      const { data: bill } = await supabase
+        .from("bills").select("amount, paid_amount").eq("id", pay.bill_id).single();
+      if (bill) {
+        const newPaid = Math.max(0, Number(bill.paid_amount ?? 0) - Number(pay.amount));
+        const amount = Number(bill.amount);
+        const status = newPaid <= 0 ? "unpaid" : newPaid >= amount ? "paid" : "partial";
+        await supabase.from("bills").update({ paid_amount: newPaid, status }).eq("id", pay.bill_id);
+      }
+    }
+    return { ok: true };
+  });
+
+
