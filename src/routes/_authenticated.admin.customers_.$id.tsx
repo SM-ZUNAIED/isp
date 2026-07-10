@@ -15,7 +15,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { getCustomerDetail } from "@/lib/customers.functions";
+import { getCustomerDetail, updateCustomerStatus } from "@/lib/customers.functions";
 import { updateBillStatus } from "@/lib/billing.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
