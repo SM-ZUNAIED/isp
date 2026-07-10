@@ -53,6 +53,7 @@ function UsersPage() {
   const remove = useServerFn(removeRole);
   const reset = useServerFn(resetPassword);
   const del = useServerFn(deleteUser);
+  const upd = useServerFn(updateUser);
 
   const q = useQuery({ queryKey: ["admin-users"], queryFn: () => list() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-users"] });
