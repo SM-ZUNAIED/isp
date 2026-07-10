@@ -235,7 +235,7 @@ function EntrySection({
                         </span>
                       ) : (
                         <>
-                          <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
+                          <EditEntryDialog kind={kind} row={r} onSaved={onChange} customers={customers} />
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button size="sm" variant="ghost" className="text-destructive">
