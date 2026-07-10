@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getCustomerPortal, submitCustomerRequest, updateCustomerProfile, updateCustomerAvatar } from "@/lib/support.functions";
+import { useTx } from "@/hooks/use-i18n";
 import { updateMyAddress } from "@/lib/address.functions";
 import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
 
@@ -50,6 +51,7 @@ function CustomerPortal() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const tx = useTx();
 
   const handleLogout = async () => {
     await signOut();
@@ -148,7 +150,7 @@ function CustomerPortal() {
             <TabsTrigger value="bills">বিল</TabsTrigger>
             <TabsTrigger value="payments">পেমেন্ট</TabsTrigger>
             <TabsTrigger value="requests">রিকোয়েস্ট</TabsTrigger>
-            <TabsTrigger value="support">Complete Support</TabsTrigger>
+            <TabsTrigger value="support">{tx("সম্পূর্ণ সাপোর্ট", "Complete Support")}</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW */}
