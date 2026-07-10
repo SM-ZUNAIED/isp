@@ -475,6 +475,8 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          reference_id: string | null
+          source: string
         }
         Insert: {
           amount: number
@@ -484,6 +486,8 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          reference_id?: string | null
+          source?: string
         }
         Update: {
           amount?: number
@@ -493,6 +497,8 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          reference_id?: string | null
+          source?: string
         }
         Relationships: []
       }
@@ -505,6 +511,8 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          reference_id: string | null
+          source: string
         }
         Insert: {
           amount: number
@@ -514,6 +522,8 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          reference_id?: string | null
+          source?: string
         }
         Update: {
           amount?: number
@@ -523,6 +533,8 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          reference_id?: string | null
+          source?: string
         }
         Relationships: []
       }
@@ -1018,6 +1030,10 @@ export type Database = {
         Row: {
           about_text: string | null
           address: string | null
+          auto_billing_enabled: boolean
+          auto_suspend_after_days: number
+          bill_due_days: number
+          bill_generation_day: number
           email: string | null
           hero_image_url: string | null
           hero_subtitle: string | null
@@ -1028,6 +1044,7 @@ export type Database = {
           landing_content: Json | null
           logo_url: string | null
           notification_toggles: Json | null
+          overdue_notice_days: number[]
           sms_api_config: Json | null
           updated_at: string
           website: string | null
@@ -1037,6 +1054,10 @@ export type Database = {
         Insert: {
           about_text?: string | null
           address?: string | null
+          auto_billing_enabled?: boolean
+          auto_suspend_after_days?: number
+          bill_due_days?: number
+          bill_generation_day?: number
           email?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
@@ -1047,6 +1068,7 @@ export type Database = {
           landing_content?: Json | null
           logo_url?: string | null
           notification_toggles?: Json | null
+          overdue_notice_days?: number[]
           sms_api_config?: Json | null
           updated_at?: string
           website?: string | null
@@ -1056,6 +1078,10 @@ export type Database = {
         Update: {
           about_text?: string | null
           address?: string | null
+          auto_billing_enabled?: boolean
+          auto_suspend_after_days?: number
+          bill_due_days?: number
+          bill_generation_day?: number
           email?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
@@ -1066,6 +1092,7 @@ export type Database = {
           landing_content?: Json | null
           logo_url?: string | null
           notification_toggles?: Json | null
+          overdue_notice_days?: number[]
           sms_api_config?: Json | null
           updated_at?: string
           website?: string | null
