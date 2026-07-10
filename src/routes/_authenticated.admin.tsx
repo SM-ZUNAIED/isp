@@ -15,6 +15,7 @@ import {
   UserCog,
   ShieldAlert,
   MapPin,
+  BarChart3,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
