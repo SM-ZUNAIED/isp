@@ -30,6 +30,7 @@ const CreateInput = z.object({
   customer_code: z.string().min(1),
   full_name: z.string().min(1),
   mobile: z.string().min(1),
+  alt_mobile: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   address_line: z.string().optional().nullable(),
   division_id: z.number().int().optional().nullable(),
