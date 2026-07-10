@@ -110,6 +110,8 @@ function TicketsPage() {
 }
 
 function TicketDialog({ id, onClose }: { id: string | null; onClose: () => void }) {
+  const tx = useTx();
+  const { lang } = useFmt();
   const list = useServerFn(listTicketReplies);
   const add = useServerFn(addTicketReply);
   const qc = useQueryClient();
@@ -123,29 +125,29 @@ function TicketDialog({ id, onClose }: { id: string | null; onClose: () => void 
   const mut = useMutation({
     mutationFn: () => add({ data: { ticket_id: id!, message: msg.trim() } }),
     onSuccess: () => { setMsg(""); qc.invalidateQueries({ queryKey: ["ticket-replies", id] }); qc.invalidateQueries({ queryKey: ["tickets"] }); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader><DialogTitle>টিকেটের কথোপকথন</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("টিকেটের কথোপকথন", "Ticket Conversation")}</DialogTitle></DialogHeader>
         <div className="space-y-3 max-h-96 overflow-y-auto">
           {q.isLoading && <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />}
           {(q.data ?? []).map((r) => (
             <div key={r.id} className={`rounded-xl p-3 ${r.is_staff ? "bg-primary/10 ml-8" : "bg-muted mr-8"}`}>
               <div className="text-xs text-muted-foreground mb-1">
-                {r.is_staff ? "স্টাফ" : "কাস্টমার"} • {new Date(r.created_at).toLocaleString("bn-BD")}
+                {r.is_staff ? tx("স্টাফ", "Staff") : tx("কাস্টমার", "Customer")} • {new Date(r.created_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}
               </div>
               <div className="text-sm whitespace-pre-wrap">{r.message}</div>
             </div>
           ))}
           {!q.isLoading && (q.data ?? []).length === 0 && (
-            <p className="text-center text-sm text-muted-foreground py-4">কোনো উত্তর নেই।</p>
+            <p className="text-center text-sm text-muted-foreground py-4">{tx("কোনো উত্তর নেই।", "No replies.")}</p>
           )}
         </div>
         <form onSubmit={(e) => { e.preventDefault(); if (msg.trim()) mut.mutate(); }} className="flex gap-2 pt-2">
-          <Textarea value={msg} onChange={(e) => setMsg(e.target.value)} rows={2} placeholder="উত্তর লিখুন..." />
+          <Textarea value={msg} onChange={(e) => setMsg(e.target.value)} rows={2} placeholder={tx("উত্তর লিখুন...", "Write reply...")} />
           <Button type="submit" disabled={mut.isPending || !msg.trim()} className="bg-gradient-primary text-white self-end">
             {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
