@@ -72,6 +72,7 @@ const NAV: Array<{ to: string; labelKey: NavKey; icon: typeof LayoutDashboard; e
 
 function AdminLayout() {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const roles = rolesQ.data ?? [];
@@ -80,7 +81,7 @@ function AdminLayout() {
   const hasAccess = isAdmin || isStaff;
 
   if (rolesQ.isLoading) {
-    return <div className="grid min-h-screen place-items-center"><div className="text-muted-foreground text-sm">লোড হচ্ছে...</div></div>;
+    return <div className="grid min-h-screen place-items-center"><div className="text-muted-foreground text-sm">{t("admin.loading")}</div></div>;
   }
 
   if (!hasAccess) {
@@ -90,11 +91,11 @@ function AdminLayout() {
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-destructive/10">
             <ShieldAlert className="h-8 w-8 text-destructive" />
           </div>
-          <h1 className="text-2xl font-bold">অ্যাক্সেস নেই</h1>
-          <p className="text-muted-foreground">এই প্যানেলে প্রবেশের জন্য Admin বা Staff role প্রয়োজন।</p>
+          <h1 className="text-2xl font-bold">{t("admin.noAccess.title")}</h1>
+          <p className="text-muted-foreground">{t("admin.noAccess.desc")}</p>
           <div className="flex gap-2 justify-center">
-            <Link to="/customer"><Button variant="outline">কাস্টমার প্যানেলে যান</Button></Link>
-            <Link to="/"><Button className="bg-gradient-primary text-white">হোম</Button></Link>
+            <Link to="/customer"><Button variant="outline">{t("admin.noAccess.customer")}</Button></Link>
+            <Link to="/"><Button className="bg-gradient-primary text-white">{t("admin.noAccess.home")}</Button></Link>
           </div>
         </div>
       </div>
