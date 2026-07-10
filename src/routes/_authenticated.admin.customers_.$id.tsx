@@ -208,9 +208,10 @@ function CustomerDetailPage() {
                 <TableHead className="text-right">{tx("পরিশোধিত", "Paid")}</TableHead>
                 <TableHead className="text-right">{tx("বকেয়া", "Due")}</TableHead>
                 <TableHead>{tx("ডিউ ডেট", "Due Date")}</TableHead><TableHead>{tx("স্ট্যাটাস", "Status")}</TableHead>
+                <TableHead className="text-right">{tx("অ্যাকশন", "Action")}</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {bills.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">{tx("কোনো বিল নেই।", "No bills.")}</TableCell></TableRow>}
+                {bills.length === 0 && <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">{tx("কোনো বিল নেই।", "No bills.")}</TableCell></TableRow>}
                 {bills.map((b) => (
                   <TableRow key={b.id}>
                     <TableCell className="font-mono text-xs">{b.bill_number}</TableCell>
@@ -221,6 +222,21 @@ function CustomerDetailPage() {
                     <TableCell>{fmtDate(b.due_date)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={BILL_TONE[b.status] ?? ""}>{b.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Select
+                        value={b.status}
+                        onValueChange={(v) => statusMut.mutate({ bill_id: b.id, status: v as "unpaid" | "partial" | "paid" | "overdue" })}
+                        disabled={statusMut.isPending}
+                      >
+                        <SelectTrigger className="h-8 w-[130px] ml-auto"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unpaid">{tx("অপরিশোধিত", "Unpaid")}</SelectItem>
+                          <SelectItem value="partial">{tx("আংশিক", "Partial")}</SelectItem>
+                          <SelectItem value="paid">{tx("পরিশোধিত", "Paid")}</SelectItem>
+                          <SelectItem value="overdue">{tx("মেয়াদোত্তীর্ণ", "Overdue")}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}
