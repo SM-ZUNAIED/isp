@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   createUnionFn, createPostOfficeFn, createVillageFn,
-  createAreaFn, createRoadFn, createBuildingFn,
 } from "@/lib/address.functions";
 
 export type AddressValue = {
@@ -30,13 +29,17 @@ export type AddressValue = {
   area_id: string | null;
   road_id: string | null;
   building_id: string | null;
+  mohalla: string | null;
+  road_name: string | null;
+  holding_no: string | null;
   address_line: string | null;
 };
 
 export const emptyAddress: AddressValue = {
   division_id: null, district_id: null, upazila_id: null,
   union_id: null, post_office_id: null, village_id: null,
-  area_id: null, road_id: null, building_id: null, address_line: null,
+  area_id: null, road_id: null, building_id: null,
+  mohalla: null, road_name: null, holding_no: null, address_line: null,
 };
 
 type Row = { id: string | number; name: string; bn_name?: string | null };
@@ -44,7 +47,6 @@ type Row = { id: string | number; name: string; bn_name?: string | null };
 const LABELS = {
   division: "বিভাগ", district: "জেলা", upazila: "উপজেলা",
   union: "ইউনিয়ন", post_office: "পোস্ট অফিস", village: "গ্রাম",
-  area: "এরিয়া / মহল্লা", road: "রোড / রাস্তা", building: "বিল্ডিং / হোল্ডিং",
 } as const;
 
 /** Cascading Bangladesh address selector. Reset children when a parent changes. */
