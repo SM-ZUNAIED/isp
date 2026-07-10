@@ -52,6 +52,11 @@ function AccountsPage() {
   const { n, bdt } = useFmt();
   const list = useServerFn(listAccounts);
   const q = useQuery({ queryKey: ["accounts"], queryFn: () => list() });
+  const listCust = useServerFn(listCustomers);
+  const custQ = useQuery({ queryKey: ["accounts", "customers"], queryFn: () => listCust() });
+  const customers: CustomerOpt[] = (custQ.data ?? []).map((c) => ({
+    id: c.id, full_name: c.full_name, customer_code: c.customer_code,
+  }));
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["accounts"] });
     qc.invalidateQueries({ queryKey: ["admin", "stats"] });
@@ -84,10 +89,10 @@ function AccountsPage() {
           <TabsTrigger value="expense">{tx("ব্যয়", "Expense")}</TabsTrigger>
         </TabsList>
         <TabsContent value="income" className="mt-4">
-          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} />
+          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} customers={customers} />
         </TabsContent>
         <TabsContent value="expense" className="mt-4">
-          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} />
+          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} customers={customers} />
         </TabsContent>
       </Tabs>
     </div>
