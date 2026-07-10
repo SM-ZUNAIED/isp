@@ -97,6 +97,8 @@ function EntrySection({
   rows: Array<{ id: string; amount: number; category: string; description: string | null; entry_date: string }>;
   loading: boolean; onChange: () => void;
 }) {
+  const tx = useTx();
+  const { n } = useFmt();
   const addFn = useServerFn(kind === "income" ? addIncome : addExpense);
   const del = useServerFn(deleteEntry);
   const [amount, setAmount] = useState("");
@@ -109,14 +111,14 @@ function EntrySection({
       data: { amount: Number(amount), category: category.trim(), description: description || null, entry_date: date },
     }),
     onSuccess: () => {
-      toast.success("সংরক্ষিত"); setAmount(""); setCategory(""); setDescription(""); setDate(today()); onChange();
+      toast.success(tx("সংরক্ষিত", "Saved")); setAmount(""); setCategory(""); setDescription(""); setDate(today()); onChange();
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id, kind } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); onChange(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); onChange(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
