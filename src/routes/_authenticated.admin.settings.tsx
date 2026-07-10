@@ -28,6 +28,8 @@ type ReviewItem = { name: string; loc_bn: string; loc_en: string; text_bn: strin
 type FaqItem = { q_bn: string; q_en: string; a_bn: string; a_en: string };
 
 type LandingContent = {
+  hero_badge_bn: string;
+  hero_badge_en: string;
   hero_title_en: string;
   hero_subtitle_en: string;
   about_text_en: string;
