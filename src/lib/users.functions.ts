@@ -142,6 +142,47 @@ export const resetPassword = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updateUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      user_id: z.string().uuid(),
+      email: z.string().email().optional(),
+      full_name: z.string().trim().max(120).optional(),
+      mobile: z.string().trim().max(20).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Update auth (email) + user_metadata.
+    const authUpdate: { email?: string; user_metadata?: Record<string, unknown> } = {};
+    if (data.email) authUpdate.email = data.email;
+    const meta: Record<string, unknown> = {};
+    if (data.full_name !== undefined) meta.full_name = data.full_name;
+    if (data.mobile !== undefined) meta.mobile = data.mobile;
+    if (Object.keys(meta).length) authUpdate.user_metadata = meta;
+
+    if (Object.keys(authUpdate).length) {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, authUpdate);
+      if (error) throw new Error(error.message);
+    }
+
+    // Upsert profile row.
+    const profilePatch: Record<string, unknown> = { id: data.user_id };
+    if (data.full_name !== undefined) profilePatch.full_name = data.full_name;
+    if (data.mobile !== undefined) profilePatch.mobile = data.mobile;
+    if (Object.keys(profilePatch).length > 1) {
+      const { error } = await supabaseAdmin
+        .from("profiles")
+        .upsert(profilePatch as never, { onConflict: "id" });
+      if (error) throw new Error(error.message);
+    }
+
+    return { ok: true };
+  });
+
 export const deleteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ user_id: z.string().uuid() }).parse(d))

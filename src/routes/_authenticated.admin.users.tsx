@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Loader2, Plus, Trash2, Shield, KeyRound, UserCog } from "lucide-react";
+import { Loader2, Plus, Trash2, Shield, KeyRound, UserCog, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  listUsers, createUser, assignRole, removeRole, resetPassword, deleteUser,
+  listUsers, createUser, assignRole, removeRole, resetPassword, deleteUser, updateUser,
   type UserRow,
 } from "@/lib/users.functions";
 import { useAuth } from "@/hooks/use-auth";
@@ -53,6 +53,7 @@ function UsersPage() {
   const remove = useServerFn(removeRole);
   const reset = useServerFn(resetPassword);
   const del = useServerFn(deleteUser);
+  const upd = useServerFn(updateUser);
 
   const q = useQuery({ queryKey: ["admin-users"], queryFn: () => list() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-users"] });
@@ -85,6 +86,13 @@ function UsersPage() {
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { user_id: id } }),
     onSuccess: () => { toast.success(tx("ইউজার ডিলিট হয়েছে", "User deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
+  const updMut = useMutation({
+    mutationFn: (d: { user_id: string; email?: string; full_name?: string; mobile?: string }) =>
+      upd({ data: d }),
+    onSuccess: () => { toast.success(tx("আপডেট হয়েছে", "Updated")); invalidate(); },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
@@ -128,6 +136,7 @@ function UsersPage() {
                     onAssign={(role) => assignMut.mutate({ user_id: u.id, role })}
                     onRemove={(role) => removeMut.mutate({ user_id: u.id, role })}
                     onReset={(password) => resetMut.mutate({ user_id: u.id, password })}
+                    onUpdate={(patch) => updMut.mutate({ user_id: u.id, ...patch })}
                     onDelete={() => delMut.mutate(u.id)}
                   />
                 ))}
@@ -149,12 +158,14 @@ function UsersPage() {
   );
 }
 
+type UserPatch = { email?: string; full_name?: string; mobile?: string };
+
 function UserRowView({
-  u, isMe, onAssign, onRemove, onReset, onDelete,
+  u, isMe, onAssign, onRemove, onReset, onUpdate, onDelete,
 }: {
   u: UserRow; isMe: boolean;
   onAssign: (r: Role) => void; onRemove: (r: Role) => void;
-  onReset: (pw: string) => void; onDelete: () => void;
+  onReset: (pw: string) => void; onUpdate: (patch: UserPatch) => void; onDelete: () => void;
 }) {
   const tx = useTx();
   const { lang } = useFmt();
@@ -194,6 +205,7 @@ function UserRowView({
               </SelectContent>
             </Select>
           )}
+          <EditUserDialog u={u} onSubmit={onUpdate} />
           <ResetPasswordDialog onSubmit={onReset} />
           {!isMe && (
             <AlertDialog>
@@ -273,6 +285,67 @@ function ResetPasswordDialog({ onSubmit }: { onSubmit: (pw: string) => void }) {
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" className="bg-gradient-primary text-white">{tx("রিসেট", "Reset")}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditUserDialog({ u, onSubmit }: { u: UserRow; onSubmit: (patch: UserPatch) => void }) {
+  const tx = useTx();
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({
+    email: u.email ?? "",
+    full_name: u.full_name ?? "",
+    mobile: u.mobile ?? "",
+  });
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) setF({ email: u.email ?? "", full_name: u.full_name ?? "", mobile: u.mobile ?? "" });
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8" title={tx("এডিট", "Edit")}>
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>{tx("ইউজার এডিট", "Edit User")}</DialogTitle></DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const patch: UserPatch = {};
+            if (f.email && f.email !== (u.email ?? "")) patch.email = f.email.trim();
+            if (f.full_name !== (u.full_name ?? "")) patch.full_name = f.full_name.trim();
+            if (f.mobile !== (u.mobile ?? "")) patch.mobile = f.mobile.trim();
+            if (Object.keys(patch).length === 0) {
+              setOpen(false);
+              return;
+            }
+            onSubmit(patch);
+            setOpen(false);
+          }}
+          className="space-y-3"
+        >
+          <div className="grid gap-1.5">
+            <Label>{tx("পূর্ণ নাম", "Full Name")}</Label>
+            <Input value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>{tx("ইমেইল", "Email")}</Label>
+            <Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>{tx("মোবাইল", "Mobile")}</Label>
+            <Input value={f.mobile} onChange={(e) => setF({ ...f, mobile: e.target.value })} />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
+            <Button type="submit" className="bg-gradient-primary text-white">{tx("সেভ", "Save")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
