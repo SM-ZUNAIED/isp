@@ -267,6 +267,11 @@ function CustomersPage() {
                             <><Power className="h-4 w-4 mr-1" /> সক্রিয়</>
                           )}
                         </Button>
+                        <Button size="sm" variant="ghost" asChild title="বিস্তারিত দেখুন">
+                          <Link to="/admin/customers/$id" params={{ id: r.id }}>
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
                         <CustomerFormDialog
                           mode="edit"
                           initial={r as unknown as CustomerRow}
