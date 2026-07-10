@@ -31,6 +31,8 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 function AccountsPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { n, bdt } = useFmt();
   const list = useServerFn(listAccounts);
   const q = useQuery({ queryKey: ["accounts"], queryFn: () => list() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["accounts"] });
@@ -44,26 +46,26 @@ function AccountsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">একাউন্টস</h1>
-        <p className="text-muted-foreground">অন্যান্য আয় ও ব্যয় ম্যানেজ করুন</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("একাউন্টস", "Accounts")}</h1>
+        <p className="text-muted-foreground">{tx("অন্যান্য আয় ও ব্যয় ম্যানেজ করুন", "Manage other income and expenses")}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatMini label="মোট আয়" value={bdt(totals.inc)} icon={TrendingUp} tone="emerald" />
-        <StatMini label="মোট ব্যয়" value={bdt(totals.exp)} icon={TrendingDown} tone="rose" />
-        <StatMini label="নেট প্রফিট" value={bdt(totals.net)} icon={Wallet} tone={totals.net >= 0 ? "indigo" : "rose"} />
+        <StatMini label={tx("মোট আয়", "Total Income")} value={bdt(totals.inc)} icon={TrendingUp} tone="emerald" />
+        <StatMini label={tx("মোট ব্যয়", "Total Expense")} value={bdt(totals.exp)} icon={TrendingDown} tone="rose" />
+        <StatMini label={tx("নেট প্রফিট", "Net Profit")} value={bdt(totals.net)} icon={Wallet} tone={totals.net >= 0 ? "indigo" : "rose"} />
       </div>
 
       <Tabs defaultValue="income">
         <TabsList>
-          <TabsTrigger value="income">আয়</TabsTrigger>
-          <TabsTrigger value="expense">ব্যয়</TabsTrigger>
+          <TabsTrigger value="income">{tx("আয়", "Income")}</TabsTrigger>
+          <TabsTrigger value="expense">{tx("ব্যয়", "Expense")}</TabsTrigger>
         </TabsList>
         <TabsContent value="income" className="mt-4">
-          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} />
+          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} fmtN={n} />
         </TabsContent>
         <TabsContent value="expense" className="mt-4">
-          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} />
+          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} fmtN={n} />
         </TabsContent>
       </Tabs>
     </div>
