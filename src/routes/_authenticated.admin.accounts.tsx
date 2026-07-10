@@ -181,20 +181,57 @@ function EntrySection({
                     {tx("কোনো এন্ট্রি নেই।", "No entries.")}
                   </TableCell></TableRow>
                 )}
-                {rows.map((r) => (
+                {rows.map((r) => {
+                  const isAuto = r.source === "bill_payment";
+                  return (
                   <TableRow key={r.id}>
                     <TableCell className="text-sm">{r.entry_date}</TableCell>
-                    <TableCell className="font-medium">{r.category}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <span>{r.category}</span>
+                        {isAuto && <Badge variant="secondary" className="text-[10px]">{tx("অটো", "Auto")}</Badge>}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{r.description ?? "—"}</TableCell>
                     <TableCell className="text-right font-semibold">{n(Number(r.amount))}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
-                      <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => delMut.mutate(r.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {isAuto ? (
+                        <span className="text-xs text-muted-foreground">
+                          {tx("পেমেন্ট লগ থেকে সিঙ্ক", "Synced from payments")}
+                        </span>
+                      ) : (
+                        <>
+                          <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="ghost" className="text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{tx("এন্ট্রি মুছবেন?", "Delete entry?")}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {tx("এই কাজটি বাতিল করা যাবে না।", "This action cannot be undone.")}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{tx("বাতিল", "Cancel")}</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => delMut.mutate(r.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  {tx("মুছুন", "Delete")}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
