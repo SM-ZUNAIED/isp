@@ -162,6 +162,7 @@ const dict = {
     // Admin nav
     "admin.nav.dashboard": "ড্যাশবোর্ড",
     "admin.nav.customers": "কাস্টমার",
+    "admin.nav.staff": "স্টাফ",
     "admin.nav.packages": "প্যাকেজ",
     "admin.nav.zones": "জোন / এলাকা",
     "admin.nav.address": "ঠিকানা (BD)",
@@ -357,6 +358,7 @@ const dict = {
     // Admin nav
     "admin.nav.dashboard": "Dashboard",
     "admin.nav.customers": "Customers",
+    "admin.nav.staff": "Staff",
     "admin.nav.packages": "Packages",
     "admin.nav.zones": "Zones / Areas",
     "admin.nav.address": "Address (BD)",

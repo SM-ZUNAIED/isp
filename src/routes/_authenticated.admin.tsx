@@ -17,6 +17,7 @@ import {
   MapPin,
   BarChart3,
   UserCircle2,
+  Users2,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 type NavKey =
-  | "admin.nav.dashboard" | "admin.nav.customers" | "admin.nav.packages" | "admin.nav.zones"
+  | "admin.nav.dashboard" | "admin.nav.customers" | "admin.nav.staff" | "admin.nav.packages" | "admin.nav.zones"
   | "admin.nav.address" | "admin.nav.addressReport" | "admin.nav.bills" | "admin.nav.payments"
   | "admin.nav.mikrotik" | "admin.nav.olt" | "admin.nav.accounts" | "admin.nav.tickets"
   | "admin.nav.notices" | "admin.nav.users" | "admin.nav.settings";
@@ -55,6 +56,7 @@ type NavKey =
 const NAV: Array<{ to: string; labelKey: NavKey; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
   { to: "/admin", labelKey: "admin.nav.dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/customers", labelKey: "admin.nav.customers", icon: Users },
+  { to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true },
   { to: "/admin/packages", labelKey: "admin.nav.packages", icon: Package },
   { to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio },
   { to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true },
