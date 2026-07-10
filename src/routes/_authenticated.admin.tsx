@@ -190,7 +190,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
     <div className="flex h-full flex-col">
       <div className="border-b p-5">
         <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary text-white font-bold">NB</div>
+          <BrandLogo size={10} />
           <div>
             <div className="font-bold leading-tight">Net Bill Pro</div>
             <div className="text-xs text-muted-foreground">{t("admin.brand.sub")}</div>
