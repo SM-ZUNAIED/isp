@@ -265,15 +265,23 @@ function LandingPage() {
             <p className="mt-4 text-muted-foreground">{t("features.subtitle")}</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              { icon: Zap, title: t("features.speed.title"), desc: t("features.speed.desc"), color: "bg-gradient-primary" },
-              { icon: Shield, title: t("features.secure.title"), desc: t("features.secure.desc"), color: "bg-gradient-accent" },
-              { icon: Signal, title: t("features.stable.title"), desc: t("features.stable.desc"), color: "bg-gradient-hero" },
-              { icon: Router, title: t("features.mikrotik.title"), desc: t("features.mikrotik.desc"), color: "bg-gradient-primary" },
-              { icon: Headphones, title: t("features.care.title"), desc: t("features.care.desc"), color: "bg-gradient-accent" },
-              { icon: Award, title: t("features.price.title"), desc: t("features.price.desc"), color: "bg-gradient-hero" },
-            ].map((f) => (
-              <div key={f.title} className="group rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-1">
+            {(lc.features && lc.features.length > 0
+              ? lc.features.map((it, idx) => ({
+                  icon: ICON_MAP[it.icon] ?? Zap,
+                  title: pickLang(it.title_bn, it.title_en),
+                  desc: pickLang(it.desc_bn, it.desc_en),
+                  color: ["bg-gradient-primary","bg-gradient-accent","bg-gradient-hero"][idx % 3],
+                }))
+              : [
+                  { icon: Zap, title: t("features.speed.title"), desc: t("features.speed.desc"), color: "bg-gradient-primary" },
+                  { icon: Shield, title: t("features.secure.title"), desc: t("features.secure.desc"), color: "bg-gradient-accent" },
+                  { icon: Signal, title: t("features.stable.title"), desc: t("features.stable.desc"), color: "bg-gradient-hero" },
+                  { icon: Router, title: t("features.mikrotik.title"), desc: t("features.mikrotik.desc"), color: "bg-gradient-primary" },
+                  { icon: Headphones, title: t("features.care.title"), desc: t("features.care.desc"), color: "bg-gradient-accent" },
+                  { icon: Award, title: t("features.price.title"), desc: t("features.price.desc"), color: "bg-gradient-hero" },
+                ]
+            ).map((f, i) => (
+              <div key={f.title + i} className="group rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-1">
                 <div className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl ${f.color} shadow-glow`}>
                   <f.icon className="h-7 w-7 text-primary-foreground" />
                 </div>
