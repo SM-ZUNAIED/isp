@@ -23,9 +23,10 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTx, useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/address")({
-  head: () => ({ meta: [{ title: "ঠিকানা ব্যবস্থাপনা — Net Bill Pro" }] }),
+  head: () => ({ meta: [{ title: "Address Management — Net Bill Pro" }] }),
   component: AddressAdminPage,
 });
 
@@ -33,17 +34,19 @@ type Level =
   | "divisions" | "districts" | "upazilas" | "unions"
   | "post_offices" | "villages" | "areas" | "roads" | "buildings";
 
-const LEVELS: Array<{ key: Level; label: string; parent?: Level; parentCol?: string }> = [
-  { key: "divisions", label: "বিভাগ" },
-  { key: "districts", label: "জেলা", parent: "divisions", parentCol: "division_id" },
-  { key: "upazilas", label: "উপজেলা", parent: "districts", parentCol: "district_id" },
-  { key: "unions", label: "ইউনিয়ন", parent: "upazilas", parentCol: "upazila_id" },
-  { key: "post_offices", label: "পোস্ট অফিস", parent: "unions", parentCol: "union_id" },
-  { key: "villages", label: "গ্রাম", parent: "post_offices", parentCol: "post_office_id" },
-  { key: "areas", label: "এরিয়া", parent: "villages", parentCol: "village_id" },
-  { key: "roads", label: "রোড", parent: "areas", parentCol: "area_id" },
-  { key: "buildings", label: "বিল্ডিং", parent: "roads", parentCol: "road_id" },
+const LEVELS: Array<{ key: Level; bn: string; en: string; parent?: Level; parentCol?: string }> = [
+  { key: "divisions", bn: "বিভাগ", en: "Division" },
+  { key: "districts", bn: "জেলা", en: "District", parent: "divisions", parentCol: "division_id" },
+  { key: "upazilas", bn: "উপজেলা", en: "Upazila", parent: "districts", parentCol: "district_id" },
+  { key: "unions", bn: "ইউনিয়ন", en: "Union", parent: "upazilas", parentCol: "upazila_id" },
+  { key: "post_offices", bn: "পোস্ট অফিস", en: "Post Office", parent: "unions", parentCol: "union_id" },
+  { key: "villages", bn: "গ্রাম", en: "Village", parent: "post_offices", parentCol: "post_office_id" },
+  { key: "areas", bn: "এরিয়া", en: "Area", parent: "villages", parentCol: "village_id" },
+  { key: "roads", bn: "রোড", en: "Road", parent: "areas", parentCol: "area_id" },
+  { key: "buildings", bn: "বিল্ডিং", en: "Building", parent: "roads", parentCol: "road_id" },
 ];
+
+const labelOf = (l: (typeof LEVELS)[number], lang: "bn" | "en") => (lang === "bn" ? l.bn : l.en);
 
 type Row = {
   id: string | number;
@@ -60,8 +63,9 @@ type Row = {
   [k: string]: unknown;
 };
 
-/* ============================== main page ============================== */
 function AddressAdminPage() {
+  const tx = useTx();
+  const { lang } = useI18n();
   const [tab, setTab] = useState<Level>("divisions");
 
   return (
@@ -71,10 +75,12 @@ function AddressAdminPage() {
           <MapPin className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">ঠিকানা ব্যবস্থাপনা</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("ঠিকানা ব্যবস্থাপনা", "Address Management")}</h1>
           <p className="text-muted-foreground text-sm">
-            বাংলাদেশের সম্পূর্ণ ঠিকানা স্তর (বিভাগ → বিল্ডিং) পরিচালনা করুন।
-            নিচের যেকোনো স্তরে ক্লিক করে যোগ, এডিট, ডিলিট বা সক্রিয়/নিষ্ক্রিয় করুন।
+            {tx(
+              "বাংলাদেশের সম্পূর্ণ ঠিকানা স্তর (বিভাগ → বিল্ডিং) পরিচালনা করুন। নিচের যেকোনো স্তরে ক্লিক করে যোগ, এডিট, ডিলিট বা সক্রিয়/নিষ্ক্রিয় করুন।",
+              "Manage the full address hierarchy of Bangladesh (Division → Building). Click any level below to add, edit, delete, or activate/deactivate items.",
+            )}
           </p>
         </div>
       </div>
@@ -84,7 +90,7 @@ function AddressAdminPage() {
           <TabsList className="inline-flex w-max">
             {LEVELS.map((l) => (
               <TabsTrigger key={l.key} value={l.key} className="whitespace-nowrap">
-                {l.label}
+                {labelOf(l, lang)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -100,11 +106,11 @@ function AddressAdminPage() {
   );
 }
 
-/* ============================== level panel ============================== */
 function LevelPanel({ level }: { level: Level }) {
+  const tx = useTx();
+  const { lang } = useI18n();
   const meta = LEVELS.find((l) => l.key === level)!;
   const chain = useMemo(() => {
-    // ancestor chain from top → current parent (excluding self)
     const c: Level[] = [];
     let cur: Level | undefined = meta.parent;
     while (cur) {
@@ -114,17 +120,14 @@ function LevelPanel({ level }: { level: Level }) {
     return c;
   }, [meta]);
 
-  // parent-id state map keyed by level
   const [parents, setParents] = useState<Record<string, string | number | "">>({});
   const parentValue = meta.parentCol ? parents[meta.parentCol] ?? "" : "";
   const [search, setSearch] = useState("");
 
-  // update a parent selection and clear descendants
   const setParent = (col: string, val: string | number | "") => {
     const idx = LEVELS.findIndex((l) => l.parentCol === col);
     setParents((prev) => {
       const next = { ...prev, [col]: val };
-      // clear all descendant parent selections
       for (let i = idx + 1; i < LEVELS.length; i++) {
         const c = LEVELS[i].parentCol;
         if (c) delete next[c];
@@ -135,7 +138,6 @@ function LevelPanel({ level }: { level: Level }) {
 
   return (
     <div className="space-y-4">
-      {/* Parent cascade filters */}
       {chain.length > 0 && (
         <Card>
           <CardContent className="p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -148,11 +150,11 @@ function LevelPanel({ level }: { level: Level }) {
                 <ParentSelect
                   key={p}
                   level={p}
-                  label={pmeta.label}
+                  label={labelOf(pmeta, lang)}
                   disabled={disabled}
                   parentCol={parentCol}
                   parentVal={parentVal || null}
-                  value={LEVELS.find((x) => x.key === p)!.key /* map */
+                  value={LEVELS.find((x) => x.key === p)!.key
                     ? (parents[nextParentCol(p)!] ?? "") : ""}
                   selected={parents[nextParentCol(p)!] ?? ""}
                   onChange={(v) => setParent(nextParentCol(p)!, v)}
@@ -163,13 +165,12 @@ function LevelPanel({ level }: { level: Level }) {
         </Card>
       )}
 
-      {/* Search + Add */}
       <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-9"
-            placeholder="নাম দিয়ে খুঁজুন..."
+            placeholder={tx("নাম দিয়ে খুঁজুন...", "Search by name...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -197,7 +198,6 @@ function nextParentCol(l: Level): string | null {
     : null;
 }
 
-/* ============================== parent select ============================== */
 function ParentSelect({
   level, label, disabled, parentCol, parentVal, selected, onChange,
 }: {
@@ -206,6 +206,8 @@ function ParentSelect({
   value: string | number | ""; selected: string | number | "";
   onChange: (v: string | number | "") => void;
 }) {
+  const tx = useTx();
+  const { lang } = useI18n();
   const q = useQuery({
     queryKey: ["addr-parent", level, parentCol, parentVal],
     enabled: !disabled,
@@ -228,19 +230,22 @@ function ParentSelect({
         value={selected === "" ? "" : String(selected)}
         onValueChange={(v) => {
           if (v === "__clear__") return onChange("");
-          // preserve numeric ids
           const asNum = Number(v);
           onChange(!Number.isNaN(asNum) && String(asNum) === v ? asNum : v);
         }}
       >
         <SelectTrigger>
-          <SelectValue placeholder={disabled ? "উপরের স্তর নির্বাচন করুন" : q.isLoading ? "লোড হচ্ছে..." : "নির্বাচন করুন"} />
+          <SelectValue placeholder={
+            disabled ? tx("উপরের স্তর নির্বাচন করুন", "Select parent level first")
+            : q.isLoading ? tx("লোড হচ্ছে...", "Loading...")
+            : tx("নির্বাচন করুন", "Select")
+          } />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__clear__">সব দেখান</SelectItem>
+          <SelectItem value="__clear__">{tx("সব দেখান", "Show all")}</SelectItem>
           {(q.data ?? []).map((r) => (
             <SelectItem key={String(r.id)} value={String(r.id)}>
-              {r.bn_name || r.name}
+              {lang === "bn" ? (r.bn_name || r.name) : (r.name || r.bn_name)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -249,7 +254,6 @@ function ParentSelect({
   );
 }
 
-/* ============================== rows table ============================== */
 function RowsTable({
   level, parentCol, parentVal, search,
 }: {
@@ -257,6 +261,8 @@ function RowsTable({
   parentVal: string | number | null; search: string;
 }) {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { lang } = useI18n();
   const q = useQuery({
     queryKey: ["addr-rows", level, parentCol, parentVal, search],
     queryFn: async () => {
@@ -282,8 +288,8 @@ function RowsTable({
         .from(level).update({ is_active: !r.is_active } as never).eq("id", r.id as never);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("স্ট্যাটাস পরিবর্তন হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("স্ট্যাটাস পরিবর্তন হয়েছে", "Status updated")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   const delMut = useMutation({
@@ -291,9 +297,11 @@ function RowsTable({
       const { error } = await supabase.from(level).delete().eq("id", id as never);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", {
-      description: e.message.includes("foreign") ? "এর অধীনে সাব-এলাকা আছে, আগে সেগুলো মুছে ফেলুন" : e.message,
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), {
+      description: e.message.includes("foreign")
+        ? tx("এর অধীনে সাব-এলাকা আছে, আগে সেগুলো মুছে ফেলুন", "It has sub-locations; delete them first")
+        : e.message,
     }),
   });
 
@@ -304,7 +312,7 @@ function RowsTable({
   if (rows.length === 0) {
     return (
       <Card><CardContent className="p-10 text-center text-sm text-muted-foreground">
-        কোনো ডেটা পাওয়া যায়নি। উপরে "নতুন যোগ করুন" ক্লিক করুন।
+        {tx('কোনো ডেটা পাওয়া যায়নি। উপরে "নতুন যোগ করুন" ক্লিক করুন।', 'No data found. Click "Add new" above.')}
       </CardContent></Card>
     );
   }
@@ -319,21 +327,25 @@ function RowsTable({
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold truncate">
-                {r.bn_name || r.name}
-                {r.bn_name && r.name && <span className="text-muted-foreground font-normal ml-2 text-xs">({r.name})</span>}
+                {lang === "bn" ? (r.bn_name || r.name) : (r.name || r.bn_name)}
+                {r.bn_name && r.name && (
+                  <span className="text-muted-foreground font-normal ml-2 text-xs">
+                    ({lang === "bn" ? r.name : r.bn_name})
+                  </span>
+                )}
               </div>
               <div className="text-xs text-muted-foreground truncate flex items-center gap-2 flex-wrap">
-                {r.code && <span>কোড: {r.code}</span>}
-                {level === "buildings" && r.holding_number && <span>হোল্ডিং: {r.holding_number}</span>}
-                {level === "buildings" && r.house_number && <span>বাসা: {r.house_number}</span>}
+                {r.code && <span>{tx("কোড", "Code")}: {r.code}</span>}
+                {level === "buildings" && r.holding_number && <span>{tx("হোল্ডিং", "Holding")}: {r.holding_number}</span>}
+                {level === "buildings" && r.house_number && <span>{tx("বাসা", "House")}: {r.house_number}</span>}
                 {typeof r.latitude === "number" && <span>{r.latitude?.toFixed(4)}, {r.longitude?.toFixed(4)}</span>}
               </div>
             </div>
             <Badge variant={r.is_active === false ? "secondary" : "default"} className="hidden sm:inline-flex">
-              {r.is_active === false ? "নিষ্ক্রিয়" : "সক্রিয়"}
+              {r.is_active === false ? tx("নিষ্ক্রিয়", "Inactive") : tx("সক্রিয়", "Active")}
             </Badge>
             <div className="flex items-center gap-1">
-              <Button size="icon" variant="ghost" title="সক্রিয়/নিষ্ক্রিয়"
+              <Button size="icon" variant="ghost" title={tx("সক্রিয়/নিষ্ক্রিয়", "Activate/Deactivate")}
                 onClick={() => toggleMut.mutate(r)} disabled={toggleMut.isPending}>
                 {r.is_active === false ? <Power className="h-4 w-4" /> : <PowerOff className="h-4 w-4" />}
               </Button>
@@ -344,15 +356,18 @@ function RowsTable({
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>মুছে ফেলবেন?</AlertDialogTitle>
+                    <AlertDialogTitle>{tx("মুছে ফেলবেন?", "Delete?")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      "{r.bn_name || r.name}" মুছে ফেলা হবে। এর অধীনে কোনো সাব-এলাকা থাকলে ব্যর্থ হবে।
+                      {tx(
+                        `"${r.bn_name || r.name}" মুছে ফেলা হবে। এর অধীনে কোনো সাব-এলাকা থাকলে ব্যর্থ হবে।`,
+                        `"${r.name || r.bn_name}" will be deleted. It will fail if sub-locations exist.`,
+                      )}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                    <AlertDialogCancel>{tx("বাতিল", "Cancel")}</AlertDialogCancel>
                     <AlertDialogAction className="bg-destructive text-destructive-foreground"
-                      onClick={() => delMut.mutate(r.id)}>মুছে ফেলুন</AlertDialogAction>
+                      onClick={() => delMut.mutate(r.id)}>{tx("মুছে ফেলুন", "Delete")}</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -364,7 +379,6 @@ function RowsTable({
   );
 }
 
-/* ============================== upsert dialog ============================== */
 function UpsertDialog({
   level, parentCol, parentVal, editRow,
 }: {
@@ -372,6 +386,8 @@ function UpsertDialog({
   parentVal: string | number | null; editRow?: Row;
 }) {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { lang } = useI18n();
   const [open, setOpen] = useState(false);
   const isEdit = !!editRow;
 
@@ -421,12 +437,12 @@ function UpsertDialog({
         if (error) throw error;
       } else {
         if (needsParent) {
-          if (parentVal === null || parentVal === "") throw new Error("প্যারেন্ট নির্বাচন করুন (উপরে ফিল্টার সেট করুন)");
+          if (parentVal === null || parentVal === "") throw new Error(tx("প্যারেন্ট নির্বাচন করুন (উপরে ফিল্টার সেট করুন)", "Select parent (set filter above)"));
           payload[parentCol!] = parentVal;
         }
         if (numericIdTable) {
           const id = Number(manualId);
-          if (!id || Number.isNaN(id)) throw new Error("সংখ্যাসূচক ID দিন");
+          if (!id || Number.isNaN(id)) throw new Error(tx("সংখ্যাসূচক ID দিন", "Enter a numeric ID"));
           payload.id = id;
         }
         const { error } = await supabase.from(level).insert(payload as never);
@@ -434,13 +450,15 @@ function UpsertDialog({
       }
     },
     onSuccess: () => {
-      toast.success(isEdit ? "আপডেট হয়েছে" : "যোগ হয়েছে");
+      toast.success(isEdit ? tx("আপডেট হয়েছে", "Updated") : tx("যোগ হয়েছে", "Added"));
       qc.invalidateQueries({ queryKey: ["addr-rows", level] });
       qc.invalidateQueries({ queryKey: ["addr-parent"] });
       setOpen(false);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
+
+  const levelLabel = labelOf(LEVELS.find((l) => l.key === level)!, lang);
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) reset(); }}>
@@ -449,47 +467,48 @@ function UpsertDialog({
           <Button size="icon" variant="ghost"><Pencil className="h-4 w-4" /></Button>
         ) : (
           <Button className="bg-gradient-primary text-white shadow-soft">
-            <Plus className="mr-2 h-4 w-4" /> নতুন যোগ করুন
+            <Plus className="mr-2 h-4 w-4" /> {tx("নতুন যোগ করুন", "Add new")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "এডিট করুন" : "নতুন যোগ করুন"} — {LEVELS.find((l) => l.key === level)!.label}
+            {isEdit ? tx("এডিট করুন", "Edit") : tx("নতুন যোগ করুন", "Add new")} — {levelLabel}
           </DialogTitle>
         </DialogHeader>
 
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           {!isEdit && needsParent && (
             <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-              প্যারেন্ট: <b>{parentVal ? String(parentVal) : "নির্বাচিত নয় — উপরে ক্যাসকেড ফিল্টারে সিলেক্ট করুন"}</b>
+              {tx("প্যারেন্ট", "Parent")}: <b>{parentVal ? String(parentVal) : tx("নির্বাচিত নয় — উপরে ক্যাসকেড ফিল্টারে সিলেক্ট করুন", "Not selected — pick from cascade filter above")}</b>
             </div>
           )}
           {!isEdit && numericIdTable && (
             <div className="space-y-1.5">
-              <Label>ID (সংখ্যা) *</Label>
+              <Label>{tx("ID (সংখ্যা) *", "ID (number) *")}</Label>
               <Input required inputMode="numeric" value={manualId}
-                onChange={(e) => setManualId(e.target.value.replace(/\D/g, ""))} placeholder="যেমন: 65" />
+                onChange={(e) => setManualId(e.target.value.replace(/\D/g, ""))} placeholder={tx("যেমন: 65", "e.g. 65")} />
               <p className="text-xs text-muted-foreground">
-                Bangladesh geo-code (BBS) ID ব্যবহার করুন যাতে অন্য সিস্টেমের সাথে ম্যাপ হয়।
+                {tx("Bangladesh geo-code (BBS) ID ব্যবহার করুন যাতে অন্য সিস্টেমের সাথে ম্যাপ হয়।",
+                    "Use the Bangladesh geo-code (BBS) ID so it maps to other systems.")}
               </p>
             </div>
           )}
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>English নাম *</Label>
+              <Label>{tx("English নাম *", "English name *")}</Label>
               <Input required value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>বাংলা নাম</Label>
+              <Label>{tx("বাংলা নাম", "Bangla name")}</Label>
               <Input value={bnName ?? ""} onChange={(e) => setBnName(e.target.value)} />
             </div>
           </div>
 
           {["divisions","districts","upazilas","unions","post_offices"].includes(level) && (
             <div className="space-y-1.5">
-              <Label>কোড (ঐচ্ছিক)</Label>
+              <Label>{tx("কোড (ঐচ্ছিক)", "Code (optional)")}</Label>
               <Input value={code ?? ""} onChange={(e) => setCode(e.target.value)} />
             </div>
           )}
@@ -497,11 +516,11 @@ function UpsertDialog({
           {level === "buildings" && (
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>হোল্ডিং নম্বর</Label>
+                <Label>{tx("হোল্ডিং নম্বর", "Holding No.")}</Label>
                 <Input value={holding ?? ""} onChange={(e) => setHolding(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label>বাসা নম্বর</Label>
+                <Label>{tx("বাসা নম্বর", "House No.")}</Label>
                 <Input value={house ?? ""} onChange={(e) => setHouse(e.target.value)} />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
@@ -525,10 +544,10 @@ function UpsertDialog({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" className="bg-gradient-primary text-white" disabled={mut.isPending}>
               {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEdit ? "সংরক্ষণ" : "যোগ করুন"}
+              {isEdit ? tx("সংরক্ষণ", "Save") : tx("যোগ করুন", "Add")}
             </Button>
           </DialogFooter>
         </form>
