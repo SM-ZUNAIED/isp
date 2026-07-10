@@ -56,10 +56,13 @@ function NoticesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">{tx("নোটিশ ও ঘোষণা", "Notices & Announcements")}</h1>
-          <p className="text-muted-foreground">{tx("হোম পেজে দেখানো নোটিশ ম্যানেজ করুন", "Manage notices shown on the home page")}</p>
+          <p className="text-muted-foreground">{tx("হোম পেজে দেখানো নোটিশ এবং SMS ব্রডকাস্ট ম্যানেজ করুন", "Manage notices and SMS broadcasts")}</p>
         </div>
         <NoticeFormDialog mode="create" onSaved={invalidate} />
       </div>
+
+      <BroadcastSmsCard />
+      <CronControlsCard />
 
       {q.isLoading ? (
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
