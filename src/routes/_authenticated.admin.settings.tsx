@@ -1,14 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { getSettings, updateSettings } from "@/lib/support.functions";
 import { useTx } from "@/hooks/use-i18n";
 
@@ -16,6 +20,18 @@ export const Route = createFileRoute("/_authenticated/admin/settings")({
   head: () => ({ meta: [{ title: "সেটিংস — Net Bill Pro" }] }),
   component: SettingsPage,
 });
+
+type FeatureItem = { icon: string; title_bn: string; title_en: string; desc_bn: string; desc_en: string };
+type AboutStat = { value: string; label_bn: string; label_en: string };
+type ReviewItem = { name: string; loc_bn: string; loc_en: string; text_bn: string; text_en: string };
+type FaqItem = { q_bn: string; q_en: string; a_bn: string; a_en: string };
+
+type LandingContent = {
+  features: FeatureItem[];
+  about_stats: AboutStat[];
+  reviews: ReviewItem[];
+  faqs: FaqItem[];
+};
 
 type SettingsForm = {
   isp_name: string;
@@ -27,21 +43,31 @@ type SettingsForm = {
   email: string;
   address: string;
   website: string;
+  landing_content: LandingContent;
 };
+
+const ICON_OPTIONS = [
+  "zap", "shield", "signal", "router", "headphones", "award", "wifi", "star", "phone", "users",
+];
+
+const EMPTY_LANDING: LandingContent = { features: [], about_stats: [], reviews: [], faqs: [] };
 
 function SettingsPage() {
   const tx = useTx();
   const get = useServerFn(getSettings);
   const update = useServerFn(updateSettings);
+  const qc = useQueryClient();
   const q = useQuery({ queryKey: ["settings"], queryFn: () => get() });
 
   const [f, setF] = useState<SettingsForm>({
     isp_name: "", hero_title: "", hero_subtitle: "", about_text: "",
     hotline: "", whatsapp: "", email: "", address: "", website: "",
+    landing_content: EMPTY_LANDING,
   });
 
   useEffect(() => {
     if (q.data) {
+      const lc = (q.data.landing_content ?? {}) as Partial<LandingContent>;
       setF({
         isp_name: q.data.isp_name ?? "",
         hero_title: q.data.hero_title ?? "",
@@ -52,13 +78,23 @@ function SettingsPage() {
         email: q.data.email ?? "",
         address: q.data.address ?? "",
         website: q.data.website ?? "",
+        landing_content: {
+          features: lc.features ?? [],
+          about_stats: lc.about_stats ?? [],
+          reviews: lc.reviews ?? [],
+          faqs: lc.faqs ?? [],
+        },
       });
     }
   }, [q.data]);
 
   const mut = useMutation({
     mutationFn: () => update({ data: f }),
-    onSuccess: () => toast.success(tx("সেটিংস সংরক্ষিত", "Settings saved")),
+    onSuccess: () => {
+      toast.success(tx("সেটিংস সংরক্ষিত", "Settings saved"));
+      qc.invalidateQueries({ queryKey: ["settings"] });
+      qc.invalidateQueries({ queryKey: ["landing"] });
+    },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
@@ -66,37 +102,167 @@ function SettingsPage() {
     return <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
-  const set = (k: keyof SettingsForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setF({ ...f, [k]: e.target.value });
+  const set = (k: keyof Omit<SettingsForm, "landing_content">) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setF({ ...f, [k]: e.target.value });
+
+  const setLC = (patch: Partial<LandingContent>) =>
+    setF((prev) => ({ ...prev, landing_content: { ...prev.landing_content, ...patch } }));
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-5xl">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">{tx("সেটিংস", "Settings")}</h1>
-        <p className="text-muted-foreground">{tx("ISP এর সাধারণ তথ্য কনফিগার করুন", "Configure ISP general information")}</p>
+        <p className="text-muted-foreground">{tx("ISP এর সাধারণ তথ্য ও ল্যান্ডিং পেজ কনটেন্ট", "General ISP info and landing page content")}</p>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="space-y-6">
-        <Card>
-          <CardHeader><CardTitle>{tx("প্রতিষ্ঠান তথ্য", "Organization Info")}</CardTitle></CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <F label={tx("ISP এর নাম", "ISP Name")}><Input value={f.isp_name} onChange={set("isp_name")} /></F>
-            <F label={tx("ওয়েবসাইট", "Website")}><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
-            <F label={tx("হটলাইন", "Hotline")}><Input value={f.hotline} onChange={set("hotline")} /></F>
-            <F label="WhatsApp"><Input value={f.whatsapp} onChange={set("whatsapp")} /></F>
-            <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
-            <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="general">
+          <TabsList className="flex flex-wrap">
+            <TabsTrigger value="general">{tx("সাধারণ", "General")}</TabsTrigger>
+            <TabsTrigger value="hero">{tx("Hero / About", "Hero / About")}</TabsTrigger>
+            <TabsTrigger value="features">{tx("Features", "Features")}</TabsTrigger>
+            <TabsTrigger value="stats">{tx("About Stats", "About Stats")}</TabsTrigger>
+            <TabsTrigger value="reviews">{tx("Reviews", "Reviews")}</TabsTrigger>
+            <TabsTrigger value="faqs">{tx("FAQs", "FAQs")}</TabsTrigger>
+          </TabsList>
 
-        <Card>
-          <CardHeader><CardTitle>{tx("হোম পেজ কনটেন্ট", "Home Page Content")}</CardTitle></CardHeader>
-          <CardContent className="grid gap-4">
-            <F label={tx("Hero শিরোনাম", "Hero Title")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
-            <F label={tx("Hero সাব-টাইটেল", "Hero Subtitle")}><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
-            <F label={tx("আমাদের সম্পর্কে", "About Us")}><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
-          </CardContent>
-        </Card>
+          <TabsContent value="general">
+            <Card>
+              <CardHeader><CardTitle>{tx("প্রতিষ্ঠান তথ্য", "Organization Info")}</CardTitle></CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <F label={tx("ISP এর নাম", "ISP Name")}><Input value={f.isp_name} onChange={set("isp_name")} /></F>
+                <F label={tx("ওয়েবসাইট", "Website")}><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
+                <F label={tx("হটলাইন", "Hotline")}><Input value={f.hotline} onChange={set("hotline")} /></F>
+                <F label="WhatsApp"><Input value={f.whatsapp} onChange={set("whatsapp")} /></F>
+                <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
+                <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="hero">
+            <Card>
+              <CardHeader><CardTitle>{tx("হোম পেজ কনটেন্ট", "Home Page Content")}</CardTitle></CardHeader>
+              <CardContent className="grid gap-4">
+                <F label={tx("Hero শিরোনাম", "Hero Title")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
+                <F label={tx("Hero সাব-টাইটেল", "Hero Subtitle")}><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
+                <F label={tx("আমাদের সম্পর্কে (About)", "About Us")}><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="features">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{tx("ফিচার তালিকা", "Features")}</CardTitle>
+                <Button type="button" size="sm" variant="outline" onClick={() =>
+                  setLC({ features: [...f.landing_content.features, { icon: "zap", title_bn: "", title_en: "", desc_bn: "", desc_en: "" }] })
+                }><Plus className="h-4 w-4 mr-1" /> {tx("যোগ করুন", "Add")}</Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {f.landing_content.features.length === 0 && (
+                  <p className="text-sm text-muted-foreground">{tx("কোনো ফিচার নেই — 'যোগ করুন' চাপুন", "No features — click Add")}</p>
+                )}
+                {f.landing_content.features.map((it, i) => (
+                  <div key={i} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-2">
+                    <F label={tx("আইকন", "Icon")}>
+                      <Select value={it.icon} onValueChange={(v) => {
+                        const arr = [...f.landing_content.features]; arr[i] = { ...it, icon: v }; setLC({ features: arr });
+                      }}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {ICON_OPTIONS.map((k) => <SelectItem key={k} value={k}>{k}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </F>
+                    <div className="flex items-end justify-end">
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => {
+                        setLC({ features: f.landing_content.features.filter((_, j) => j !== i) });
+                      }}><Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Remove")}</Button>
+                    </div>
+                    <F label={tx("শিরোনাম (বাংলা)", "Title (Bangla)")}><Input value={it.title_bn} onChange={(e) => { const a = [...f.landing_content.features]; a[i] = { ...it, title_bn: e.target.value }; setLC({ features: a }); }} /></F>
+                    <F label={tx("শিরোনাম (English)", "Title (English)")}><Input value={it.title_en} onChange={(e) => { const a = [...f.landing_content.features]; a[i] = { ...it, title_en: e.target.value }; setLC({ features: a }); }} /></F>
+                    <F label={tx("বিবরণ (বাংলা)", "Description (Bangla)")}><Textarea rows={2} value={it.desc_bn} onChange={(e) => { const a = [...f.landing_content.features]; a[i] = { ...it, desc_bn: e.target.value }; setLC({ features: a }); }} /></F>
+                    <F label={tx("বিবরণ (English)", "Description (English)")}><Textarea rows={2} value={it.desc_en} onChange={(e) => { const a = [...f.landing_content.features]; a[i] = { ...it, desc_en: e.target.value }; setLC({ features: a }); }} /></F>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="stats">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{tx("About সেকশনের পরিসংখ্যান", "About Section Stats")}</CardTitle>
+                <Button type="button" size="sm" variant="outline" onClick={() =>
+                  setLC({ about_stats: [...f.landing_content.about_stats, { value: "", label_bn: "", label_en: "" }] })
+                }><Plus className="h-4 w-4 mr-1" /> {tx("যোগ করুন", "Add")}</Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {f.landing_content.about_stats.map((it, i) => (
+                  <div key={i} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-3">
+                    <F label={tx("মান", "Value")}><Input value={it.value} placeholder="10+" onChange={(e) => { const a = [...f.landing_content.about_stats]; a[i] = { ...it, value: e.target.value }; setLC({ about_stats: a }); }} /></F>
+                    <F label={tx("লেবেল (বাংলা)", "Label (Bangla)")}><Input value={it.label_bn} onChange={(e) => { const a = [...f.landing_content.about_stats]; a[i] = { ...it, label_bn: e.target.value }; setLC({ about_stats: a }); }} /></F>
+                    <F label={tx("লেবেল (English)", "Label (English)")}><Input value={it.label_en} onChange={(e) => { const a = [...f.landing_content.about_stats]; a[i] = { ...it, label_en: e.target.value }; setLC({ about_stats: a }); }} /></F>
+                    <div className="sm:col-span-3 flex justify-end">
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => { setLC({ about_stats: f.landing_content.about_stats.filter((_, j) => j !== i) }); }}><Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Remove")}</Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reviews">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{tx("গ্রাহকদের মতামত", "Customer Reviews")}</CardTitle>
+                <Button type="button" size="sm" variant="outline" onClick={() =>
+                  setLC({ reviews: [...f.landing_content.reviews, { name: "", loc_bn: "", loc_en: "", text_bn: "", text_en: "" }] })
+                }><Plus className="h-4 w-4 mr-1" /> {tx("যোগ করুন", "Add")}</Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {f.landing_content.reviews.map((it, i) => (
+                  <div key={i} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-2">
+                    <F label={tx("নাম", "Name")}><Input value={it.name} onChange={(e) => { const a = [...f.landing_content.reviews]; a[i] = { ...it, name: e.target.value }; setLC({ reviews: a }); }} /></F>
+                    <div className="flex items-end justify-end">
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => { setLC({ reviews: f.landing_content.reviews.filter((_, j) => j !== i) }); }}><Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Remove")}</Button>
+                    </div>
+                    <F label={tx("এলাকা (বাংলা)", "Location (Bangla)")}><Input value={it.loc_bn} onChange={(e) => { const a = [...f.landing_content.reviews]; a[i] = { ...it, loc_bn: e.target.value }; setLC({ reviews: a }); }} /></F>
+                    <F label={tx("এলাকা (English)", "Location (English)")}><Input value={it.loc_en} onChange={(e) => { const a = [...f.landing_content.reviews]; a[i] = { ...it, loc_en: e.target.value }; setLC({ reviews: a }); }} /></F>
+                    <F label={tx("মন্তব্য (বাংলা)", "Comment (Bangla)")}><Textarea rows={2} value={it.text_bn} onChange={(e) => { const a = [...f.landing_content.reviews]; a[i] = { ...it, text_bn: e.target.value }; setLC({ reviews: a }); }} /></F>
+                    <F label={tx("মন্তব্য (English)", "Comment (English)")}><Textarea rows={2} value={it.text_en} onChange={(e) => { const a = [...f.landing_content.reviews]; a[i] = { ...it, text_en: e.target.value }; setLC({ reviews: a }); }} /></F>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="faqs">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{tx("প্রশ্ন ও উত্তর", "FAQs")}</CardTitle>
+                <Button type="button" size="sm" variant="outline" onClick={() =>
+                  setLC({ faqs: [...f.landing_content.faqs, { q_bn: "", q_en: "", a_bn: "", a_en: "" }] })
+                }><Plus className="h-4 w-4 mr-1" /> {tx("যোগ করুন", "Add")}</Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {f.landing_content.faqs.map((it, i) => (
+                  <div key={i} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-2">
+                    <F label={tx("প্রশ্ন (বাংলা)", "Question (Bangla)")}><Input value={it.q_bn} onChange={(e) => { const a = [...f.landing_content.faqs]; a[i] = { ...it, q_bn: e.target.value }; setLC({ faqs: a }); }} /></F>
+                    <F label={tx("প্রশ্ন (English)", "Question (English)")}><Input value={it.q_en} onChange={(e) => { const a = [...f.landing_content.faqs]; a[i] = { ...it, q_en: e.target.value }; setLC({ faqs: a }); }} /></F>
+                    <F label={tx("উত্তর (বাংলা)", "Answer (Bangla)")}><Textarea rows={2} value={it.a_bn} onChange={(e) => { const a = [...f.landing_content.faqs]; a[i] = { ...it, a_bn: e.target.value }; setLC({ faqs: a }); }} /></F>
+                    <F label={tx("উত্তর (English)", "Answer (English)")}><Textarea rows={2} value={it.a_en} onChange={(e) => { const a = [...f.landing_content.faqs]; a[i] = { ...it, a_en: e.target.value }; setLC({ faqs: a }); }} /></F>
+                    <div className="sm:col-span-2 flex justify-end">
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => { setLC({ faqs: f.landing_content.faqs.filter((_, j) => j !== i) }); }}><Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Remove")}</Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         <div className="flex justify-end">
           <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
