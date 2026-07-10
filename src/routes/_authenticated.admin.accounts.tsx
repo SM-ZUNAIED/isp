@@ -127,18 +127,18 @@ function EntrySection({
         <CardContent className="p-4">
           <form onSubmit={(e) => { e.preventDefault(); if (amount && category.trim()) addMut.mutate(); }}
             className="grid grid-cols-1 md:grid-cols-5 gap-3">
-            <div className="space-y-1"><Label className="text-xs">টাকা (৳)</Label>
+            <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
               <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
-            <div className="space-y-1"><Label className="text-xs">বিভাগ</Label>
+            <div className="space-y-1"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
               <Input required value={category} onChange={(e) => setCategory(e.target.value)}
-                placeholder={kind === "income" ? "কানেকশন ফি" : "বিদ্যুৎ বিল"} /></div>
-            <div className="space-y-1 md:col-span-2"><Label className="text-xs">বর্ণনা</Label>
+                placeholder={kind === "income" ? tx("কানেকশন ফি", "Connection Fee") : tx("বিদ্যুৎ বিল", "Electricity Bill")} /></div>
+            <div className="space-y-1 md:col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
               <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-            <div className="space-y-1"><Label className="text-xs">তারিখ</Label>
+            <div className="space-y-1"><Label className="text-xs">{tx("তারিখ", "Date")}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
             <Button type="submit" disabled={addMut.isPending} className="bg-gradient-primary text-white md:col-span-5">
               {addMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-              যোগ করুন
+              {tx("যোগ করুন", "Add")}
             </Button>
           </form>
         </CardContent>
@@ -150,10 +150,10 @@ function EntrySection({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>তারিখ</TableHead>
-                  <TableHead>বিভাগ</TableHead>
-                  <TableHead>বর্ণনা</TableHead>
-                  <TableHead className="text-right">পরিমাণ (৳)</TableHead>
+                  <TableHead>{tx("তারিখ", "Date")}</TableHead>
+                  <TableHead>{tx("বিভাগ", "Category")}</TableHead>
+                  <TableHead>{tx("বর্ণনা", "Description")}</TableHead>
+                  <TableHead className="text-right">{tx("পরিমাণ (৳)", "Amount (BDT)")}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -163,7 +163,7 @@ function EntrySection({
                 </TableCell></TableRow>}
                 {!loading && rows.length === 0 && (
                   <TableRow><TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                    কোনো এন্ট্রি নেই।
+                    {tx("কোনো এন্ট্রি নেই।", "No entries.")}
                   </TableCell></TableRow>
                 )}
                 {rows.map((r) => (
@@ -171,7 +171,7 @@ function EntrySection({
                     <TableCell className="text-sm">{r.entry_date}</TableCell>
                     <TableCell className="font-medium">{r.category}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{r.description ?? "—"}</TableCell>
-                    <TableCell className="text-right font-semibold">{bn.format(Number(r.amount))}</TableCell>
+                    <TableCell className="text-right font-semibold">{n(Number(r.amount))}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
                       <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => delMut.mutate(r.id)}>
