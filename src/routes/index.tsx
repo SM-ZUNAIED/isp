@@ -392,28 +392,30 @@ function LandingPage() {
             <h2 className="text-3xl font-bold md:text-4xl">{t("reviews.title")}</h2>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {([1, 2, 3] as const).map((i) => {
-              const name = t(`reviews.${i}.name` as const);
-              const loc = t(`reviews.${i}.loc` as const);
-              const text = t(`reviews.${i}.text` as const);
-              return (
-                <div key={i} className="rounded-3xl border bg-gradient-card p-6 shadow-soft">
-                  <div className="flex gap-1 text-warning">
-                    {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}
+            {(lc.reviews && lc.reviews.length > 0
+              ? lc.reviews.map((r) => ({ name: r.name, loc: pickLang(r.loc_bn, r.loc_en), text: pickLang(r.text_bn, r.text_en) }))
+              : ([1, 2, 3] as const).map((i) => ({
+                  name: t(`reviews.${i}.name` as const),
+                  loc: t(`reviews.${i}.loc` as const),
+                  text: t(`reviews.${i}.text` as const),
+                }))
+            ).map((r, i) => (
+              <div key={i} className="rounded-3xl border bg-gradient-card p-6 shadow-soft">
+                <div className="flex gap-1 text-warning">
+                  {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}
+                </div>
+                <p className="mt-4 text-muted-foreground">"{r.text}"</p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground font-bold">
+                    {(r.name || "?").charAt(0)}
                   </div>
-                  <p className="mt-4 text-muted-foreground">"{text}"</p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground font-bold">
-                      {name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="font-semibold">{name}</div>
-                      <div className="text-xs text-muted-foreground">{loc}</div>
-                    </div>
+                  <div>
+                    <div className="font-semibold">{r.name}</div>
+                    <div className="text-xs text-muted-foreground">{r.loc}</div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
