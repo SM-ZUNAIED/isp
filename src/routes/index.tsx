@@ -55,6 +55,18 @@ function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
   const { t, lang } = useI18n();
+  const pickLang = <B extends string, E extends string>(bn: B | undefined | null, en: E | undefined | null) =>
+    (lang === "bn" ? (bn || en || "") : (en || bn || ""));
+  const lc = (settings?.landing_content ?? {}) as {
+    features?: Array<{ icon: string; title_bn?: string; title_en?: string; desc_bn?: string; desc_en?: string }>;
+    about_stats?: Array<{ value: string; label_bn?: string; label_en?: string }>;
+    reviews?: Array<{ name: string; loc_bn?: string; loc_en?: string; text_bn?: string; text_en?: string }>;
+    faqs?: Array<{ q_bn?: string; q_en?: string; a_bn?: string; a_en?: string }>;
+  };
+  const ICON_MAP: Record<string, typeof Zap> = {
+    zap: Zap, shield: Shield, signal: Signal, router: Router, headphones: Headphones,
+    award: Award, wifi: Wifi, star: Star, phone: Phone, users: Users,
+  };
   const { session, signOut } = useAuth();
   const rolesQ = useQuery({
     queryKey: ["my-roles", session?.user.id],
@@ -253,15 +265,23 @@ function LandingPage() {
             <p className="mt-4 text-muted-foreground">{t("features.subtitle")}</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              { icon: Zap, title: t("features.speed.title"), desc: t("features.speed.desc"), color: "bg-gradient-primary" },
-              { icon: Shield, title: t("features.secure.title"), desc: t("features.secure.desc"), color: "bg-gradient-accent" },
-              { icon: Signal, title: t("features.stable.title"), desc: t("features.stable.desc"), color: "bg-gradient-hero" },
-              { icon: Router, title: t("features.mikrotik.title"), desc: t("features.mikrotik.desc"), color: "bg-gradient-primary" },
-              { icon: Headphones, title: t("features.care.title"), desc: t("features.care.desc"), color: "bg-gradient-accent" },
-              { icon: Award, title: t("features.price.title"), desc: t("features.price.desc"), color: "bg-gradient-hero" },
-            ].map((f) => (
-              <div key={f.title} className="group rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-1">
+            {(lc.features && lc.features.length > 0
+              ? lc.features.map((it, idx) => ({
+                  icon: ICON_MAP[it.icon] ?? Zap,
+                  title: pickLang(it.title_bn, it.title_en),
+                  desc: pickLang(it.desc_bn, it.desc_en),
+                  color: ["bg-gradient-primary","bg-gradient-accent","bg-gradient-hero"][idx % 3],
+                }))
+              : [
+                  { icon: Zap, title: t("features.speed.title"), desc: t("features.speed.desc"), color: "bg-gradient-primary" },
+                  { icon: Shield, title: t("features.secure.title"), desc: t("features.secure.desc"), color: "bg-gradient-accent" },
+                  { icon: Signal, title: t("features.stable.title"), desc: t("features.stable.desc"), color: "bg-gradient-hero" },
+                  { icon: Router, title: t("features.mikrotik.title"), desc: t("features.mikrotik.desc"), color: "bg-gradient-primary" },
+                  { icon: Headphones, title: t("features.care.title"), desc: t("features.care.desc"), color: "bg-gradient-accent" },
+                  { icon: Award, title: t("features.price.title"), desc: t("features.price.desc"), color: "bg-gradient-hero" },
+                ]
+            ).map((f, i) => (
+              <div key={f.title + i} className="group rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-1">
                 <div className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl ${f.color} shadow-glow`}>
                   <f.icon className="h-7 w-7 text-primary-foreground" />
                 </div>
@@ -343,14 +363,18 @@ function LandingPage() {
               {settings?.about_text ?? `${ispName} — ${t("about.default")}`}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <div className="rounded-2xl border bg-card p-4">
-                <div className="text-3xl font-bold text-primary">{t("about.yearsValue")}</div>
-                <div className="text-sm text-muted-foreground">{t("about.years")}</div>
-              </div>
-              <div className="rounded-2xl border bg-card p-4">
-                <div className="text-3xl font-bold text-secondary">{t("about.teamValue")}</div>
-                <div className="text-sm text-muted-foreground">{t("about.team")}</div>
-              </div>
+              {(lc.about_stats && lc.about_stats.length > 0
+                ? lc.about_stats.map((s) => ({ value: s.value, label: pickLang(s.label_bn, s.label_en) }))
+                : [
+                    { value: t("about.yearsValue"), label: t("about.years") },
+                    { value: t("about.teamValue"), label: t("about.team") },
+                  ]
+              ).map((s, i) => (
+                <div key={i} className="rounded-2xl border bg-card p-4">
+                  <div className={`text-3xl font-bold ${i % 2 === 0 ? "text-primary" : "text-secondary"}`}>{s.value}</div>
+                  <div className="text-sm text-muted-foreground">{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
           <div className="relative aspect-square rounded-3xl bg-gradient-hero p-8 shadow-elevated">
@@ -368,28 +392,30 @@ function LandingPage() {
             <h2 className="text-3xl font-bold md:text-4xl">{t("reviews.title")}</h2>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {([1, 2, 3] as const).map((i) => {
-              const name = t(`reviews.${i}.name` as const);
-              const loc = t(`reviews.${i}.loc` as const);
-              const text = t(`reviews.${i}.text` as const);
-              return (
-                <div key={i} className="rounded-3xl border bg-gradient-card p-6 shadow-soft">
-                  <div className="flex gap-1 text-warning">
-                    {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}
+            {(lc.reviews && lc.reviews.length > 0
+              ? lc.reviews.map((r) => ({ name: r.name, loc: pickLang(r.loc_bn, r.loc_en), text: pickLang(r.text_bn, r.text_en) }))
+              : ([1, 2, 3] as const).map((i) => ({
+                  name: t(`reviews.${i}.name` as const),
+                  loc: t(`reviews.${i}.loc` as const),
+                  text: t(`reviews.${i}.text` as const),
+                }))
+            ).map((r, i) => (
+              <div key={i} className="rounded-3xl border bg-gradient-card p-6 shadow-soft">
+                <div className="flex gap-1 text-warning">
+                  {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}
+                </div>
+                <p className="mt-4 text-muted-foreground">"{r.text}"</p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground font-bold">
+                    {(r.name || "?").charAt(0)}
                   </div>
-                  <p className="mt-4 text-muted-foreground">"{text}"</p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground font-bold">
-                      {name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="font-semibold">{name}</div>
-                      <div className="text-xs text-muted-foreground">{loc}</div>
-                    </div>
+                  <div>
+                    <div className="font-semibold">{r.name}</div>
+                    <div className="text-xs text-muted-foreground">{r.loc}</div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -401,13 +427,19 @@ function LandingPage() {
             <h2 className="text-3xl font-bold md:text-4xl">{t("faq.title")}</h2>
           </div>
           <div className="mt-12 space-y-4">
-            {([1, 2, 3, 4] as const).map((i) => (
+            {(lc.faqs && lc.faqs.length > 0
+              ? lc.faqs.map((it) => ({ q: pickLang(it.q_bn, it.q_en), a: pickLang(it.a_bn, it.a_en) }))
+              : ([1, 2, 3, 4] as const).map((i) => ({
+                  q: t(`faq.${i}.q` as const),
+                  a: t(`faq.${i}.a` as const),
+                }))
+            ).map((it, i) => (
               <details key={i} className="group rounded-2xl border bg-card p-5 shadow-soft">
                 <summary className="flex cursor-pointer items-center justify-between font-semibold">
-                  {t(`faq.${i}.q` as const)}
+                  {it.q}
                   <ChevronRight className="h-5 w-5 transition-transform group-open:rotate-90" />
                 </summary>
-                <p className="mt-3 text-muted-foreground">{t(`faq.${i}.a` as const)}</p>
+                <p className="mt-3 text-muted-foreground">{it.a}</p>
               </details>
             ))}
           </div>
