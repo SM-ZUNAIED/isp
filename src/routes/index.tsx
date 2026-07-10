@@ -155,6 +155,16 @@ function LandingPage() {
               <DropdownMenuContent align="end" className="w-48">
                 {session ? (
                   <>
+                    {isPrivileged && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer">
+                            <ShieldCheck className="h-4 w-4 mr-2" /> এডমিন প্যানেল
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to="/customer" className="cursor-pointer">
                         <LayoutDashboard className="h-4 w-4 mr-2" /> আমার পোর্টাল
