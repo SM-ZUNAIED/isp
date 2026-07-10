@@ -502,3 +502,42 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+function FilterSelect({
+  label, rows, loading, value, onChange, disabled, depHint,
+}: {
+  label: string;
+  rows: Array<{ id: number | string; name: string; bn_name?: string | null }>;
+  loading: boolean;
+  value: number | string | null;
+  onChange: (v: number | string | null) => void;
+  disabled?: boolean;
+  depHint?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      <Select
+        disabled={disabled}
+        value={value == null ? "__all__" : String(value)}
+        onValueChange={(v) => {
+          if (v === "__all__") return onChange(null);
+          const n = Number(v);
+          onChange(!Number.isNaN(n) && String(n) === v ? n : v);
+        }}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder={disabled ? (depHint ?? "নিষ্ক্রিয়") : (loading ? "লোড হচ্ছে..." : "সব")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">সব {label}</SelectItem>
+          {rows.map((r) => (
+            <SelectItem key={String(r.id)} value={String(r.id)}>
+              {r.bn_name || r.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
