@@ -62,10 +62,10 @@ function AccountsPage() {
           <TabsTrigger value="expense">{tx("ব্যয়", "Expense")}</TabsTrigger>
         </TabsList>
         <TabsContent value="income" className="mt-4">
-          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} fmtN={n} />
+          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} />
         </TabsContent>
         <TabsContent value="expense" className="mt-4">
-          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} fmtN={n} />
+          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} />
         </TabsContent>
       </Tabs>
     </div>
