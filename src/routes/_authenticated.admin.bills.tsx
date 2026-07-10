@@ -21,18 +21,13 @@ import {
 import {
   listBills, generateMonthlyBills, collectPayment,
 } from "@/lib/billing.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/bills")({
-  head: () => ({ meta: [{ title: "বিল ও পেমেন্ট — Net Bill Pro" }] }),
+  head: () => ({ meta: [{ title: "Bills & Payments — Net Bill Pro" }] }),
   component: BillsPage,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const bdt = (n: number) => `৳ ${bn.format(Math.round(n))}`;
-
-const STATUS_LABEL: Record<string, string> = {
-  paid: "পরিশোধিত", unpaid: "অপরিশোধিত", partial: "আংশিক", overdue: "মেয়াদোত্তীর্ণ",
-};
 const STATUS_TONE: Record<string, string> = {
   paid: "bg-emerald-100 text-emerald-700 border-emerald-200",
   unpaid: "bg-rose-100 text-rose-700 border-rose-200",
@@ -47,6 +42,14 @@ function currentMonth() {
 
 function BillsPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { n, bdt } = useFmt();
+  const STATUS_LABEL: Record<string, string> = {
+    paid: tx("পরিশোধিত", "Paid"),
+    unpaid: tx("অপরিশোধিত", "Unpaid"),
+    partial: tx("আংশিক", "Partial"),
+    overdue: tx("মেয়াদোত্তীর্ণ", "Overdue"),
+  };
   const list = useServerFn(listBills);
   const generate = useServerFn(generateMonthlyBills);
 
@@ -64,12 +67,14 @@ function BillsPage() {
   const genMut = useMutation({
     mutationFn: () => generate({ data: { billing_month: month } }),
     onSuccess: (r) => {
-      toast.success(`${bn.format(r.created)}টি বিল তৈরি হয়েছে`, {
-        description: r.skipped ? `${bn.format(r.skipped)}টি ইতিমধ্যে ছিল` : undefined,
+      toast.success(tx(`${n(r.created)}টি বিল তৈরি হয়েছে`, `${n(r.created)} bills created`), {
+        description: r.skipped
+          ? tx(`${n(r.skipped)}টি ইতিমধ্যে ছিল`, `${n(r.skipped)} already existed`)
+          : undefined,
       });
       invalidate();
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   const rows = useMemo(() => {
@@ -102,20 +107,22 @@ function BillsPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">বিল ও পেমেন্ট</h1>
-          <p className="text-muted-foreground">মাসিক বিল জেনারেট করুন এবং কালেকশন গ্রহণ করুন</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("বিল ও পেমেন্ট", "Bills & Payments")}</h1>
+          <p className="text-muted-foreground">
+            {tx("মাসিক বিল জেনারেট করুন এবং কালেকশন গ্রহণ করুন", "Generate monthly bills and collect payments")}
+          </p>
         </div>
         <Card className="p-0">
           <CardContent className="flex flex-col sm:flex-row items-stretch gap-2 p-3">
             <div className="space-y-1">
-              <Label className="text-xs">বিলিং মাস</Label>
+              <Label className="text-xs">{tx("বিলিং মাস", "Billing Month")}</Label>
               <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-40" />
             </div>
             <div className="flex items-end">
               <Button onClick={() => genMut.mutate()} disabled={genMut.isPending}
                 className="bg-gradient-primary text-white shadow-soft">
                 {genMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
-                বিল জেনারেট করুন
+                {tx("বিল জেনারেট করুন", "Generate Bills")}
               </Button>
             </div>
           </CardContent>
@@ -123,9 +130,9 @@ function BillsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatMini label="মোট বিল" value={bdt(totals.billed)} tone="indigo" />
-        <StatMini label="কালেকশন" value={bdt(totals.collected)} tone="emerald" />
-        <StatMini label="বকেয়া" value={bdt(totals.due)} tone="rose" />
+        <StatMini label={tx("মোট বিল", "Total Billed")} value={bdt(totals.billed)} tone="indigo" />
+        <StatMini label={tx("কালেকশন", "Collected")} value={bdt(totals.collected)} tone="emerald" />
+        <StatMini label={tx("বকেয়া", "Due")} value={bdt(totals.due)} tone="rose" />
       </div>
 
       <Card>
@@ -134,16 +141,16 @@ function BillsPage() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input value={q} onChange={(e) => setQ(e.target.value)}
-                placeholder="বিল নং, কাস্টমার নাম বা কোড..." className="pl-9" />
+                placeholder={tx("বিল নং, কাস্টমার নাম বা কোড...", "Bill no., customer name or code...")} className="pl-9" />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
-                <SelectItem value="unpaid">অপরিশোধিত</SelectItem>
-                <SelectItem value="partial">আংশিক</SelectItem>
-                <SelectItem value="paid">পরিশোধিত</SelectItem>
-                <SelectItem value="overdue">মেয়াদোত্তীর্ণ</SelectItem>
+                <SelectItem value="all">{tx("সব স্ট্যাটাস", "All statuses")}</SelectItem>
+                <SelectItem value="unpaid">{STATUS_LABEL.unpaid}</SelectItem>
+                <SelectItem value="partial">{STATUS_LABEL.partial}</SelectItem>
+                <SelectItem value="paid">{STATUS_LABEL.paid}</SelectItem>
+                <SelectItem value="overdue">{STATUS_LABEL.overdue}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -152,14 +159,14 @@ function BillsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>বিল নং</TableHead>
-                  <TableHead>কাস্টমার</TableHead>
-                  <TableHead>মাস</TableHead>
-                  <TableHead className="text-right">মোট</TableHead>
-                  <TableHead className="text-right">পরিশোধিত</TableHead>
-                  <TableHead className="text-right">বকেয়া</TableHead>
-                  <TableHead>স্ট্যাটাস</TableHead>
-                  <TableHead className="text-right">অ্যাকশন</TableHead>
+                  <TableHead>{tx("বিল নং", "Bill No.")}</TableHead>
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
+                  <TableHead>{tx("মাস", "Month")}</TableHead>
+                  <TableHead className="text-right">{tx("মোট", "Total")}</TableHead>
+                  <TableHead className="text-right">{tx("পরিশোধিত", "Paid")}</TableHead>
+                  <TableHead className="text-right">{tx("বকেয়া", "Due")}</TableHead>
+                  <TableHead>{tx("স্ট্যাটাস", "Status")}</TableHead>
+                  <TableHead className="text-right">{tx("অ্যাকশন", "Action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -170,7 +177,7 @@ function BillsPage() {
                 )}
                 {!bills.isLoading && rows.length === 0 && (
                   <TableRow><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
-                    কোনো বিল নেই। উপরে "বিল জেনারেট করুন" ক্লিক করুন।
+                    {tx('কোনো বিল নেই। উপরে "বিল জেনারেট করুন" ক্লিক করুন।', 'No bills. Click "Generate Bills" above.')}
                   </TableCell></TableRow>
                 )}
                 {rows.map((b) => (
@@ -233,6 +240,8 @@ function StatMini({ label, value, tone }: { label: string; value: string; tone: 
 function CollectDialog({
   billId, due, onDone,
 }: { billId: string; due: number; onDone: () => void }) {
+  const tx = useTx();
+  const { bdt } = useFmt();
   const collect = useServerFn(collectPayment);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(String(Math.round(due)));
@@ -249,54 +258,56 @@ function CollectDialog({
       },
     }),
     onSuccess: (r) => {
-      toast.success("পেমেন্ট গ্রহণ হয়েছে", { description: `রশিদ: ${r.receipt}` });
+      toast.success(tx("পেমেন্ট গ্রহণ হয়েছে", "Payment received"), {
+        description: `${tx("রশিদ", "Receipt")}: ${r.receipt}`,
+      });
       setOpen(false); setTxn("");
       onDone();
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-gradient-primary text-white">
-          <Receipt className="h-4 w-4 mr-1" /> কালেকশন
+          <Receipt className="h-4 w-4 mr-1" /> {tx("কালেকশন", "Collect")}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>পেমেন্ট গ্রহণ</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("পেমেন্ট গ্রহণ", "Receive Payment")}</DialogTitle></DialogHeader>
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="space-y-1.5">
-            <Label>টাকার পরিমাণ (৳)</Label>
+            <Label>{tx("টাকার পরিমাণ (৳)", "Amount (BDT)")}</Label>
             <Input type="number" min="1" required value={amount}
               onChange={(e) => setAmount(e.target.value)} />
-            <p className="text-xs text-muted-foreground">বকেয়া: {bdt(due)}</p>
+            <p className="text-xs text-muted-foreground">{tx("বকেয়া", "Due")}: {bdt(due)}</p>
           </div>
           <div className="space-y-1.5">
-            <Label>পেমেন্ট মাধ্যম</Label>
+            <Label>{tx("পেমেন্ট মাধ্যম", "Payment Method")}</Label>
             <Select value={method} onValueChange={(v) => setMethod(v as typeof method)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="cash">নগদ (Cash)</SelectItem>
-                <SelectItem value="bkash">বিকাশ</SelectItem>
-                <SelectItem value="nagad">নগদ (Mobile)</SelectItem>
-                <SelectItem value="rocket">রকেট</SelectItem>
-                <SelectItem value="bank">ব্যাংক</SelectItem>
-                <SelectItem value="other">অন্যান্য</SelectItem>
+                <SelectItem value="cash">{tx("নগদ (Cash)", "Cash")}</SelectItem>
+                <SelectItem value="bkash">{tx("বিকাশ", "bKash")}</SelectItem>
+                <SelectItem value="nagad">{tx("নগদ (Mobile)", "Nagad")}</SelectItem>
+                <SelectItem value="rocket">{tx("রকেট", "Rocket")}</SelectItem>
+                <SelectItem value="bank">{tx("ব্যাংক", "Bank")}</SelectItem>
+                <SelectItem value="other">{tx("অন্যান্য", "Other")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {method !== "cash" && (
             <div className="space-y-1.5">
-              <Label>ট্রানজেকশন আইডি</Label>
+              <Label>{tx("ট্রানজেকশন আইডি", "Transaction ID")}</Label>
               <Input value={txn} onChange={(e) => setTxn(e.target.value)} placeholder="TrxID" />
             </div>
           )}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
               {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              সংরক্ষণ
+              {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
