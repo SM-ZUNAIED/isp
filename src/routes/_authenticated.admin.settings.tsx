@@ -159,6 +159,12 @@ function SettingsPage() {
             <Card>
               <CardHeader><CardTitle>{tx("হোম পেজ কনটেন্ট", "Home Page Content")}</CardTitle></CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
+                <F label={tx("Hero ব্যাজ (বাংলা)", "Hero Badge (Bangla)")}>
+                  <Input value={f.landing_content.hero_badge_bn ?? ""} onChange={(e) => setLC({ hero_badge_bn: e.target.value })} placeholder="বাংলাদেশের ১ নম্বর ISP সফটওয়্যার" />
+                </F>
+                <F label={tx("Hero ব্যাজ (English)", "Hero Badge (English)")}>
+                  <Input value={f.landing_content.hero_badge_en ?? ""} onChange={(e) => setLC({ hero_badge_en: e.target.value })} placeholder="Bangladesh's #1 ISP Software" />
+                </F>
                 <F label={tx("Hero শিরোনাম (বাংলা)", "Hero Title (Bangla)")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
                 <F label={tx("Hero শিরোনাম (English)", "Hero Title (English)")}>
                   <Input value={f.landing_content.hero_title_en ?? ""} onChange={(e) => setLC({ hero_title_en: e.target.value })} />
