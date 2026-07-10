@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -16,11 +17,20 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
-type EntryRow = { id: string; amount: number; category: string; description: string | null; entry_date: string };
+type EntryRow = {
+  id: string; amount: number; category: string;
+  description: string | null; entry_date: string;
+  source?: string | null;
+};
 
 export const Route = createFileRoute("/_authenticated/admin/accounts")({
   head: () => ({ meta: [{ title: "একাউন্টস — Net Bill Pro" }] }),
@@ -35,7 +45,12 @@ function AccountsPage() {
   const { n, bdt } = useFmt();
   const list = useServerFn(listAccounts);
   const q = useQuery({ queryKey: ["accounts"], queryFn: () => list() });
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["accounts"] });
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["accounts"] });
+    qc.invalidateQueries({ queryKey: ["admin", "stats"] });
+    qc.invalidateQueries({ queryKey: ["payments"] });
+    qc.invalidateQueries({ queryKey: ["bills"] });
+  };
 
   const totals = useMemo(() => {
     const inc = (q.data?.incomes ?? []).reduce((s, r) => s + Number(r.amount), 0);
