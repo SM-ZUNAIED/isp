@@ -51,6 +51,7 @@ function CustomerPortal() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const tx = useTx();
 
   const handleLogout = async () => {
     await signOut();
