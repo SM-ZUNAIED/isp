@@ -1,0 +1,1 @@
+ALTER TABLE public.incomes ADD COLUMN IF NOT EXISTS party_name text; ALTER TABLE public.expenses ADD COLUMN IF NOT EXISTS party_name text;

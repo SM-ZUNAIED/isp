@@ -147,6 +147,7 @@ const EntryInput = z.object({
   category: z.string().min(1),
   description: z.string().optional().nullable(),
   entry_date: z.string().min(1),
+  party_name: z.string().trim().max(200).optional().nullable(),
 });
 
 export const addIncome = createServerFn({ method: "POST" })

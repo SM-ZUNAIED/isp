@@ -30,6 +30,7 @@ type EntryRow = {
   id: string; amount: number; category: string;
   description: string | null; entry_date: string;
   source?: string | null;
+  party_name?: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/accounts")({
@@ -119,14 +120,21 @@ function EntrySection({
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [partyName, setPartyName] = useState("");
   const [date, setDate] = useState(today());
 
   const addMut = useMutation({
     mutationFn: () => addFn({
-      data: { amount: Number(amount), category: category.trim(), description: description || null, entry_date: date },
+      data: {
+        amount: Number(amount), category: category.trim(),
+        description: description || null,
+        party_name: partyName.trim() || null,
+        entry_date: date,
+      },
     }),
     onSuccess: () => {
-      toast.success(tx("সংরক্ষিত", "Saved")); setAmount(""); setCategory(""); setDescription(""); setDate(today()); onChange();
+      toast.success(tx("সংরক্ষিত", "Saved"));
+      setAmount(""); setCategory(""); setDescription(""); setPartyName(""); setDate(today()); onChange();
     },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
@@ -141,17 +149,22 @@ function EntrySection({
       <Card>
         <CardContent className="p-4">
           <form onSubmit={(e) => { e.preventDefault(); if (amount && category.trim()) addMut.mutate(); }}
-            className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            className="grid grid-cols-1 md:grid-cols-6 gap-3">
             <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
               <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
             <div className="space-y-1"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
               <Input required value={category} onChange={(e) => setCategory(e.target.value)}
                 placeholder={kind === "income" ? tx("কানেকশন ফি", "Connection Fee") : tx("বিদ্যুৎ বিল", "Electricity Bill")} /></div>
+            <div className="space-y-1"><Label className="text-xs">
+              {kind === "income" ? tx("ইউজার / প্রদানকারী", "User / Payer") : tx("ইউজার / প্রাপক", "User / Payee")}
+            </Label>
+              <Input value={partyName} onChange={(e) => setPartyName(e.target.value)}
+                placeholder={tx("নাম", "Name")} /></div>
             <div className="space-y-1 md:col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
               <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
             <div className="space-y-1"><Label className="text-xs">{tx("তারিখ", "Date")}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-            <Button type="submit" disabled={addMut.isPending} className="bg-gradient-primary text-white md:col-span-5">
+            <Button type="submit" disabled={addMut.isPending} className="bg-gradient-primary text-white md:col-span-6">
               {addMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
               {tx("যোগ করুন", "Add")}
             </Button>
@@ -167,17 +180,18 @@ function EntrySection({
                 <TableRow>
                   <TableHead>{tx("তারিখ", "Date")}</TableHead>
                   <TableHead>{tx("বিভাগ", "Category")}</TableHead>
+                  <TableHead>{tx("ইউজার", "User")}</TableHead>
                   <TableHead>{tx("বর্ণনা", "Description")}</TableHead>
                   <TableHead className="text-right">{tx("পরিমাণ (৳)", "Amount (BDT)")}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading && <TableRow><TableCell colSpan={5} className="py-10 text-center">
+                {loading && <TableRow><TableCell colSpan={6} className="py-10 text-center">
                   <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
                 </TableCell></TableRow>}
                 {!loading && rows.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                  <TableRow><TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                     {tx("কোনো এন্ট্রি নেই।", "No entries.")}
                   </TableCell></TableRow>
                 )}
@@ -192,6 +206,7 @@ function EntrySection({
                         {isAuto && <Badge variant="secondary" className="text-[10px]">{tx("অটো", "Auto")}</Badge>}
                       </div>
                     </TableCell>
+                    <TableCell className="text-sm">{r.party_name ?? "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{r.description ?? "—"}</TableCell>
                     <TableCell className="text-right font-semibold">{n(Number(r.amount))}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
@@ -254,13 +269,16 @@ function EditEntryDialog({
   const [amount, setAmount] = useState(String(row.amount));
   const [category, setCategory] = useState(row.category);
   const [description, setDescription] = useState(row.description ?? "");
+  const [partyName, setPartyName] = useState(row.party_name ?? "");
   const [date, setDate] = useState(row.entry_date);
   const mut = useMutation({
     mutationFn: () => update({
       data: {
         id: row.id, kind,
         amount: Number(amount), category: category.trim(),
-        description: description || null, entry_date: date,
+        description: description || null,
+        party_name: partyName.trim() || null,
+        entry_date: date,
       },
     }),
     onSuccess: () => { toast.success(tx("আপডেট হয়েছে", "Updated")); setOpen(false); onSaved(); },
@@ -269,7 +287,11 @@ function EditEntryDialog({
   return (
     <Dialog open={open} onOpenChange={(v) => {
       setOpen(v);
-      if (v) { setAmount(String(row.amount)); setCategory(row.category); setDescription(row.description ?? ""); setDate(row.entry_date); }
+      if (v) {
+        setAmount(String(row.amount)); setCategory(row.category);
+        setDescription(row.description ?? ""); setPartyName(row.party_name ?? "");
+        setDate(row.entry_date);
+      }
     }}>
       <DialogTrigger asChild>
         <Button size="sm" variant="ghost"><Pencil className="h-4 w-4" /></Button>
@@ -283,6 +305,10 @@ function EditEntryDialog({
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
           <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
             <Input required value={category} onChange={(e) => setCategory(e.target.value)} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">
+            {kind === "income" ? tx("ইউজার / প্রদানকারী", "User / Payer") : tx("ইউজার / প্রাপক", "User / Payee")}
+          </Label>
+            <Input value={partyName} onChange={(e) => setPartyName(e.target.value)} /></div>
           <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <DialogFooter className="col-span-2">

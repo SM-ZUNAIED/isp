@@ -475,6 +475,7 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          party_name: string | null
           reference_id: string | null
           source: string
         }
@@ -486,6 +487,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
           reference_id?: string | null
           source?: string
         }
@@ -497,6 +499,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
           reference_id?: string | null
           source?: string
         }
@@ -511,6 +514,7 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          party_name: string | null
           reference_id: string | null
           source: string
         }
@@ -522,6 +526,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
           reference_id?: string | null
           source?: string
         }
@@ -533,6 +538,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
           reference_id?: string | null
           source?: string
         }
