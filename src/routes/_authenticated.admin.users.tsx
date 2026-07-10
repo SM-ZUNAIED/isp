@@ -291,3 +291,64 @@ function ResetPasswordDialog({ onSubmit }: { onSubmit: (pw: string) => void }) {
     </Dialog>
   );
 }
+
+function EditUserDialog({ u, onSubmit }: { u: UserRow; onSubmit: (patch: UserPatch) => void }) {
+  const tx = useTx();
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({
+    email: u.email ?? "",
+    full_name: u.full_name ?? "",
+    mobile: u.mobile ?? "",
+  });
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) setF({ email: u.email ?? "", full_name: u.full_name ?? "", mobile: u.mobile ?? "" });
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8" title={tx("এডিট", "Edit")}>
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>{tx("ইউজার এডিট", "Edit User")}</DialogTitle></DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const patch: UserPatch = {};
+            if (f.email && f.email !== (u.email ?? "")) patch.email = f.email.trim();
+            if (f.full_name !== (u.full_name ?? "")) patch.full_name = f.full_name.trim();
+            if (f.mobile !== (u.mobile ?? "")) patch.mobile = f.mobile.trim();
+            if (Object.keys(patch).length === 0) {
+              setOpen(false);
+              return;
+            }
+            onSubmit(patch);
+            setOpen(false);
+          }}
+          className="space-y-3"
+        >
+          <div className="grid gap-1.5">
+            <Label>{tx("পূর্ণ নাম", "Full Name")}</Label>
+            <Input value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>{tx("ইমেইল", "Email")}</Label>
+            <Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>{tx("মোবাইল", "Mobile")}</Label>
+            <Input value={f.mobile} onChange={(e) => setF({ ...f, mobile: e.target.value })} />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
+            <Button type="submit" className="bg-gradient-primary text-white">{tx("সেভ", "Save")}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
