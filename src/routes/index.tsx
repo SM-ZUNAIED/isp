@@ -524,6 +524,8 @@ function LandingPage() {
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>{t("contact.hotline")}: {hotline}</li>
               <li>WhatsApp: {whatsapp}</li>
+              {settings?.email && <li>Email: {settings.email}</li>}
+              {settings?.address && <li>{settings.address}</li>}
             </ul>
           </div>
           <div>
