@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { sendSms, type SmsConfig } from "@/lib/sms.server";
 
 /**
  * Unified cron endpoint. Called by pg_cron with `?task=<name>`.
