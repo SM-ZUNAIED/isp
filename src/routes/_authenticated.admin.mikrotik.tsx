@@ -55,8 +55,8 @@ function MikrotikPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">MikroTik রাউটার</h1>
-          <p className="text-muted-foreground">রাউটার যুক্ত করুন এবং স্ট্যাটাস পরীক্ষা করুন</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("MikroTik রাউটার", "MikroTik Routers")}</h1>
+          <p className="text-muted-foreground">{tx("রাউটার যুক্ত করুন এবং স্ট্যাটাস পরীক্ষা করুন", "Add routers and check status")}</p>
         </div>
         <MikrotikFormDialog mode="create" onSaved={invalidate} />
       </div>
@@ -65,7 +65,7 @@ function MikrotikPage() {
         <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
         <Card><CardContent className="p-10 text-center text-muted-foreground">
-          কোনো MikroTik যুক্ত নেই। উপরে "নতুন MikroTik" ক্লিক করে যোগ করুন।
+          {tx('কোনো MikroTik যুক্ত নেই। উপরে "নতুন MikroTik" ক্লিক করে যোগ করুন।', 'No MikroTik added. Click "New MikroTik" above to add.')}
         </CardContent></Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -83,9 +83,9 @@ function MikrotikPage() {
                     </div>
                   </div>
                   {m.is_online ? (
-                    <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />অনলাইন</Badge>
+                    <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />{tx("অনলাইন", "Online")}</Badge>
                   ) : (
-                    <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />অফলাইন</Badge>
+                    <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />{tx("অফলাইন", "Offline")}</Badge>
                   )}
                 </div>
 
@@ -95,14 +95,14 @@ function MikrotikPage() {
                 </div>
 
                 <div className="text-xs text-muted-foreground">
-                  শেষ চেক: {m.last_checked_at ? new Date(m.last_checked_at).toLocaleString("bn-BD") : "—"}
+                  {tx("শেষ চেক", "Last checked")}: {m.last_checked_at ? new Date(m.last_checked_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US") : "—"}
                 </div>
 
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="flex-1"
                     onClick={() => pingMut.mutate(m.id)} disabled={pingMut.isPending}>
                     {pingMut.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Activity className="h-4 w-4 mr-1" />}
-                    হেলথ চেক
+                    {tx("হেলথ চেক", "Health Check")}
                   </Button>
                   <MikrotikFormDialog
                     mode="edit"
