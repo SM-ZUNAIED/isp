@@ -72,7 +72,7 @@ function SettingsPage() {
   const q = useQuery({ queryKey: ["settings"], queryFn: () => get() });
 
   const [f, setF] = useState<SettingsForm>({
-    isp_name: "", hero_title: "", hero_subtitle: "", about_text: "",
+    isp_name: "", logo_url: "", hero_title: "", hero_subtitle: "", about_text: "",
     hotline: "", whatsapp: "", email: "", address: "", website: "",
     landing_content: EMPTY_LANDING,
   });
@@ -82,6 +82,7 @@ function SettingsPage() {
       const lc = (q.data.landing_content ?? {}) as Partial<LandingContent>;
       setF({
         isp_name: q.data.isp_name ?? "",
+        logo_url: q.data.logo_url ?? "",
         hero_title: q.data.hero_title ?? "",
         hero_subtitle: q.data.hero_subtitle ?? "",
         about_text: q.data.about_text ?? "",
