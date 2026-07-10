@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
+import { getSettings } from "@/lib/support.functions";
+import { useLogoUrl } from "@/hooks/use-logo";
 
 const getMyRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
