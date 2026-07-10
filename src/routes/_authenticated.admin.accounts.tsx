@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -16,11 +17,20 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
-type EntryRow = { id: string; amount: number; category: string; description: string | null; entry_date: string };
+type EntryRow = {
+  id: string; amount: number; category: string;
+  description: string | null; entry_date: string;
+  source?: string | null;
+};
 
 export const Route = createFileRoute("/_authenticated/admin/accounts")({
   head: () => ({ meta: [{ title: "একাউন্টস — Net Bill Pro" }] }),
@@ -35,7 +45,12 @@ function AccountsPage() {
   const { n, bdt } = useFmt();
   const list = useServerFn(listAccounts);
   const q = useQuery({ queryKey: ["accounts"], queryFn: () => list() });
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["accounts"] });
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["accounts"] });
+    qc.invalidateQueries({ queryKey: ["admin", "stats"] });
+    qc.invalidateQueries({ queryKey: ["payments"] });
+    qc.invalidateQueries({ queryKey: ["bills"] });
+  };
 
   const totals = useMemo(() => {
     const inc = (q.data?.incomes ?? []).reduce((s, r) => s + Number(r.amount), 0);
@@ -94,7 +109,7 @@ function EntrySection({
   kind, rows, loading, onChange,
 }: {
   kind: "income" | "expense";
-  rows: Array<{ id: string; amount: number; category: string; description: string | null; entry_date: string }>;
+  rows: EntryRow[];
   loading: boolean; onChange: () => void;
 }) {
   const tx = useTx();
@@ -166,20 +181,57 @@ function EntrySection({
                     {tx("কোনো এন্ট্রি নেই।", "No entries.")}
                   </TableCell></TableRow>
                 )}
-                {rows.map((r) => (
+                {rows.map((r) => {
+                  const isAuto = r.source === "bill_payment";
+                  return (
                   <TableRow key={r.id}>
                     <TableCell className="text-sm">{r.entry_date}</TableCell>
-                    <TableCell className="font-medium">{r.category}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <span>{r.category}</span>
+                        {isAuto && <Badge variant="secondary" className="text-[10px]">{tx("অটো", "Auto")}</Badge>}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{r.description ?? "—"}</TableCell>
                     <TableCell className="text-right font-semibold">{n(Number(r.amount))}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
-                      <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => delMut.mutate(r.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {isAuto ? (
+                        <span className="text-xs text-muted-foreground">
+                          {tx("পেমেন্ট লগ থেকে সিঙ্ক", "Synced from payments")}
+                        </span>
+                      ) : (
+                        <>
+                          <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="ghost" className="text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{tx("এন্ট্রি মুছবেন?", "Delete entry?")}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {tx("এই কাজটি বাতিল করা যাবে না।", "This action cannot be undone.")}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{tx("বাতিল", "Cancel")}</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => delMut.mutate(r.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  {tx("মুছুন", "Delete")}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
