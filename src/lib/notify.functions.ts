@@ -14,11 +14,12 @@ export const broadcastSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ context, data }) => {
+    const { sendSms, type SmsConfig } = await import("@/lib/sms.server") as typeof import("@/lib/sms.server");
     const { supabase } = context;
 
     const { data: setRow } = await supabase
       .from("settings").select("sms_api_config").limit(1).maybeSingle();
-    const cfg = (setRow?.sms_api_config as SmsConfig | null) ?? null;
+    const cfg = (setRow?.sms_api_config as import("@/lib/sms.server").SmsConfig | null) ?? null;
     if (!cfg?.url) throw new Error("SMS API config not set (Settings → SMS)");
 
     let recipients: Array<{ mobile: string; id: string | null; name?: string | null }> = [];
