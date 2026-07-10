@@ -12,9 +12,10 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { listZones, createZone, updateZone, deleteZone } from "@/lib/catalog.functions";
+import { useTx } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/zones")({
-  head: () => ({ meta: [{ title: "জোন — Net Bill Pro" }] }),
+  head: () => ({ meta: [{ title: "Zones — Net Bill Pro" }] }),
   component: ZonesPage,
 });
 
@@ -22,6 +23,7 @@ type ZoneRow = { id: string; name: string; description?: string | null };
 
 function ZonesPage() {
   const qc = useQueryClient();
+  const tx = useTx();
   const list = useServerFn(listZones);
   const create = useServerFn(createZone);
   const del = useServerFn(deleteZone);
@@ -33,31 +35,31 @@ function ZonesPage() {
 
   const createMut = useMutation({
     mutationFn: () => create({ data: { name: name.trim(), description: desc || null } }),
-    onSuccess: () => { toast.success("জোন যুক্ত হয়েছে"); setName(""); setDesc(""); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("জোন যুক্ত হয়েছে", "Zone added")); setName(""); setDesc(""); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">জোন / এলাকা</h1>
-        <p className="text-muted-foreground">সার্ভিস এলাকাসমূহ যোগ করুন</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("জোন / এলাকা", "Zones / Areas")}</h1>
+        <p className="text-muted-foreground">{tx("সার্ভিস এলাকাসমূহ যোগ করুন", "Add service areas")}</p>
       </div>
 
       <Card>
         <CardContent className="p-4">
           <form className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3"
             onSubmit={(e) => { e.preventDefault(); if (name.trim()) createMut.mutate(); }}>
-            <Input placeholder="জোনের নাম" required value={name} onChange={(e) => setName(e.target.value)} />
-            <Input placeholder="বর্ণনা (ঐচ্ছিক)" value={desc} onChange={(e) => setDesc(e.target.value)} />
+            <Input placeholder={tx("জোনের নাম", "Zone name")} required value={name} onChange={(e) => setName(e.target.value)} />
+            <Input placeholder={tx("বর্ণনা (ঐচ্ছিক)", "Description (optional)")} value={desc} onChange={(e) => setDesc(e.target.value)} />
             <Button type="submit" disabled={createMut.isPending} className="bg-gradient-primary text-white">
               {createMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-              যোগ করুন
+              {tx("যোগ করুন", "Add")}
             </Button>
           </form>
         </CardContent>
@@ -90,7 +92,9 @@ function ZonesPage() {
             </Card>
           ))}
           {(q.data ?? []).length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-6 sm:col-span-2">কোনো জোন নেই।</p>
+            <p className="text-sm text-muted-foreground text-center py-6 sm:col-span-2">
+              {tx("কোনো জোন নেই।", "No zones found.")}
+            </p>
           )}
         </div>
       )}
@@ -99,14 +103,15 @@ function ZonesPage() {
 }
 
 function EditZoneDialog({ zone, onSaved }: { zone: ZoneRow; onSaved: () => void }) {
+  const tx = useTx();
   const update = useServerFn(updateZone);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(zone.name);
   const [desc, setDesc] = useState(zone.description ?? "");
   const mut = useMutation({
     mutationFn: () => update({ data: { id: zone.id, name: name.trim(), description: desc || null } }),
-    onSuccess: () => { toast.success("আপডেট হয়েছে"); setOpen(false); onSaved(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("আপডেট হয়েছে", "Updated")); setOpen(false); onSaved(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) { setName(zone.name); setDesc(zone.description ?? ""); } }}>
@@ -114,16 +119,16 @@ function EditZoneDialog({ zone, onSaved }: { zone: ZoneRow; onSaved: () => void 
         <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>জোন এডিট</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("জোন এডিট", "Edit Zone")}</DialogTitle></DialogHeader>
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
-          <div className="space-y-1.5"><Label>নাম *</Label>
+          <div className="space-y-1.5"><Label>{tx("নাম *", "Name *")}</Label>
             <Input required value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label>বর্ণনা</Label>
+          <div className="space-y-1.5"><Label>{tx("বর্ণনা", "Description")}</Label>
             <Input value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" className="bg-gradient-primary text-white" disabled={mut.isPending}>
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
