@@ -377,12 +377,12 @@ function pickName(rows: Row[] | undefined, id: string | number | null): string |
 }
 
 export function composeAddress(parts: {
-  building?: string | null; road?: string | null; area?: string | null;
+  holding?: string | null; road?: string | null; mohalla?: string | null;
   village?: string | null; post_office?: string | null; union?: string | null;
   upazila?: string | null; district?: string | null; division?: string | null;
 }): string | null {
   const seq = [
-    parts.building, parts.road, parts.area,
+    parts.holding, parts.road, parts.mohalla,
     parts.village && `${parts.village} গ্রাম`,
     parts.post_office && `${parts.post_office} পোস্ট অফিস`,
     parts.union && `${parts.union} ইউনিয়ন`,
