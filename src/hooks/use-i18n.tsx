@@ -406,6 +406,22 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = (typeof window !== "undefined" && localStorage.getItem("lang")) as Lang | null;
     if (stored === "bn" || stored === "en") setLangState(stored);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "lang" && (e.newValue === "bn" || e.newValue === "en")) {
+        setLangState(e.newValue);
+      }
+    };
+    const onCustom = (e: Event) => {
+      const detail = (e as CustomEvent<Lang>).detail;
+      if (detail === "bn" || detail === "en") setLangState(detail);
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("lang-change", onCustom as EventListener);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("lang-change", onCustom as EventListener);
+    };
   }, []);
 
   useEffect(() => {
@@ -413,9 +429,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem("lang", lang); } catch {}
   }, [lang]);
 
+  const setLang = (l: Lang) => {
+    setLangState(l);
+    try { window.dispatchEvent(new CustomEvent("lang-change", { detail: l })); } catch {}
+  };
+  const toggle = () => setLang(lang === "bn" ? "en" : "bn");
+
   const t = (k: Key) => (dict[lang] as Record<string, string>)[k] ?? k;
   return (
-    <I18nContext.Provider value={{ lang, setLang: setLangState, toggle: () => setLangState((l) => (l === "bn" ? "en" : "bn")), t }}>
+    <I18nContext.Provider value={{ lang, setLang, toggle, t }}>
       {children}
     </I18nContext.Provider>
   );
