@@ -174,9 +174,26 @@ function SettingsPage() {
                       <Select value={it.icon} onValueChange={(v) => {
                         const arr = [...f.landing_content.features]; arr[i] = { ...it, icon: v }; setLC({ features: arr });
                       }}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue>
+                            <span className="inline-flex items-center gap-2">
+                              {(() => { const I = ICON_MAP[it.icon] ?? Zap; return <I className="h-4 w-4" />; })()}
+                              {it.icon}
+                            </span>
+                          </SelectValue>
+                        </SelectTrigger>
                         <SelectContent>
-                          {ICON_OPTIONS.map((k) => <SelectItem key={k} value={k}>{k}</SelectItem>)}
+                          {ICON_OPTIONS.map((k) => {
+                            const I = ICON_MAP[k];
+                            return (
+                              <SelectItem key={k} value={k}>
+                                <span className="inline-flex items-center gap-2">
+                                  <I className="h-4 w-4" />
+                                  {k}
+                                </span>
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </F>
