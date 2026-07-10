@@ -71,6 +71,16 @@ function CustomerDetailPage() {
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
+  const updCustStatus = useServerFn(updateCustomerStatus);
+  const custStatusMut = useMutation({
+    mutationFn: (v: { id: string; status: "active" | "pending" | "suspended" | "expired" }) => updCustStatus({ data: v }),
+    onSuccess: () => {
+      toast.success(tx("স্ট্যাটাস আপডেট হয়েছে", "Status updated"));
+      qc.invalidateQueries({ queryKey: ["customer-detail", id] });
+    },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
   if (q.isLoading) {
     return <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
