@@ -105,21 +105,77 @@ function AdminLayout() {
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-white">NB</div>
           <span>Net Bill Pro</span>
         </Link>
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
-            <SidebarContent isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
-          </SheetContent>
-        </Sheet>
+        <div className="flex items-center gap-2">
+          <TopBarActions />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-0">
+              <SidebarContent isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
+            </SheetContent>
+          </Sheet>
+        </div>
       </header>
 
       <main className="lg:pl-64">
+        <div className="hidden lg:flex sticky top-0 z-30 h-16 items-center justify-end gap-2 border-b bg-card/80 backdrop-blur px-6">
+          <TopBarActions />
+        </div>
         <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8">
           <Outlet />
         </div>
       </main>
+    </div>
+  );
+}
+
+function TopBarActions() {
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <div className="flex items-center gap-2">
+      <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
+        <Link to="/pay-bill">বিল পরিশোধ</Link>
+      </Button>
+      <LangToggle />
+      <ThemeToggle />
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          aria-label="আমার অ্যাকাউন্ট"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:brightness-110 transition focus:outline-none"
+        >
+          <UserCircle2 className="h-5 w-5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          {session ? (
+            <>
+              <DropdownMenuItem asChild>
+                <Link to="/customer" className="cursor-pointer">
+                  <LayoutDashboard className="h-4 w-4 mr-2" /> আমার পোর্টাল
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => {
+                  await signOut();
+                  toast.success("লগ আউট হয়েছে");
+                  navigate({ to: "/", replace: true });
+                }}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <LogOut className="h-4 w-4 mr-2" /> লগ আউট
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <DropdownMenuItem asChild>
+              <Link to="/auth" className="cursor-pointer">
+                <UserCircle2 className="h-4 w-4 mr-2" /> লগইন
+              </Link>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
