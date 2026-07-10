@@ -136,6 +136,7 @@ function UsersPage() {
                     onAssign={(role) => assignMut.mutate({ user_id: u.id, role })}
                     onRemove={(role) => removeMut.mutate({ user_id: u.id, role })}
                     onReset={(password) => resetMut.mutate({ user_id: u.id, password })}
+                    onUpdate={(patch) => updMut.mutate({ user_id: u.id, ...patch })}
                     onDelete={() => delMut.mutate(u.id)}
                   />
                 ))}
