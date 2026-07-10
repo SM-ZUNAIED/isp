@@ -140,9 +140,11 @@ function LandingPage() {
             <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.contact")}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
-              <Link to="/pay-bill">{t("nav.payBill")}</Link>
-            </Button>
+            {!isPrivileged && (
+              <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
+                <Link to="/pay-bill">{t("nav.payBill")}</Link>
+              </Button>
+            )}
             <LangToggle />
             <ThemeToggle />
             <DropdownMenu>
