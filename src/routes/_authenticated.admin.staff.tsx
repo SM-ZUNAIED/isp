@@ -98,7 +98,7 @@ function StaffPage() {
   const [search, setSearch] = useState("");
 
   const createMut = useMutation({
-    mutationFn: (d: Parameters<typeof create>[0]["data"]) => create({ data: d }),
+    mutationFn: (d: Record<string, unknown>) => create({ data: d as never }),
     onSuccess: () => {
       toast.success(tx("স্টাফ যোগ হয়েছে", "Staff added"));
       setOpen(false); setForm(EMPTY_FORM); invalidate();
@@ -107,7 +107,7 @@ function StaffPage() {
   });
 
   const updateMut = useMutation({
-    mutationFn: (d: Parameters<typeof update>[0]["data"]) => update({ data: d }),
+    mutationFn: (d: Record<string, unknown>) => update({ data: d as never }),
     onSuccess: () => {
       toast.success(tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); setForm(EMPTY_FORM); invalidate();

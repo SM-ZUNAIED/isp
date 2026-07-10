@@ -21,6 +21,7 @@ import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.r
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated.admin.users'
 import { Route as AuthenticatedAdminTicketsRouteImport } from './routes/_authenticated.admin.tickets'
+import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated.admin.staff'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated.admin.settings'
 import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authenticated.admin.payments'
 import { Route as AuthenticatedAdminPackagesRouteImport } from './routes/_authenticated.admin.packages'
@@ -95,6 +96,11 @@ const AuthenticatedAdminTicketsRoute =
     path: '/tickets',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminStaffRoute = AuthenticatedAdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -188,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/_authenticated/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
+    | '/admin/staff'
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/zones'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
+    | '/admin/staff'
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/zones'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/packages'
     | '/_authenticated/admin/payments'
     | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/staff'
     | '/_authenticated/admin/tickets'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/zones'
@@ -424,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/tickets'
       fullPath: '/admin/tickets'
       preLoaderRoute: typeof AuthenticatedAdminTicketsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/staff': {
+      id: '/_authenticated/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AuthenticatedAdminStaffRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/settings': {
@@ -531,6 +550,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPackagesRoute: typeof AuthenticatedAdminPackagesRoute
   AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminStaffRoute: typeof AuthenticatedAdminStaffRoute
   AuthenticatedAdminTicketsRoute: typeof AuthenticatedAdminTicketsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminZonesRoute: typeof AuthenticatedAdminZonesRoute
@@ -550,6 +570,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPackagesRoute: AuthenticatedAdminPackagesRoute,
   AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminStaffRoute: AuthenticatedAdminStaffRoute,
   AuthenticatedAdminTicketsRoute: AuthenticatedAdminTicketsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminZonesRoute: AuthenticatedAdminZonesRoute,
