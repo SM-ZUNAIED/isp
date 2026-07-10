@@ -124,37 +124,37 @@ function CustomerDetailPage() {
                 <MapPin className="h-4 w-4" />
               </div>
               <div>
-                <div className="font-semibold">সম্পূর্ণ ঠিকানা</div>
-                <div className="text-xs text-muted-foreground">ক্যাসকেডিং BD address breakdown</div>
+                <div className="font-semibold">{tx("সম্পূর্ণ ঠিকানা", "Full Address")}</div>
+                <div className="text-xs text-muted-foreground">{tx("ক্যাসকেডিং BD address breakdown", "Cascading BD address breakdown")}</div>
               </div>
             </div>
 
             {/* Composed address line */}
             {(c.address_line || c.address) && (
               <div className="rounded-lg bg-muted/40 p-3 text-sm">
-                <span className="text-muted-foreground text-xs">সম্পূর্ণ:</span>{" "}
+                <span className="text-muted-foreground text-xs">{tx("সম্পূর্ণ", "Full")}:</span>{" "}
                 <span className="font-medium">{c.address_line || c.address}</span>
               </div>
             )}
 
             {/* Address level grid */}
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <AddrItem icon={<Landmark className="h-4 w-4" />} label="বিভাগ" value={label(a.division)} />
-              <AddrItem icon={<Landmark className="h-4 w-4" />} label="জেলা" value={label(a.district)} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="উপজেলা" value={label(a.upazila)} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="ইউনিয়ন" value={label(a.union)} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="পোস্ট অফিস"
-                value={label(a.post_office)} extra={a.post_office?.code ? `কোড ${a.post_office.code}` : undefined} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="গ্রাম" value={label(a.village)} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="মহল্লা / এরিয়া" value={c.mohalla || "—"} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="রোড" value={c.road_name || "—"} />
-              <AddrItem icon={<Building2 className="h-4 w-4" />} label="হোল্ডিং / বিল্ডিং" value={c.holding_no || "—"} />
+              <AddrItem icon={<Landmark className="h-4 w-4" />} label={tx("বিভাগ", "Division")} value={label(a.division)} />
+              <AddrItem icon={<Landmark className="h-4 w-4" />} label={tx("জেলা", "District")} value={label(a.district)} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label={tx("উপজেলা", "Upazila")} value={label(a.upazila)} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label={tx("ইউনিয়ন", "Union")} value={label(a.union)} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label={tx("পোস্ট অফিস", "Post Office")}
+                value={label(a.post_office)} extra={a.post_office?.code ? `${tx("কোড", "Code")} ${a.post_office.code}` : undefined} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label={tx("গ্রাম", "Village")} value={label(a.village)} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label={tx("মহল্লা / এরিয়া", "Mohalla / Area")} value={c.mohalla || "—"} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label={tx("রোড", "Road")} value={c.road_name || "—"} />
+              <AddrItem icon={<Building2 className="h-4 w-4" />} label={tx("হোল্ডিং / বিল্ডিং", "Holding / Building")} value={c.holding_no || "—"} />
             </div>
 
             {a.building?.google_map_url && (
               <Button asChild variant="outline" size="sm">
                 <a href={a.building.google_map_url} target="_blank" rel="noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-1.5" /> Google Maps-এ দেখুন
+                  <ExternalLink className="h-4 w-4 mr-1.5" /> {tx("Google Maps-এ দেখুন", "View on Google Maps")}
                 </a>
               </Button>
             )}
@@ -168,14 +168,14 @@ function CustomerDetailPage() {
               <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                 <User className="h-4 w-4" />
               </div>
-              <div className="font-semibold">সংযোগ ও যোগাযোগ</div>
+              <div className="font-semibold">{tx("সংযোগ ও যোগাযোগ", "Connection & Contact")}</div>
             </div>
-            <InfoRow icon={<Phone className="h-4 w-4" />} label="মোবাইল" value={c.mobile} />
-            <InfoRow icon={<Phone className="h-4 w-4" />} label="বিকল্প মোবাইল" value={c.alt_mobile || "—"} />
-            <InfoRow icon={<MapPin className="h-4 w-4" />} label="জোন" value={c.zones?.name ?? "—"} />
+            <InfoRow icon={<Phone className="h-4 w-4" />} label={tx("মোবাইল", "Mobile")} value={c.mobile} />
+            <InfoRow icon={<Phone className="h-4 w-4" />} label={tx("বিকল্প মোবাইল", "Alt Mobile")} value={c.alt_mobile || "—"} />
+            <InfoRow icon={<MapPin className="h-4 w-4" />} label={tx("জোন", "Zone")} value={c.zones?.name ?? "—"} />
             <InfoRow icon={<Wifi className="h-4 w-4" />} label="PPPoE User" value={c.pppoe_username || "—"} mono />
             <InfoRow icon={<Wifi className="h-4 w-4" />} label="PPPoE Pass" value={c.pppoe_password || "—"} mono />
-            <InfoRow icon={<Receipt className="h-4 w-4" />} label="যোগদান" value={fmtDate(c.created_at)} />
+            <InfoRow icon={<Receipt className="h-4 w-4" />} label={tx("যোগদান", "Joined")} value={fmtDate(c.created_at)} />
           </CardContent>
         </Card>
       </div>
@@ -183,25 +183,25 @@ function CustomerDetailPage() {
       {/* ============ Bills history ============ */}
       <Card>
         <CardContent className="p-4 space-y-3">
-          <div className="font-semibold">সাম্প্রতিক বিল</div>
+          <div className="font-semibold">{tx("সাম্প্রতিক বিল", "Recent Bills")}</div>
           <div className="rounded-xl border overflow-x-auto">
             <Table>
               <TableHeader><TableRow>
-                <TableHead>বিল নং</TableHead><TableHead>মাস</TableHead>
-                <TableHead className="text-right">অ্যামাউন্ট</TableHead>
-                <TableHead className="text-right">পরিশোধিত</TableHead>
-                <TableHead className="text-right">বকেয়া</TableHead>
-                <TableHead>ডিউ ডেট</TableHead><TableHead>স্ট্যাটাস</TableHead>
+                <TableHead>{tx("বিল নং", "Bill No.")}</TableHead><TableHead>{tx("মাস", "Month")}</TableHead>
+                <TableHead className="text-right">{tx("অ্যামাউন্ট", "Amount")}</TableHead>
+                <TableHead className="text-right">{tx("পরিশোধিত", "Paid")}</TableHead>
+                <TableHead className="text-right">{tx("বকেয়া", "Due")}</TableHead>
+                <TableHead>{tx("ডিউ ডেট", "Due Date")}</TableHead><TableHead>{tx("স্ট্যাটাস", "Status")}</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {bills.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">কোনো বিল নেই।</TableCell></TableRow>}
+                {bills.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">{tx("কোনো বিল নেই।", "No bills.")}</TableCell></TableRow>}
                 {bills.map((b) => (
                   <TableRow key={b.id}>
                     <TableCell className="font-mono text-xs">{b.bill_number}</TableCell>
                     <TableCell>{fmtDate(b.billing_month)}</TableCell>
-                    <TableCell className="text-right">{bdt(b.amount)}</TableCell>
-                    <TableCell className="text-right text-emerald-600">{bdt(b.paid_amount)}</TableCell>
-                    <TableCell className="text-right text-rose-600">{bdt(b.due_amount)}</TableCell>
+                    <TableCell className="text-right">{bdt(Number(b.amount ?? 0))}</TableCell>
+                    <TableCell className="text-right text-emerald-600">{bdt(Number(b.paid_amount ?? 0))}</TableCell>
+                    <TableCell className="text-right text-rose-600">{bdt(Number(b.due_amount ?? 0))}</TableCell>
                     <TableCell>{fmtDate(b.due_date)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={BILL_TONE[b.status] ?? ""}>{b.status}</Badge>
@@ -217,23 +217,23 @@ function CustomerDetailPage() {
       {/* ============ Payments history ============ */}
       <Card>
         <CardContent className="p-4 space-y-3">
-          <div className="font-semibold">সাম্প্রতিক পেমেন্ট</div>
+          <div className="font-semibold">{tx("সাম্প্রতিক পেমেন্ট", "Recent Payments")}</div>
           <div className="rounded-xl border overflow-x-auto">
             <Table>
               <TableHeader><TableRow>
-                <TableHead>রিসিট</TableHead><TableHead>তারিখ</TableHead>
-                <TableHead>মেথড</TableHead><TableHead>TrxID</TableHead>
-                <TableHead className="text-right">অ্যামাউন্ট</TableHead>
+                <TableHead>{tx("রিসিট", "Receipt")}</TableHead><TableHead>{tx("তারিখ", "Date")}</TableHead>
+                <TableHead>{tx("মেথড", "Method")}</TableHead><TableHead>TrxID</TableHead>
+                <TableHead className="text-right">{tx("অ্যামাউন্ট", "Amount")}</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {payments.length === 0 && <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">কোনো পেমেন্ট নেই।</TableCell></TableRow>}
+                {payments.length === 0 && <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">{tx("কোনো পেমেন্ট নেই।", "No payments.")}</TableCell></TableRow>}
                 {payments.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-mono text-xs">{p.receipt_number}</TableCell>
                     <TableCell>{fmtDate(p.paid_at)}</TableCell>
                     <TableCell><Badge variant="secondary">{p.method}</Badge></TableCell>
                     <TableCell className="font-mono text-xs">{p.transaction_id || "—"}</TableCell>
-                    <TableCell className="text-right">{bdt(p.amount)}</TableCell>
+                    <TableCell className="text-right">{bdt(Number(p.amount ?? 0))}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
