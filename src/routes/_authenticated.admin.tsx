@@ -46,22 +46,28 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
-  { to: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard, exact: true },
-  { to: "/admin/customers", label: "কাস্টমার", icon: Users },
-  { to: "/admin/packages", label: "প্যাকেজ", icon: Package },
-  { to: "/admin/zones", label: "জোন / এলাকা", icon: Radio },
-  { to: "/admin/address", label: "ঠিকানা (BD)", icon: MapPin, adminOnly: true },
-  { to: "/admin/reports/address", label: "এলাকা রিপোর্ট", icon: BarChart3 },
-  { to: "/admin/bills", label: "বিল", icon: Receipt },
-  { to: "/admin/payments", label: "পেমেন্ট লগ", icon: Wallet },
-  { to: "/admin/mikrotik", label: "MikroTik", icon: RouterIcon },
-  { to: "/admin/olt", label: "OLT / ONU", icon: Radio },
-  { to: "/admin/accounts", label: "একাউন্টস", icon: Wallet },
-  { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
-  { to: "/admin/notices", label: "নোটিশ", icon: Bell },
-  { to: "/admin/users", label: "ইউজার ও রোল", icon: UserCog, adminOnly: true },
-  { to: "/admin/settings", label: "সেটিংস", icon: SettingsIcon, adminOnly: true },
+type NavKey =
+  | "admin.nav.dashboard" | "admin.nav.customers" | "admin.nav.packages" | "admin.nav.zones"
+  | "admin.nav.address" | "admin.nav.addressReport" | "admin.nav.bills" | "admin.nav.payments"
+  | "admin.nav.mikrotik" | "admin.nav.olt" | "admin.nav.accounts" | "admin.nav.tickets"
+  | "admin.nav.notices" | "admin.nav.users" | "admin.nav.settings";
+
+const NAV: Array<{ to: string; labelKey: NavKey; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
+  { to: "/admin", labelKey: "admin.nav.dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/customers", labelKey: "admin.nav.customers", icon: Users },
+  { to: "/admin/packages", labelKey: "admin.nav.packages", icon: Package },
+  { to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio },
+  { to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true },
+  { to: "/admin/reports/address", labelKey: "admin.nav.addressReport", icon: BarChart3 },
+  { to: "/admin/bills", labelKey: "admin.nav.bills", icon: Receipt },
+  { to: "/admin/payments", labelKey: "admin.nav.payments", icon: Wallet },
+  { to: "/admin/mikrotik", labelKey: "admin.nav.mikrotik", icon: RouterIcon },
+  { to: "/admin/olt", labelKey: "admin.nav.olt", icon: Radio },
+  { to: "/admin/accounts", labelKey: "admin.nav.accounts", icon: Wallet },
+  { to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket },
+  { to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell },
+  { to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true },
+  { to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true },
 ];
 
 function AdminLayout() {
