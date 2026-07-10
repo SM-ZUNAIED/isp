@@ -60,6 +60,17 @@ function CustomerDetailPage() {
   const fetchDetail = useServerFn(getCustomerDetail);
   const q = useQuery({ queryKey: ["customer-detail", id], queryFn: () => fetchDetail({ data: { id } }) });
 
+  const qc = useQueryClient();
+  const updStatus = useServerFn(updateBillStatus);
+  const statusMut = useMutation({
+    mutationFn: (v: { bill_id: string; status: "unpaid" | "partial" | "paid" | "overdue" }) => updStatus({ data: v }),
+    onSuccess: () => {
+      toast.success(tx("স্ট্যাটাস আপডেট হয়েছে", "Status updated"));
+      qc.invalidateQueries({ queryKey: ["customer-detail", id] });
+    },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
   if (q.isLoading) {
     return <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
