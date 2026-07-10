@@ -129,16 +129,7 @@ function LandingPage() {
             <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.contact")}</a>
           </nav>
           <div className="flex items-center gap-2">
-            {session ? (
-              <Link
-                to="/customer"
-                title="আমার পোর্টাল"
-                aria-label="আমার পোর্টাল"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:brightness-110 transition"
-              >
-                <UserCircle2 className="h-5 w-5" />
-              </Link>
-            ) : (
+            {!session && (
               <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
                 <Link to="/auth">{t("nav.login")}</Link>
               </Button>
@@ -148,9 +139,37 @@ function LandingPage() {
             </Button>
             <LangToggle />
             <ThemeToggle />
+            {session && (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  aria-label="আমার অ্যাকাউন্ট"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:brightness-110 transition focus:outline-none"
+                >
+                  <UserCircle2 className="h-5 w-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/customer" className="cursor-pointer">
+                      <LayoutDashboard className="h-4 w-4 mr-2" /> আমার পোর্টাল
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await signOut();
+                      toast.success("লগ আউট হয়েছে");
+                    }}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" /> লগ আউট
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </header>
+
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-hero py-20 md:py-32">
