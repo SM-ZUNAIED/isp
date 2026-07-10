@@ -513,8 +513,12 @@ function LandingPage() {
         <div className="container mx-auto grid gap-8 px-4 md:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary">
-                <Wifi className="h-5 w-5 text-primary-foreground" />
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary overflow-hidden">
+                {logoUrl ? (
+                  <img src={logoUrl} alt={ispName} className="h-full w-full object-contain" />
+                ) : (
+                  <Wifi className="h-5 w-5 text-primary-foreground" />
+                )}
               </div>
               <span className="text-xl font-bold">{ispName}</span>
             </div>
