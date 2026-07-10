@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,9 +64,41 @@ function CustomersPage() {
   const del = useServerFn(deleteCustomer);
 
   const [q, setQ] = useState("");
+  const [divisionId, setDivisionId] = useState<number | null>(null);
+  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [upazilaId, setUpazilaId] = useState<number | null>(null);
 
   const customersQ = useQuery({ queryKey: ["customers"], queryFn: () => list() });
   const optsQ = useQuery({ queryKey: ["catalog", "customers-opts"], queryFn: () => opts() });
+
+  const divisionsQ = useQuery({
+    queryKey: ["addr", "divisions"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("divisions").select("id,name,bn_name").order("name");
+      if (error) throw error; return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
+  const districtsQ = useQuery({
+    queryKey: ["addr", "districts", divisionId],
+    enabled: divisionId != null,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("districts")
+        .select("id,name,bn_name").eq("division_id", divisionId!).order("name");
+      if (error) throw error; return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
+  const upazilasQ = useQuery({
+    queryKey: ["addr", "upazilas", districtId],
+    enabled: districtId != null,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("upazilas")
+        .select("id,name,bn_name").eq("district_id", districtId!).order("name");
+      if (error) throw error; return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["customers"] });
 
@@ -82,16 +115,24 @@ function CustomersPage() {
   });
 
   const rows = useMemo(() => {
-    const all = customersQ.data ?? [];
+    let all = customersQ.data ?? [];
+    if (divisionId != null) all = all.filter((r) => r.division_id === divisionId);
+    if (districtId != null) all = all.filter((r) => r.district_id === districtId);
+    if (upazilaId != null) all = all.filter((r) => r.upazila_id === upazilaId);
     if (!q.trim()) return all;
     const s = q.toLowerCase();
     return all.filter(
       (r) =>
         r.full_name?.toLowerCase().includes(s) ||
         r.customer_code?.toLowerCase().includes(s) ||
-        r.mobile?.toLowerCase().includes(s),
+        r.mobile?.toLowerCase().includes(s) ||
+        r.address_line?.toLowerCase().includes(s) ||
+        r.address?.toLowerCase().includes(s),
     );
-  }, [customersQ.data, q]);
+  }, [customersQ.data, q, divisionId, districtId, upazilaId]);
+
+  const clearFilters = () => { setDivisionId(null); setDistrictId(null); setUpazilaId(null); };
+  const hasFilter = divisionId != null || districtId != null || upazilaId != null || q.trim() !== "";
 
   return (
     <div className="space-y-6">
@@ -110,14 +151,55 @@ function CustomersPage() {
 
       <Card>
         <CardContent className="p-4 space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="নাম, কোড বা মোবাইল দিয়ে খুঁজুন..."
-              className="pl-9"
-            />
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">খুঁজুন</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="নাম, কোড, মোবাইল, ঠিকানা..."
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              <FilterSelect
+                label="বিভাগ"
+                loading={divisionsQ.isLoading}
+                rows={divisionsQ.data ?? []}
+                value={divisionId}
+                onChange={(v) => { setDivisionId(v as number | null); setDistrictId(null); setUpazilaId(null); }}
+              />
+              <FilterSelect
+                label="জেলা"
+                loading={districtsQ.isFetching}
+                rows={districtsQ.data ?? []}
+                value={districtId}
+                disabled={divisionId == null}
+                depHint="প্রথমে বিভাগ"
+                onChange={(v) => { setDistrictId(v as number | null); setUpazilaId(null); }}
+              />
+              <FilterSelect
+                label="উপজেলা"
+                loading={upazilasQ.isFetching}
+                rows={upazilasQ.data ?? []}
+                value={upazilaId}
+                disabled={districtId == null}
+                depHint="প্রথমে জেলা"
+                onChange={(v) => setUpazilaId(v as number | null)}
+              />
+            </div>
+            {hasFilter && (
+              <Button variant="outline" size="sm" onClick={() => { setQ(""); clearFilters(); }} className="lg:mb-0.5">
+                <X className="h-4 w-4 mr-1" /> ফিল্টার ক্লিয়ার
+              </Button>
+            )}
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            দেখানো হচ্ছে {bn.format(rows.length)} / {bn.format(customersQ.data?.length ?? 0)} জন
           </div>
 
           <div className="rounded-xl border overflow-x-auto">
@@ -127,6 +209,7 @@ function CustomersPage() {
                   <TableHead>কোড</TableHead>
                   <TableHead>নাম</TableHead>
                   <TableHead>মোবাইল</TableHead>
+                  <TableHead>ঠিকানা</TableHead>
                   <TableHead>প্যাকেজ</TableHead>
                   <TableHead>জোন</TableHead>
                   <TableHead className="text-right">বিল (৳)</TableHead>
@@ -136,13 +219,13 @@ function CustomersPage() {
               </TableHeader>
               <TableBody>
                 {customersQ.isLoading && (
-                  <TableRow><TableCell colSpan={8} className="py-10 text-center">
+                  <TableRow><TableCell colSpan={9} className="py-10 text-center">
                     <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
                   </TableCell></TableRow>
                 )}
                 {!customersQ.isLoading && rows.length === 0 && (
-                  <TableRow><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
-                    কোনো কাস্টমার নেই। উপরে "নতুন কাস্টমার" বাটনে ক্লিক করে যোগ করুন।
+                  <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
+                    কোনো কাস্টমার নেই।
                   </TableCell></TableRow>
                 )}
                 {rows.map((r) => {
@@ -152,6 +235,12 @@ function CustomersPage() {
                       <TableCell className="font-mono text-xs">{r.customer_code}</TableCell>
                       <TableCell className="font-medium">{r.full_name}</TableCell>
                       <TableCell>{r.mobile}</TableCell>
+                      <TableCell className="max-w-[240px]">
+                        <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                          {(r.address_line || r.address) && <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />}
+                          <span className="line-clamp-2">{r.address_line || r.address || "—"}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>{r.packages?.name ?? "—"}</TableCell>
                       <TableCell>{r.zones?.name ?? "—"}</TableCell>
                       <TableCell className="text-right">{bn.format(Number(r.monthly_bill ?? 0))}</TableCell>
@@ -410,6 +499,45 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div className="space-y-1.5">
       <Label className="text-xs font-medium">{label}</Label>
       {children}
+    </div>
+  );
+}
+
+function FilterSelect({
+  label, rows, loading, value, onChange, disabled, depHint,
+}: {
+  label: string;
+  rows: Array<{ id: number | string; name: string; bn_name?: string | null }>;
+  loading: boolean;
+  value: number | string | null;
+  onChange: (v: number | string | null) => void;
+  disabled?: boolean;
+  depHint?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      <Select
+        disabled={disabled}
+        value={value == null ? "__all__" : String(value)}
+        onValueChange={(v) => {
+          if (v === "__all__") return onChange(null);
+          const n = Number(v);
+          onChange(!Number.isNaN(n) && String(n) === v ? n : v);
+        }}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder={disabled ? (depHint ?? "নিষ্ক্রিয়") : (loading ? "লোড হচ্ছে..." : "সব")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">সব {label}</SelectItem>
+          {rows.map((r) => (
+            <SelectItem key={String(r.id)} value={String(r.id)}>
+              {r.bn_name || r.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
