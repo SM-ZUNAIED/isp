@@ -41,6 +41,8 @@ const CATEGORY: Record<string, { bn: string; en: string }> = {
 
 function TicketsPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { lang } = useFmt();
   const list = useServerFn(listTickets);
   const setStatus = useServerFn(updateTicketStatus);
   const q = useQuery({ queryKey: ["tickets"], queryFn: () => list() });
@@ -49,25 +51,26 @@ function TicketsPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const statusMut = useMutation({
     mutationFn: (v: { id: string; status: "pending" | "in_progress" | "solved" | "closed" }) => setStatus({ data: v }),
-    onSuccess: () => { toast.success("স্ট্যাটাস আপডেট"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("স্ট্যাটাস আপডেট", "Status updated")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">সাপোর্ট টিকেট</h1>
-        <p className="text-muted-foreground">গ্রাহকের অভিযোগ ও সাপোর্ট ম্যানেজ করুন</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("সাপোর্ট টিকেট", "Support Tickets")}</h1>
+        <p className="text-muted-foreground">{tx("গ্রাহকের অভিযোগ ও সাপোর্ট ম্যানেজ করুন", "Manage customer complaints and support")}</p>
       </div>
 
       {q.isLoading ? (
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
-        <Card><CardContent className="p-10 text-center text-muted-foreground">কোনো টিকেট নেই।</CardContent></Card>
+        <Card><CardContent className="p-10 text-center text-muted-foreground">{tx("কোনো টিকেট নেই।", "No tickets.")}</CardContent></Card>
       ) : (
         <div className="grid gap-3">
           {(q.data ?? []).map((t) => {
             const st = STATUS[t.status];
+            const cat = CATEGORY[t.category];
             return (
               <Card key={t.id} className="hover:shadow-md transition">
                 <CardContent className="p-4 flex flex-col sm:flex-row gap-3 sm:items-center">
@@ -77,22 +80,22 @@ function TicketsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{t.subject}</span>
-                      <Badge variant="outline" className={st.tone}>{st.label}</Badge>
-                      <Badge variant="outline">{CATEGORY[t.category] ?? t.category}</Badge>
+                      <Badge variant="outline" className={st.tone}>{tx(st.bn, st.en)}</Badge>
+                      <Badge variant="outline">{cat ? tx(cat.bn, cat.en) : t.category}</Badge>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       #{t.ticket_number} • {t.customers?.full_name ?? "—"} ({t.customers?.mobile ?? "—"})
-                      • {new Date(t.created_at).toLocaleString("bn-BD")}
+                      • {new Date(t.created_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <Select value={t.status} onValueChange={(v) => statusMut.mutate({ id: t.id, status: v as "pending" | "in_progress" | "solved" | "closed" })}>
                       <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {Object.entries(STATUS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                        {Object.entries(STATUS).map(([k, v]) => <SelectItem key={k} value={k}>{tx(v.bn, v.en)}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                    <Button size="sm" variant="outline" onClick={() => setOpenId(t.id)}>বিস্তারিত</Button>
+                    <Button size="sm" variant="outline" onClick={() => setOpenId(t.id)}>{tx("বিস্তারিত", "Details")}</Button>
                   </div>
                 </CardContent>
               </Card>
