@@ -348,7 +348,7 @@ function CustomerFormDialog({
   const update = useServerFn(updateCustomer);
   const [open, setOpen] = useState(false);
   const empty = {
-    customer_code: "", full_name: "", mobile: "", alt_mobile: "", address: "", package_id: "",
+    customer_code: "", full_name: "", mobile: "", alt_mobile: "", email: "", address: "", package_id: "",
     zone_id: "", monthly_bill: "0", status: "pending" as CustomerStatus,
     pppoe_username: "", pppoe_password: "",
   };
