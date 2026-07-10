@@ -97,3 +97,40 @@ export const deleteCustomer = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const getCustomerDetail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { supabase } = context;
+    const { data: c, error } = await supabase.from("customers").select(
+      "id, customer_code, full_name, mobile, address, address_line, status, monthly_bill, expiry_date, created_at, pppoe_username, pppoe_password, division_id, district_id, upazila_id, union_id, post_office_id, village_id, area_id, road_id, building_id, packages(name, monthly_price), zones(name)",
+    ).eq("id", data.id).maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!c) throw new Error("কাস্টমার পাওয়া যায়নি");
+
+    const [dv, ds, up, un, po, vi, ar, rd, bd, bills, pays] = await Promise.all([
+      c.division_id != null ? supabase.from("divisions").select("id,name,bn_name").eq("id", c.division_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.district_id != null ? supabase.from("districts").select("id,name,bn_name").eq("id", c.district_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.upazila_id != null ? supabase.from("upazilas").select("id,name,bn_name").eq("id", c.upazila_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.union_id ? supabase.from("unions").select("id,name,bn_name").eq("id", c.union_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.post_office_id ? supabase.from("post_offices").select("id,name,bn_name,code").eq("id", c.post_office_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.village_id ? supabase.from("villages").select("id,name,bn_name").eq("id", c.village_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.area_id ? supabase.from("areas").select("id,name,bn_name").eq("id", c.area_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.road_id ? supabase.from("roads").select("id,name,bn_name").eq("id", c.road_id).maybeSingle() : Promise.resolve({ data: null }),
+      c.building_id ? supabase.from("buildings").select("id,name,holding_number,house_number,google_map_url").eq("id", c.building_id).maybeSingle() : Promise.resolve({ data: null }),
+      supabase.from("bills").select("id, bill_number, billing_month, amount, paid_amount, due_amount, due_date, status").eq("customer_id", c.id).order("billing_month", { ascending: false }).limit(24),
+      supabase.from("payments").select("id, receipt_number, amount, method, paid_at, transaction_id").eq("customer_id", c.id).order("paid_at", { ascending: false }).limit(24),
+    ]);
+
+    return {
+      customer: c,
+      address: {
+        division: dv.data, district: ds.data, upazila: up.data,
+        union: un.data, post_office: po.data, village: vi.data,
+        area: ar.data, road: rd.data, building: bd.data,
+      },
+      bills: bills.data ?? [],
+      payments: pays.data ?? [],
+    };
+  });
