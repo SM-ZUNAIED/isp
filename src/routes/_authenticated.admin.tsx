@@ -32,6 +32,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useI18n } from "@/hooks/use-i18n";
 
 const getMyRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -45,26 +46,33 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
-  { to: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard, exact: true },
-  { to: "/admin/customers", label: "কাস্টমার", icon: Users },
-  { to: "/admin/packages", label: "প্যাকেজ", icon: Package },
-  { to: "/admin/zones", label: "জোন / এলাকা", icon: Radio },
-  { to: "/admin/address", label: "ঠিকানা (BD)", icon: MapPin, adminOnly: true },
-  { to: "/admin/reports/address", label: "এলাকা রিপোর্ট", icon: BarChart3 },
-  { to: "/admin/bills", label: "বিল", icon: Receipt },
-  { to: "/admin/payments", label: "পেমেন্ট লগ", icon: Wallet },
-  { to: "/admin/mikrotik", label: "MikroTik", icon: RouterIcon },
-  { to: "/admin/olt", label: "OLT / ONU", icon: Radio },
-  { to: "/admin/accounts", label: "একাউন্টস", icon: Wallet },
-  { to: "/admin/tickets", label: "সাপোর্ট টিকেট", icon: Ticket },
-  { to: "/admin/notices", label: "নোটিশ", icon: Bell },
-  { to: "/admin/users", label: "ইউজার ও রোল", icon: UserCog, adminOnly: true },
-  { to: "/admin/settings", label: "সেটিংস", icon: SettingsIcon, adminOnly: true },
+type NavKey =
+  | "admin.nav.dashboard" | "admin.nav.customers" | "admin.nav.packages" | "admin.nav.zones"
+  | "admin.nav.address" | "admin.nav.addressReport" | "admin.nav.bills" | "admin.nav.payments"
+  | "admin.nav.mikrotik" | "admin.nav.olt" | "admin.nav.accounts" | "admin.nav.tickets"
+  | "admin.nav.notices" | "admin.nav.users" | "admin.nav.settings";
+
+const NAV: Array<{ to: string; labelKey: NavKey; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
+  { to: "/admin", labelKey: "admin.nav.dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/customers", labelKey: "admin.nav.customers", icon: Users },
+  { to: "/admin/packages", labelKey: "admin.nav.packages", icon: Package },
+  { to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio },
+  { to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true },
+  { to: "/admin/reports/address", labelKey: "admin.nav.addressReport", icon: BarChart3 },
+  { to: "/admin/bills", labelKey: "admin.nav.bills", icon: Receipt },
+  { to: "/admin/payments", labelKey: "admin.nav.payments", icon: Wallet },
+  { to: "/admin/mikrotik", labelKey: "admin.nav.mikrotik", icon: RouterIcon },
+  { to: "/admin/olt", labelKey: "admin.nav.olt", icon: Radio },
+  { to: "/admin/accounts", labelKey: "admin.nav.accounts", icon: Wallet },
+  { to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket },
+  { to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell },
+  { to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true },
+  { to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true },
 ];
 
 function AdminLayout() {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
   const roles = rolesQ.data ?? [];
@@ -73,7 +81,7 @@ function AdminLayout() {
   const hasAccess = isAdmin || isStaff;
 
   if (rolesQ.isLoading) {
-    return <div className="grid min-h-screen place-items-center"><div className="text-muted-foreground text-sm">লোড হচ্ছে...</div></div>;
+    return <div className="grid min-h-screen place-items-center"><div className="text-muted-foreground text-sm">{t("admin.loading")}</div></div>;
   }
 
   if (!hasAccess) {
@@ -83,11 +91,11 @@ function AdminLayout() {
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-destructive/10">
             <ShieldAlert className="h-8 w-8 text-destructive" />
           </div>
-          <h1 className="text-2xl font-bold">অ্যাক্সেস নেই</h1>
-          <p className="text-muted-foreground">এই প্যানেলে প্রবেশের জন্য Admin বা Staff role প্রয়োজন।</p>
+          <h1 className="text-2xl font-bold">{t("admin.noAccess.title")}</h1>
+          <p className="text-muted-foreground">{t("admin.noAccess.desc")}</p>
           <div className="flex gap-2 justify-center">
-            <Link to="/customer"><Button variant="outline">কাস্টমার প্যানেলে যান</Button></Link>
-            <Link to="/"><Button className="bg-gradient-primary text-white">হোম</Button></Link>
+            <Link to="/customer"><Button variant="outline">{t("admin.noAccess.customer")}</Button></Link>
+            <Link to="/"><Button className="bg-gradient-primary text-white">{t("admin.noAccess.home")}</Button></Link>
           </div>
         </div>
       </div>
@@ -144,6 +152,7 @@ function TopBarActions() {
 
 function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
   const { user, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -154,7 +163,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary text-white font-bold">NB</div>
           <div>
             <div className="font-bold leading-tight">Net Bill Pro</div>
-            <div className="text-xs text-muted-foreground">ISP অ্যাডমিন প্যানেল</div>
+            <div className="text-xs text-muted-foreground">{t("admin.brand.sub")}</div>
           </div>
         </Link>
       </div>
@@ -182,8 +191,8 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
               )}
             >
               <Icon className="h-4 w-4" />
-              <span className="flex-1 text-left">{item.label}</span>
-              {item.disabled && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5">শীঘ্রই</span>}
+              <span className="flex-1 text-left">{t(item.labelKey)}</span>
+              {item.disabled && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5">{t("admin.soon")}</span>}
             </button>
           );
         })}
@@ -198,7 +207,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
             navigate({ to: "/", replace: true });
           }}
         >
-          <LogOut className="mr-2 h-4 w-4" /> লগআউট
+          <LogOut className="mr-2 h-4 w-4" /> {t("admin.logout")}
         </Button>
       </div>
     </div>

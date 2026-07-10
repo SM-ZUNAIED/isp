@@ -8,18 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getDashboardStats, claimOwnerRole } from "@/lib/admin.functions";
+import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const bdt = (n: number) => `৳ ${bn.format(Math.round(n))}`;
-
 function AdminDashboard() {
   const router = useRouter();
+  const { t, lang } = useI18n();
   const fetchStats = useServerFn(getDashboardStats);
   const claim = useServerFn(claimOwnerRole);
+
+  const nf = new Intl.NumberFormat(lang === "bn" ? "bn-BD" : "en-US");
+  const money = (n: number) => (lang === "bn" ? `৳ ${nf.format(Math.round(n))}` : `BDT ${nf.format(Math.round(n))}`);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin", "stats"],
@@ -30,13 +32,13 @@ function AdminDashboard() {
     mutationFn: () => claim(),
     onSuccess: (r) => {
       if (r.ok) {
-        toast.success("আপনি এখন Owner (Admin)");
+        toast.success(t("admin.dash.claim.success"));
         router.invalidate();
       } else {
-        toast.error("ইতিমধ্যে একজন Admin আছেন");
+        toast.error(t("admin.dash.claim.exists"));
       }
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(t("admin.dash.claim.failed"), { description: e.message }),
   });
 
   if (isLoading) {
@@ -47,7 +49,7 @@ function AdminDashboard() {
     );
   }
   if (error) {
-    return <div className="text-destructive">লোড করতে সমস্যা হয়েছে: {(error as Error).message}</div>;
+    return <div className="text-destructive">{t("admin.dash.loadError")}: {(error as Error).message}</div>;
   }
 
   const s = data!;
@@ -56,8 +58,8 @@ function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">ড্যাশবোর্ড</h1>
-        <p className="text-muted-foreground">আপনার ISP ব্যবসার সারসংক্ষেপ</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{t("admin.dash.title")}</h1>
+        <p className="text-muted-foreground">{t("admin.dash.subtitle")}</p>
       </div>
 
       {!isPrivileged && (
@@ -65,19 +67,16 @@ function AdminDashboard() {
           <CardContent className="flex flex-col md:flex-row md:items-center gap-3 p-4">
             <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
             <div className="flex-1">
-              <div className="font-semibold">আপনার এখনো Admin অনুমতি নেই</div>
-              <p className="text-sm text-muted-foreground">
-                আপনি যদি এই ISP এর মালিক হন এবং কোনো Admin এখনো সেট করা না থাকে, নিচের বাটনে ক্লিক করে
-                নিজেকে Owner (Admin) হিসেবে দাবি করুন।
-              </p>
+              <div className="font-semibold">{t("admin.dash.noAdmin.title")}</div>
+              <p className="text-sm text-muted-foreground">{t("admin.dash.noAdmin.desc")}</p>
             </div>
             <div className="flex gap-2 flex-wrap">
               <Button variant="outline" asChild>
-                <a href="/customer">কাস্টমার পোর্টাল</a>
+                <a href="/customer">{t("admin.dash.customerPortal")}</a>
               </Button>
               <Button onClick={() => claimMut.mutate()} disabled={claimMut.isPending}>
                 {claimMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
-                Owner হিসেবে দাবি করুন
+                {t("admin.dash.claim")}
               </Button>
             </div>
           </CardContent>
@@ -85,22 +84,22 @@ function AdminDashboard() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="মোট কাস্টমার" value={bn.format(s.totalCustomers)} icon={Users} tone="indigo" />
-        <StatCard title="সক্রিয় কাস্টমার" value={bn.format(s.activeCustomers)} icon={UserCheck} tone="emerald" />
-        <StatCard title="এই মাসের কালেকশন" value={bdt(s.monthlyRevenue)} icon={Wallet} tone="amber" />
-        <StatCard title="বকেয়া বিল" value={bn.format(s.pendingBills)} icon={Receipt} tone="rose" />
-        <StatCard title="খোলা টিকেট" value={bn.format(s.openTickets)} icon={Ticket} tone="indigo" />
-        <StatCard title="অনলাইন MikroTik" value={bn.format(s.onlineDevices)} icon={Wifi} tone="emerald" />
+        <StatCard title={t("admin.dash.stat.totalCustomers")} value={nf.format(s.totalCustomers)} icon={Users} tone="indigo" />
+        <StatCard title={t("admin.dash.stat.activeCustomers")} value={nf.format(s.activeCustomers)} icon={UserCheck} tone="emerald" />
+        <StatCard title={t("admin.dash.stat.monthlyRevenue")} value={money(s.monthlyRevenue)} icon={Wallet} tone="amber" />
+        <StatCard title={t("admin.dash.stat.pendingBills")} value={nf.format(s.pendingBills)} icon={Receipt} tone="rose" />
+        <StatCard title={t("admin.dash.stat.openTickets")} value={nf.format(s.openTickets)} icon={Ticket} tone="indigo" />
+        <StatCard title={t("admin.dash.stat.onlineDevices")} value={nf.format(s.onlineDevices)} icon={Wifi} tone="emerald" />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>দ্রুত পরিচিতি</CardTitle>
+          <CardTitle>{t("admin.dash.quick.title")}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-2">
-          <p>• কাস্টমার, প্যাকেজ, বিল, MikroTik, OLT/ONU মডিউল পরবর্তী ফেজে যুক্ত হবে।</p>
-          <p>• সব ডেটা আপনার নিজস্ব Supabase ডাটাবেসে সুরক্ষিত (RLS enabled)।</p>
-          <p>• সাপোর্ট: TechnoNex — 01339562416</p>
+          <p>{t("admin.dash.quick.1")}</p>
+          <p>{t("admin.dash.quick.2")}</p>
+          <p>{t("admin.dash.quick.3")}</p>
         </CardContent>
       </Card>
     </div>
