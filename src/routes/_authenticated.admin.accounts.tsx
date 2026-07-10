@@ -276,11 +276,12 @@ function EntrySection({
 }
 
 function EditEntryDialog({
-  kind, row, onSaved,
+  kind, row, onSaved, customers,
 }: {
   kind: "income" | "expense";
   row: EntryRow;
   onSaved: () => void;
+  customers: CustomerOpt[];
 }) {
   const tx = useTx();
   const update = useServerFn(updateEntry);
@@ -324,10 +325,21 @@ function EditEntryDialog({
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
           <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
             <Input required value={category} onChange={(e) => setCategory(e.target.value)} /></div>
-          <div className="space-y-1 col-span-2"><Label className="text-xs">
-            {kind === "income" ? tx("ইউজার / প্রদানকারী", "User / Payer") : tx("ইউজার / প্রাপক", "User / Payee")}
-          </Label>
-            <Input value={partyName} onChange={(e) => setPartyName(e.target.value)} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("কাস্টমার", "Customer")}</Label>
+            <Select value={partyName || "__none"} onValueChange={(v) => setPartyName(v === "__none" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder={tx("কাস্টমার নির্বাচন", "Select customer")} /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="__none">{tx("— কোনটি না —", "— None —")}</SelectItem>
+                {customers.map((c) => (
+                  <SelectItem key={c.id} value={`${c.full_name} (${c.customer_code})`}>
+                    {c.full_name} ({c.customer_code})
+                  </SelectItem>
+                ))}
+                {partyName && !customers.some((c) => `${c.full_name} (${c.customer_code})` === partyName) && (
+                  <SelectItem value={partyName}>{partyName}</SelectItem>
+                )}
+              </SelectContent>
+            </Select></div>
           <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <DialogFooter className="col-span-2">
