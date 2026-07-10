@@ -140,7 +140,7 @@ function AdminLayout() {
 
       <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-card px-4 py-3">
         <Link to="/" className="flex items-center gap-2 font-bold">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-white">NB</div>
+          <BrandLogo size={9} />
           <span>Net Bill Pro</span>
         </Link>
         <div className="flex items-center gap-2">
