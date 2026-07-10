@@ -235,10 +235,8 @@ function CustomerPortal() {
               />
             </div>
 
-            <PresentAddressCard
-              customer={c}
-              onSaved={() => qc.invalidateQueries({ queryKey: ["customer-portal"] })}
-            />
+
+
 
 
 
