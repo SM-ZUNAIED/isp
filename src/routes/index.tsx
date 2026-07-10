@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useLogoUrl } from "@/hooks/use-logo";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -84,6 +85,7 @@ function LandingPage() {
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
   const whatsapp = settings?.whatsapp ?? "01339562416";
+  const { data: logoUrl } = useLogoUrl(settings?.logo_url ?? null);
 
   const submitInquiryFn = useServerFn(submitInquiry);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -141,8 +143,12 @@ function LandingPage() {
       <header className="sticky top-0 z-40 glass border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary shadow-glow">
-              <Wifi className="h-5 w-5 text-primary-foreground" />
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary shadow-glow overflow-hidden">
+              {logoUrl ? (
+                <img src={logoUrl} alt={ispName} className="h-full w-full object-contain" />
+              ) : (
+                <Wifi className="h-5 w-5 text-primary-foreground" />
+              )}
             </div>
             <span className="text-xl font-bold">{ispName}</span>
           </Link>
