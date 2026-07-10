@@ -118,11 +118,12 @@ function StatMini({ label, value, icon: Icon, tone }: {
 }
 
 function EntrySection({
-  kind, rows, loading, onChange,
+  kind, rows, loading, onChange, customers,
 }: {
   kind: "income" | "expense";
   rows: EntryRow[];
   loading: boolean; onChange: () => void;
+  customers: CustomerOpt[];
 }) {
   const tx = useTx();
   const { n } = useFmt();
@@ -161,11 +162,18 @@ function EntrySection({
         <CardContent className="p-4">
           <form onSubmit={(e) => { e.preventDefault(); if (amount && category.trim()) addMut.mutate(); }}
             className="grid grid-cols-1 md:grid-cols-6 gap-3">
-            <div className="space-y-1"><Label className="text-xs">
-              {kind === "income" ? tx("ইউজার / প্রদানকারী", "User / Payer") : tx("ইউজার / প্রাপক", "User / Payee")}
-            </Label>
-              <Input value={partyName} onChange={(e) => setPartyName(e.target.value)}
-                placeholder={tx("নাম", "Name")} /></div>
+            <div className="space-y-1"><Label className="text-xs">{tx("কাস্টমার", "Customer")}</Label>
+              <Select value={partyName || "__none"} onValueChange={(v) => setPartyName(v === "__none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder={tx("কাস্টমার নির্বাচন", "Select customer")} /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="__none">{tx("— কোনটি না —", "— None —")}</SelectItem>
+                  {customers.map((c) => (
+                    <SelectItem key={c.id} value={`${c.full_name} (${c.customer_code})`}>
+                      {c.full_name} ({c.customer_code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select></div>
             <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
               <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
             <div className="space-y-1"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
