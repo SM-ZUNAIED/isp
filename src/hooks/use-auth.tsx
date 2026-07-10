@@ -26,8 +26,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setLoading(false);
     });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    // Validate against the Auth server: a stale/deleted-user token in
+    // localStorage otherwise sticks around and every server fn 401s.
+    supabase.auth.getUser().then(async ({ data, error }) => {
+      if (error || !data?.user) {
+        await supabase.auth.signOut().catch(() => {});
+        setSession(null);
+      } else {
+        const { data: s } = await supabase.auth.getSession();
+        setSession(s.session);
+      }
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
