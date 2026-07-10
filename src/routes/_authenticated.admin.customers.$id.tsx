@@ -48,6 +48,10 @@ const BILL_TONE: Record<string, string> = {
 function CustomerDetailPage() {
   const { id } = Route.useParams();
   const router = useRouter();
+  const tx = useTx();
+  const { lang, n: nfmt, bdt } = useFmt();
+  const fmtDate = (s: string | null | undefined) =>
+    s ? new Date(s).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", { year: "numeric", month: "short", day: "numeric" }) : "—";
   const fetchDetail = useServerFn(getCustomerDetail);
   const q = useQuery({ queryKey: ["customer-detail", id], queryFn: () => fetchDetail({ data: { id } }) });
 
@@ -57,8 +61,8 @@ function CustomerDetailPage() {
   if (q.error || !q.data) {
     return (
       <div className="p-8 text-center space-y-3">
-        <p className="text-destructive">{(q.error as Error)?.message ?? "কাস্টমার লোড হয়নি"}</p>
-        <Button variant="outline" onClick={() => router.invalidate()}>রিট্রাই</Button>
+        <p className="text-destructive">{(q.error as Error)?.message ?? tx("কাস্টমার লোড হয়নি", "Customer not loaded")}</p>
+        <Button variant="outline" onClick={() => router.invalidate()}>{tx("রিট্রাই", "Retry")}</Button>
       </div>
     );
   }
@@ -69,7 +73,7 @@ function CustomerDetailPage() {
   const totalDue = bills.reduce((s, b) => s + Number(b.due_amount ?? 0), 0);
 
   const label = (o: { name?: string; bn_name?: string | null } | null | undefined) =>
-    o ? (o.bn_name || o.name || "—") : "—";
+    o ? ((lang === "bn" ? o.bn_name : o.name) || o.name || o.bn_name || "—") : "—";
 
   return (
     <div className="space-y-6">
