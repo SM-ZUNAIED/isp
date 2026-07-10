@@ -302,7 +302,7 @@ function PickField({
 
 /* ============ Add-child dialog ============ */
 
-type AddLevel = "union" | "post_office" | "village" | "area" | "road" | "building";
+type AddLevel = "union" | "post_office" | "village";
 
 function AddChildDialog({
   open, onOpenChange, level, label, parentId, onCreated,
