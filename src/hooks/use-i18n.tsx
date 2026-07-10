@@ -426,3 +426,24 @@ export function useI18n() {
   if (!ctx) throw new Error("useI18n must be used within I18nProvider");
   return ctx;
 }
+
+/**
+ * Inline translator for ad-hoc strings that don't need to live in the dictionary.
+ * Usage:  const tx = useTx(); tx("বাংলা", "English")
+ */
+export function useTx() {
+  const { lang } = useI18n();
+  return (bn: string, en: string) => (lang === "bn" ? bn : en);
+}
+
+/** Language-aware number and currency formatters. */
+export function useFmt() {
+  const { lang } = useI18n();
+  const nf = new Intl.NumberFormat(lang === "bn" ? "bn-BD" : "en-US");
+  return {
+    lang,
+    n: (v: number) => nf.format(v),
+    bdt: (v: number) => (lang === "bn" ? `৳ ${nf.format(Math.round(v))}` : `BDT ${nf.format(Math.round(v))}`),
+  };
+}
+

@@ -8,18 +8,26 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { listPayments } from "@/lib/billing.functions";
+import { useTx, useFmt, useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/payments")({
-  head: () => ({ meta: [{ title: "পেমেন্ট লগ — Net Bill Pro" }] }),
+  head: () => ({ meta: [{ title: "Payment Log — Net Bill Pro" }] }),
   component: PaymentsPage,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const METHOD_LABEL: Record<string, string> = {
-  cash: "নগদ", bkash: "বিকাশ", nagad: "নগদ (Mobile)", rocket: "রকেট", bank: "ব্যাংক", other: "অন্যান্য",
-};
-
 function PaymentsPage() {
+  const tx = useTx();
+  const { lang } = useI18n();
+  const { n, bdt } = useFmt();
+  const METHOD_LABEL: Record<string, string> = {
+    cash: tx("নগদ (Cash)", "Cash"),
+    bkash: tx("বিকাশ", "bKash"),
+    nagad: tx("নগদ (Mobile)", "Nagad"),
+    rocket: tx("রকেট", "Rocket"),
+    bank: tx("ব্যাংক", "Bank"),
+    other: tx("অন্যান্য", "Other"),
+  };
+
   const list = useServerFn(listPayments);
   const q = useQuery({ queryKey: ["payments"], queryFn: () => list() });
 
@@ -28,9 +36,12 @@ function PaymentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">পেমেন্ট লগ</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("পেমেন্ট লগ", "Payment Log")}</h1>
         <p className="text-muted-foreground">
-          সর্বমোট {bn.format(q.data?.length ?? 0)}টি এন্ট্রি — সংগ্রহ ৳ {bn.format(total)}
+          {tx(
+            `সর্বমোট ${n(q.data?.length ?? 0)}টি এন্ট্রি — সংগ্রহ ${bdt(total)}`,
+            `Total ${n(q.data?.length ?? 0)} entries — Collected ${bdt(total)}`,
+          )}
         </p>
       </div>
 
@@ -40,12 +51,12 @@ function PaymentsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>রশিদ নং</TableHead>
-                  <TableHead>কাস্টমার</TableHead>
-                  <TableHead>মাধ্যম</TableHead>
+                  <TableHead>{tx("রশিদ নং", "Receipt No.")}</TableHead>
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
+                  <TableHead>{tx("মাধ্যম", "Method")}</TableHead>
                   <TableHead>TrxID</TableHead>
-                  <TableHead className="text-right">পরিমাণ (৳)</TableHead>
-                  <TableHead>সময়</TableHead>
+                  <TableHead className="text-right">{tx("পরিমাণ (৳)", "Amount (BDT)")}</TableHead>
+                  <TableHead>{tx("সময়", "Time")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -56,7 +67,7 @@ function PaymentsPage() {
                 )}
                 {!q.isLoading && (q.data ?? []).length === 0 && (
                   <TableRow><TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                    কোনো পেমেন্ট নেই।
+                    {tx("কোনো পেমেন্ট নেই।", "No payments yet.")}
                   </TableCell></TableRow>
                 )}
                 {(q.data ?? []).map((p) => (
@@ -70,9 +81,9 @@ function PaymentsPage() {
                       <Badge variant="outline">{METHOD_LABEL[p.method] ?? p.method}</Badge>
                     </TableCell>
                     <TableCell className="font-mono text-xs">{p.transaction_id || "—"}</TableCell>
-                    <TableCell className="text-right font-semibold">৳ {bn.format(Number(p.amount))}</TableCell>
+                    <TableCell className="text-right font-semibold">{bdt(Number(p.amount))}</TableCell>
                     <TableCell className="text-sm">
-                      {new Date(p.paid_at).toLocaleString("bn-BD", { dateStyle: "medium", timeStyle: "short" })}
+                      {new Date(p.paid_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US", { dateStyle: "medium", timeStyle: "short" })}
                     </TableCell>
                   </TableRow>
                 ))}
