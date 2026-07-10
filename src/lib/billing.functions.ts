@@ -149,7 +149,7 @@ export const updateBillStatus = createServerFn({ method: "POST" })
 
     const { error } = await supabase
       .from("bills")
-      .update({ status: data.status, paid_amount: paid, due_amount: Math.max(0, due) })
+      .update({ status: data.status, paid_amount: paid })
       .eq("id", data.bill_id);
     if (error) throw new Error(error.message);
     return { ok: true };
