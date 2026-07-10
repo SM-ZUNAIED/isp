@@ -17,6 +17,9 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
@@ -24,7 +27,10 @@ import {
 import {
   listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
+import { listCustomers } from "@/lib/customers.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
+
+type CustomerOpt = { id: string; full_name: string; customer_code: string };
 
 type EntryRow = {
   id: string; amount: number; category: string;
@@ -46,6 +52,11 @@ function AccountsPage() {
   const { n, bdt } = useFmt();
   const list = useServerFn(listAccounts);
   const q = useQuery({ queryKey: ["accounts"], queryFn: () => list() });
+  const listCust = useServerFn(listCustomers);
+  const custQ = useQuery({ queryKey: ["accounts", "customers"], queryFn: () => listCust() });
+  const customers: CustomerOpt[] = (custQ.data ?? []).map((c) => ({
+    id: c.id, full_name: c.full_name, customer_code: c.customer_code,
+  }));
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["accounts"] });
     qc.invalidateQueries({ queryKey: ["admin", "stats"] });
@@ -78,10 +89,10 @@ function AccountsPage() {
           <TabsTrigger value="expense">{tx("ব্যয়", "Expense")}</TabsTrigger>
         </TabsList>
         <TabsContent value="income" className="mt-4">
-          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} />
+          <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} customers={customers} />
         </TabsContent>
         <TabsContent value="expense" className="mt-4">
-          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} />
+          <EntrySection kind="expense" rows={q.data?.expenses ?? []} loading={q.isLoading} onChange={invalidate} customers={customers} />
         </TabsContent>
       </Tabs>
     </div>
@@ -107,11 +118,12 @@ function StatMini({ label, value, icon: Icon, tone }: {
 }
 
 function EntrySection({
-  kind, rows, loading, onChange,
+  kind, rows, loading, onChange, customers,
 }: {
   kind: "income" | "expense";
   rows: EntryRow[];
   loading: boolean; onChange: () => void;
+  customers: CustomerOpt[];
 }) {
   const tx = useTx();
   const { n } = useFmt();
@@ -150,11 +162,18 @@ function EntrySection({
         <CardContent className="p-4">
           <form onSubmit={(e) => { e.preventDefault(); if (amount && category.trim()) addMut.mutate(); }}
             className="grid grid-cols-1 md:grid-cols-6 gap-3">
-            <div className="space-y-1"><Label className="text-xs">
-              {kind === "income" ? tx("ইউজার / প্রদানকারী", "User / Payer") : tx("ইউজার / প্রাপক", "User / Payee")}
-            </Label>
-              <Input value={partyName} onChange={(e) => setPartyName(e.target.value)}
-                placeholder={tx("নাম", "Name")} /></div>
+            <div className="space-y-1"><Label className="text-xs">{tx("কাস্টমার", "Customer")}</Label>
+              <Select value={partyName || "__none"} onValueChange={(v) => setPartyName(v === "__none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder={tx("কাস্টমার নির্বাচন", "Select customer")} /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="__none">{tx("— কোনটি না —", "— None —")}</SelectItem>
+                  {customers.map((c) => (
+                    <SelectItem key={c.id} value={`${c.full_name} (${c.customer_code})`}>
+                      {c.full_name} ({c.customer_code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select></div>
             <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
               <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
             <div className="space-y-1"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
@@ -180,7 +199,7 @@ function EntrySection({
                 <TableRow>
                   <TableHead>{tx("তারিখ", "Date")}</TableHead>
                   <TableHead>{tx("বিভাগ", "Category")}</TableHead>
-                  <TableHead>{tx("ইউজার", "User")}</TableHead>
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
                   <TableHead>{tx("বর্ণনা", "Description")}</TableHead>
                   <TableHead className="text-right">{tx("পরিমাণ (৳)", "Amount (BDT)")}</TableHead>
                   <TableHead></TableHead>
@@ -216,7 +235,7 @@ function EntrySection({
                         </span>
                       ) : (
                         <>
-                          <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
+                          <EditEntryDialog kind={kind} row={r} onSaved={onChange} customers={customers} />
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button size="sm" variant="ghost" className="text-destructive">
@@ -257,11 +276,12 @@ function EntrySection({
 }
 
 function EditEntryDialog({
-  kind, row, onSaved,
+  kind, row, onSaved, customers,
 }: {
   kind: "income" | "expense";
   row: EntryRow;
   onSaved: () => void;
+  customers: CustomerOpt[];
 }) {
   const tx = useTx();
   const update = useServerFn(updateEntry);
@@ -305,10 +325,21 @@ function EditEntryDialog({
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
           <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
             <Input required value={category} onChange={(e) => setCategory(e.target.value)} /></div>
-          <div className="space-y-1 col-span-2"><Label className="text-xs">
-            {kind === "income" ? tx("ইউজার / প্রদানকারী", "User / Payer") : tx("ইউজার / প্রাপক", "User / Payee")}
-          </Label>
-            <Input value={partyName} onChange={(e) => setPartyName(e.target.value)} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("কাস্টমার", "Customer")}</Label>
+            <Select value={partyName || "__none"} onValueChange={(v) => setPartyName(v === "__none" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder={tx("কাস্টমার নির্বাচন", "Select customer")} /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="__none">{tx("— কোনটি না —", "— None —")}</SelectItem>
+                {customers.map((c) => (
+                  <SelectItem key={c.id} value={`${c.full_name} (${c.customer_code})`}>
+                    {c.full_name} ({c.customer_code})
+                  </SelectItem>
+                ))}
+                {partyName && !customers.some((c) => `${c.full_name} (${c.customer_code})` === partyName) && (
+                  <SelectItem value={partyName}>{partyName}</SelectItem>
+                )}
+              </SelectContent>
+            </Select></div>
           <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <DialogFooter className="col-span-2">
