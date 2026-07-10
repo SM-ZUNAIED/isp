@@ -135,52 +135,9 @@ function TopBarActions() {
   const navigate = useNavigate();
   return (
     <div className="flex items-center gap-2">
-      <Link
-        to="/pay-bill"
-        aria-label="বিল পরিশোধ"
-        title="বিল পরিশোধ"
-        className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary text-white shadow-glow hover:brightness-110 transition"
-      >
-        <Receipt className="h-4 w-4" />
-      </Link>
       <LangToggle />
       <ThemeToggle />
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          aria-label="আমার অ্যাকাউন্ট"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:brightness-110 transition focus:outline-none"
-        >
-          <UserCircle2 className="h-5 w-5" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          {session ? (
-            <>
-              <DropdownMenuItem asChild>
-                <Link to="/customer" className="cursor-pointer">
-                  <LayoutDashboard className="h-4 w-4 mr-2" /> আমার পোর্টাল
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={async () => {
-                  await signOut();
-                  toast.success("লগ আউট হয়েছে");
-                  navigate({ to: "/", replace: true });
-                }}
-                className="cursor-pointer text-destructive focus:text-destructive"
-              >
-                <LogOut className="h-4 w-4 mr-2" /> লগ আউট
-              </DropdownMenuItem>
-            </>
-          ) : (
-            <DropdownMenuItem asChild>
-              <Link to="/auth" className="cursor-pointer">
-                <UserCircle2 className="h-4 w-4 mr-2" /> লগইন
-              </Link>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+
     </div>
   );
 }
