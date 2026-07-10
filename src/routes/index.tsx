@@ -54,7 +54,7 @@ function scrollToId(id: string) {
 function LandingPage() {
   const { data } = useSuspenseQuery(landingQuery);
   const { settings, packages, notices } = data;
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { session, signOut } = useAuth();
   const rolesQ = useQuery({
     queryKey: ["my-roles", session?.user.id],
@@ -212,10 +212,10 @@ function LandingPage() {
               <span>{t("hero.badge")}</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-6xl lg:text-7xl">
-              {settings?.hero_title ?? t("hero.title")}
+              {lang === "bn" ? (settings?.hero_title ?? t("hero.title")) : t("hero.title")}
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-lg opacity-90 md:text-xl">
-              {settings?.hero_subtitle ?? t("hero.subtitle")}
+              {lang === "bn" ? (settings?.hero_subtitle ?? t("hero.subtitle")) : t("hero.subtitle")}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => scrollToId("contact")} className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
