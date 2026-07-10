@@ -73,14 +73,15 @@ function OltPage() {
 
 function OltList() {
   const qc = useQueryClient();
+  const tx = useTx();
   const list = useServerFn(listOlts);
   const del = useServerFn(deleteOlt);
   const q = useQuery({ queryKey: ["olts"], queryFn: () => list() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["olts"] });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
@@ -89,7 +90,7 @@ function OltList() {
       {q.isLoading ? (
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
-        <Card><CardContent className="p-10 text-center text-muted-foreground">কোনো OLT নেই।</CardContent></Card>
+        <Card><CardContent className="p-10 text-center text-muted-foreground">{tx("কোনো OLT নেই।", "No OLT found.")}</CardContent></Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(q.data ?? []).map((o) => (
@@ -108,19 +109,19 @@ function OltList() {
                   <Badge variant="outline" className="uppercase">{o.brand}</Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <Info label="PON পোর্ট" value={String(o.pon_ports ?? 0)} />
-                  <Info label="স্ট্যাটাস" value={o.is_online ? "অনলাইন" : "অফলাইন"} tone={o.is_online ? "emerald" : "rose"} />
+                  <Info label={tx("PON পোর্ট", "PON Ports")} value={String(o.pon_ports ?? 0)} />
+                  <Info label={tx("স্ট্যাটাস", "Status")} value={o.is_online ? tx("অনলাইন", "Online") : tx("অফলাইন", "Offline")} tone={o.is_online ? "emerald" : "rose"} />
                 </div>
                 <div className="flex gap-2">
                   <OltFormDialog
                     mode="edit"
                     initial={o as unknown as OltRow}
                     onSaved={invalidate}
-                    trigger={<Button variant="outline" size="sm" className="flex-1"><Pencil className="h-4 w-4 mr-1" /> এডিট</Button>}
+                    trigger={<Button variant="outline" size="sm" className="flex-1"><Pencil className="h-4 w-4 mr-1" /> {tx("এডিট", "Edit")}</Button>}
                   />
                   <Button variant="ghost" size="sm" className="text-destructive flex-1"
                     onClick={() => delMut.mutate(o.id)}>
-                    <Trash2 className="h-4 w-4 mr-1" /> মুছুন
+                    <Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Delete")}
                   </Button>
                 </div>
               </CardContent>
