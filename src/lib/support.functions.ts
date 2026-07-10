@@ -237,6 +237,8 @@ const FaqItem = z.object({
   a_en: z.string().default(""),
 });
 const LandingContent = z.object({
+  hero_badge_bn: z.string().optional().nullable(),
+  hero_badge_en: z.string().optional().nullable(),
   hero_title_en: z.string().optional().nullable(),
   hero_subtitle_en: z.string().optional().nullable(),
   about_text_en: z.string().optional().nullable(),
