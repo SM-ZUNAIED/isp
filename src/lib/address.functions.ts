@@ -12,6 +12,9 @@ const AddressInput = z.object({
   area_id: z.string().uuid().nullable(),
   road_id: z.string().uuid().nullable(),
   building_id: z.string().uuid().nullable(),
+  mohalla: z.string().trim().max(200).nullable().optional(),
+  road_name: z.string().trim().max(200).nullable().optional(),
+  holding_no: z.string().trim().max(200).nullable().optional(),
   address_line: z.string().trim().max(500).nullable(),
 });
 
