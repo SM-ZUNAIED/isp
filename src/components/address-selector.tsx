@@ -116,69 +116,31 @@ export function AddressSelector({
     enabled: value.post_office_id != null,
     staleTime: 5 * 60_000,
   });
-  const areas = useQuery({
-    queryKey: ["addr", "areas", value.village_id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("areas")
-        .select("id,name,bn_name").eq("village_id", value.village_id!).order("name");
-      if (error) throw error; return (data ?? []) as Row[];
-    },
-    enabled: value.village_id != null,
-    staleTime: 5 * 60_000,
-  });
-  const roads = useQuery({
-    queryKey: ["addr", "roads", value.area_id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("roads")
-        .select("id,name,bn_name").eq("area_id", value.area_id!).order("name");
-      if (error) throw error; return (data ?? []) as Row[];
-    },
-    enabled: value.area_id != null,
-    staleTime: 5 * 60_000,
-  });
-  const buildings = useQuery({
-    queryKey: ["addr", "buildings", value.road_id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("buildings")
-        .select("id,name,bn_name:holding_number").eq("road_id", value.road_id!).order("name");
-      if (error) throw error; return (data ?? []) as Row[];
-    },
-    enabled: value.road_id != null,
-    staleTime: 5 * 60_000,
-  });
 
   // ---------- change helpers (auto-reset children) ----------
   const patch = (p: Partial<AddressValue>) => onChange({ ...value, ...p });
   const setDivision = (id: number | null) => patch({
     division_id: id, district_id: null, upazila_id: null, union_id: null,
-    post_office_id: null, village_id: null, area_id: null, road_id: null, building_id: null,
+    post_office_id: null, village_id: null,
   });
   const setDistrict = (id: number | null) => patch({
     district_id: id, upazila_id: null, union_id: null,
-    post_office_id: null, village_id: null, area_id: null, road_id: null, building_id: null,
+    post_office_id: null, village_id: null,
   });
   const setUpazila = (id: number | null) => patch({
-    upazila_id: id, union_id: null, post_office_id: null,
-    village_id: null, area_id: null, road_id: null, building_id: null,
+    upazila_id: id, union_id: null, post_office_id: null, village_id: null,
   });
   const setUnion = (id: string | null) => patch({
-    union_id: id, post_office_id: null, village_id: null, area_id: null, road_id: null, building_id: null,
+    union_id: id, post_office_id: null, village_id: null,
   });
-  const setPO = (id: string | null) => patch({
-    post_office_id: id, village_id: null, area_id: null, road_id: null, building_id: null,
-  });
-  const setVillage = (id: string | null) => patch({
-    village_id: id, area_id: null, road_id: null, building_id: null,
-  });
-  const setArea = (id: string | null) => patch({ area_id: id, road_id: null, building_id: null });
-  const setRoad = (id: string | null) => patch({ road_id: id, building_id: null });
-  const setBuilding = (id: string | null) => patch({ building_id: id });
+  const setPO = (id: string | null) => patch({ post_office_id: id, village_id: null });
+  const setVillage = (id: string | null) => patch({ village_id: id });
 
   // ---------- auto-compose formatted address line ----------
   const composed = useMemo(() => composeAddress({
-    building: pickName(buildings.data, value.building_id),
-    road: pickName(roads.data, value.road_id),
-    area: pickName(areas.data, value.area_id),
+    holding: value.holding_no,
+    road: value.road_name,
+    mohalla: value.mohalla,
     village: pickName(villages.data, value.village_id),
     post_office: pickName(postOffices.data, value.post_office_id),
     union: pickName(unions.data, value.union_id),
@@ -186,7 +148,7 @@ export function AddressSelector({
     district: pickName(districts.data, value.district_id),
     division: pickName(divisions.data, value.division_id),
   }), [
-    value, buildings.data, roads.data, areas.data, villages.data,
+    value, villages.data,
     postOffices.data, unions.data, upazilas.data, districts.data, divisions.data,
   ]);
 
@@ -219,18 +181,28 @@ export function AddressSelector({
           value={value.village_id} onSelect={(v) => setVillage(v as string | null)}
           disabled={disabled || value.post_office_id == null} depHint="প্রথমে পোস্ট অফিস"
           add={value.post_office_id ? { level: "village", parentId: value.post_office_id, onCreated: (r) => setVillage(String(r.id)) } : undefined} />
-        <PickField label={LABELS.area} rows={areas.data} loading={areas.isFetching}
-          value={value.area_id} onSelect={(v) => setArea(v as string | null)}
-          disabled={disabled || value.village_id == null} depHint="প্রথমে গ্রাম"
-          add={value.village_id ? { level: "area", parentId: value.village_id, onCreated: (r) => setArea(String(r.id)) } : undefined} />
-        <PickField label={LABELS.road} rows={roads.data} loading={roads.isFetching}
-          value={value.road_id} onSelect={(v) => setRoad(v as string | null)}
-          disabled={disabled || value.area_id == null} depHint="প্রথমে এরিয়া"
-          add={value.area_id ? { level: "road", parentId: value.area_id, onCreated: (r) => setRoad(String(r.id)) } : undefined} />
-        <PickField label={LABELS.building} rows={buildings.data} loading={buildings.isFetching}
-          value={value.building_id} onSelect={(v) => setBuilding(v as string | null)}
-          disabled={disabled || value.road_id == null} depHint="প্রথমে রোড"
-          add={value.road_id ? { level: "building", parentId: value.road_id, onCreated: (r) => setBuilding(String(r.id)) } : undefined} />
+      </div>
+
+      {/* Optional free-text fields */}
+      <div className="grid gap-3 sm:grid-cols-3 pt-1">
+        <div className="space-y-1.5">
+          <Label className="text-xs">মহল্লা / এরিয়া (ঐচ্ছিক)</Label>
+          <Input value={value.mohalla ?? ""} disabled={disabled}
+            onChange={(e) => patch({ mohalla: e.target.value || null })}
+            placeholder="যেমন: পশ্চিমপাড়া" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">রোড / রাস্তা (ঐচ্ছিক)</Label>
+          <Input value={value.road_name ?? ""} disabled={disabled}
+            onChange={(e) => patch({ road_name: e.target.value || null })}
+            placeholder="যেমন: মেইন রোড" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">হোল্ডিং / বিল্ডিং (ঐচ্ছিক)</Label>
+          <Input value={value.holding_no ?? ""} disabled={disabled}
+            onChange={(e) => patch({ holding_no: e.target.value || null })}
+            placeholder="যেমন: বাসা #১২" />
+        </div>
       </div>
 
       <div className="space-y-1.5">
