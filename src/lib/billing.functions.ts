@@ -102,7 +102,6 @@ export const collectPayment = createServerFn({ method: "POST" })
       .from("bills")
       .update({
         paid_amount: newPaid,
-        due_amount: Math.max(0, due),
         status,
       })
       .eq("id", bill.id);
