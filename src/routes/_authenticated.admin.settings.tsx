@@ -58,8 +58,8 @@ function SettingsPage() {
 
   const mut = useMutation({
     mutationFn: () => update({ data: f }),
-    onSuccess: () => toast.success("সেটিংস সংরক্ষিত"),
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => toast.success(tx("সেটিংস সংরক্ষিত", "Settings saved")),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   if (q.isLoading) {
