@@ -14,7 +14,7 @@ import {
 import { getCustomerDetail } from "@/lib/customers.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
-export const Route = createFileRoute("/_authenticated/admin/customers/$id")({
+export const Route = createFileRoute("/_authenticated/admin/customers_/$id")({
   head: () => ({ meta: [{ title: "কাস্টমার বিস্তারিত — Net Bill Pro" }] }),
   component: CustomerDetailPage,
   errorComponent: ({ error }) => (
