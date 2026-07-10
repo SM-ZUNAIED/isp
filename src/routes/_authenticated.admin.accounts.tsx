@@ -18,6 +18,7 @@ import {
 import {
   listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 type EntryRow = { id: string; amount: number; category: string; description: string | null; entry_date: string };
 
@@ -26,8 +27,6 @@ export const Route = createFileRoute("/_authenticated/admin/accounts")({
   component: AccountsPage,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const bdt = (n: number) => `৳ ${bn.format(Math.round(n))}`;
 const today = () => new Date().toISOString().slice(0, 10);
 
 function AccountsPage() {
