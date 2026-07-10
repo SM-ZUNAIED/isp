@@ -28,6 +28,9 @@ type ReviewItem = { name: string; loc_bn: string; loc_en: string; text_bn: strin
 type FaqItem = { q_bn: string; q_en: string; a_bn: string; a_en: string };
 
 type LandingContent = {
+  hero_title_en: string;
+  hero_subtitle_en: string;
+  about_text_en: string;
   features: FeatureItem[];
   about_stats: AboutStat[];
   reviews: ReviewItem[];
@@ -54,7 +57,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 const ICON_OPTIONS = Object.keys(ICON_MAP);
 
 
-const EMPTY_LANDING: LandingContent = { features: [], about_stats: [], reviews: [], faqs: [] };
+const EMPTY_LANDING: LandingContent = { hero_title_en: "", hero_subtitle_en: "", about_text_en: "", features: [], about_stats: [], reviews: [], faqs: [] };
 
 function SettingsPage() {
   const tx = useTx();
@@ -83,6 +86,9 @@ function SettingsPage() {
         address: q.data.address ?? "",
         website: q.data.website ?? "",
         landing_content: {
+          hero_title_en: lc.hero_title_en ?? "",
+          hero_subtitle_en: lc.hero_subtitle_en ?? "",
+          about_text_en: lc.about_text_en ?? "",
           features: lc.features ?? [],
           about_stats: lc.about_stats ?? [],
           reviews: lc.reviews ?? [],
@@ -148,10 +154,19 @@ function SettingsPage() {
           <TabsContent value="hero">
             <Card>
               <CardHeader><CardTitle>{tx("হোম পেজ কনটেন্ট", "Home Page Content")}</CardTitle></CardHeader>
-              <CardContent className="grid gap-4">
-                <F label={tx("Hero শিরোনাম", "Hero Title")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
-                <F label={tx("Hero সাব-টাইটেল", "Hero Subtitle")}><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
-                <F label={tx("আমাদের সম্পর্কে (About)", "About Us")}><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <F label={tx("Hero শিরোনাম (বাংলা)", "Hero Title (Bangla)")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
+                <F label={tx("Hero শিরোনাম (English)", "Hero Title (English)")}>
+                  <Input value={f.landing_content.hero_title_en ?? ""} onChange={(e) => setLC({ hero_title_en: e.target.value })} />
+                </F>
+                <F label={tx("Hero সাব-টাইটেল (বাংলা)", "Hero Subtitle (Bangla)")}><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
+                <F label={tx("Hero সাব-টাইটেল (English)", "Hero Subtitle (English)")}>
+                  <Textarea rows={2} value={f.landing_content.hero_subtitle_en ?? ""} onChange={(e) => setLC({ hero_subtitle_en: e.target.value })} />
+                </F>
+                <F label={tx("আমাদের সম্পর্কে (বাংলা)", "About Us (Bangla)")}><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
+                <F label={tx("আমাদের সম্পর্কে (English)", "About Us (English)")}>
+                  <Textarea rows={4} value={f.landing_content.about_text_en ?? ""} onChange={(e) => setLC({ about_text_en: e.target.value })} />
+                </F>
               </CardContent>
             </Card>
           </TabsContent>

@@ -237,6 +237,9 @@ const FaqItem = z.object({
   a_en: z.string().default(""),
 });
 const LandingContent = z.object({
+  hero_title_en: z.string().optional().nullable(),
+  hero_subtitle_en: z.string().optional().nullable(),
+  about_text_en: z.string().optional().nullable(),
   features: z.array(FeatureItem).default([]),
   about_stats: z.array(AboutStat).default([]),
   reviews: z.array(ReviewItem).default([]),

@@ -58,6 +58,7 @@ function LandingPage() {
   const pickLang = <B extends string, E extends string>(bn: B | undefined | null, en: E | undefined | null) =>
     (lang === "bn" ? (bn || en || "") : (en || bn || ""));
   const lc = (settings?.landing_content ?? {}) as {
+    hero_title_en?: string; hero_subtitle_en?: string; about_text_en?: string;
     features?: Array<{ icon: string; title_bn?: string; title_en?: string; desc_bn?: string; desc_en?: string }>;
     about_stats?: Array<{ value: string; label_bn?: string; label_en?: string }>;
     reviews?: Array<{ name: string; loc_bn?: string; loc_en?: string; text_bn?: string; text_en?: string }>;
@@ -224,10 +225,10 @@ function LandingPage() {
               <span>{t("hero.badge")}</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-6xl lg:text-7xl">
-              {lang === "bn" ? (settings?.hero_title ?? t("hero.title")) : t("hero.title")}
+              {lang === "bn" ? (settings?.hero_title ?? t("hero.title")) : (lc.hero_title_en || t("hero.title"))}
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-lg opacity-90 md:text-xl">
-              {lang === "bn" ? (settings?.hero_subtitle ?? t("hero.subtitle")) : t("hero.subtitle")}
+              {lang === "bn" ? (settings?.hero_subtitle ?? t("hero.subtitle")) : (lc.hero_subtitle_en || t("hero.subtitle"))}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => scrollToId("contact")} className="bg-background text-foreground hover:bg-background/90 shadow-elevated">
@@ -360,7 +361,9 @@ function LandingPage() {
           <div>
             <h2 className="text-3xl font-bold md:text-4xl">{t("about.title")}</h2>
             <p className="mt-4 text-muted-foreground">
-              {settings?.about_text ?? `${ispName} — ${t("about.default")}`}
+              {lang === "bn"
+                ? (settings?.about_text ?? `${ispName} — ${t("about.default")}`)
+                : (lc.about_text_en || `${ispName} — ${t("about.default")}`)}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
               {(lc.about_stats && lc.about_stats.length > 0
