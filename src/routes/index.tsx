@@ -363,14 +363,18 @@ function LandingPage() {
               {settings?.about_text ?? `${ispName} — ${t("about.default")}`}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <div className="rounded-2xl border bg-card p-4">
-                <div className="text-3xl font-bold text-primary">{t("about.yearsValue")}</div>
-                <div className="text-sm text-muted-foreground">{t("about.years")}</div>
-              </div>
-              <div className="rounded-2xl border bg-card p-4">
-                <div className="text-3xl font-bold text-secondary">{t("about.teamValue")}</div>
-                <div className="text-sm text-muted-foreground">{t("about.team")}</div>
-              </div>
+              {(lc.about_stats && lc.about_stats.length > 0
+                ? lc.about_stats.map((s) => ({ value: s.value, label: pickLang(s.label_bn, s.label_en) }))
+                : [
+                    { value: t("about.yearsValue"), label: t("about.years") },
+                    { value: t("about.teamValue"), label: t("about.team") },
+                  ]
+              ).map((s, i) => (
+                <div key={i} className="rounded-2xl border bg-card p-4">
+                  <div className={`text-3xl font-bold ${i % 2 === 0 ? "text-primary" : "text-secondary"}`}>{s.value}</div>
+                  <div className="text-sm text-muted-foreground">{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
           <div className="relative aspect-square rounded-3xl bg-gradient-hero p-8 shadow-elevated">
