@@ -243,3 +243,19 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
     </div>
   );
 }
+
+function BrandLogo({ size = 10 }: { size?: number }) {
+  const fetchSettings = useServerFn(getSettings);
+  const q = useQuery({
+    queryKey: ["settings", "brand"],
+    queryFn: () => fetchSettings(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: url } = useLogoUrl(q.data?.logo_url ?? null);
+  const cls = `grid place-items-center rounded-xl bg-gradient-primary text-white font-bold overflow-hidden h-${size} w-${size}`;
+  return (
+    <div className={cls} style={{ height: `${size * 0.25}rem`, width: `${size * 0.25}rem` }}>
+      {url ? <img src={url} alt="logo" className="h-full w-full object-contain" /> : "NB"}
+    </div>
+  );
+}
