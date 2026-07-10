@@ -148,7 +148,7 @@ function CustomerPortal() {
             <TabsTrigger value="bills">বিল</TabsTrigger>
             <TabsTrigger value="payments">পেমেন্ট</TabsTrigger>
             <TabsTrigger value="requests">রিকোয়েস্ট</TabsTrigger>
-            <TabsTrigger value="support">Complete Support</TabsTrigger>
+            <TabsTrigger value="support">{tx("সম্পূর্ণ সাপোর্ট", "Complete Support")}</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW */}
