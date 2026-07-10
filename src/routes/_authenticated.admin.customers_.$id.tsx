@@ -1,17 +1,22 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, MapPin, User, Phone, Wifi, Package as PackageIcon,
   Receipt, Wallet, Building2, Milestone, Landmark, ExternalLink, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { getCustomerDetail } from "@/lib/customers.functions";
+import { updateBillStatus } from "@/lib/billing.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/customers_/$id")({
@@ -54,6 +59,17 @@ function CustomerDetailPage() {
     s ? new Date(s).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", { year: "numeric", month: "short", day: "numeric" }) : "—";
   const fetchDetail = useServerFn(getCustomerDetail);
   const q = useQuery({ queryKey: ["customer-detail", id], queryFn: () => fetchDetail({ data: { id } }) });
+
+  const qc = useQueryClient();
+  const updStatus = useServerFn(updateBillStatus);
+  const statusMut = useMutation({
+    mutationFn: (v: { bill_id: string; status: "unpaid" | "partial" | "paid" | "overdue" }) => updStatus({ data: v }),
+    onSuccess: () => {
+      toast.success(tx("স্ট্যাটাস আপডেট হয়েছে", "Status updated"));
+      qc.invalidateQueries({ queryKey: ["customer-detail", id] });
+    },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
 
   if (q.isLoading) {
     return <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -192,9 +208,10 @@ function CustomerDetailPage() {
                 <TableHead className="text-right">{tx("পরিশোধিত", "Paid")}</TableHead>
                 <TableHead className="text-right">{tx("বকেয়া", "Due")}</TableHead>
                 <TableHead>{tx("ডিউ ডেট", "Due Date")}</TableHead><TableHead>{tx("স্ট্যাটাস", "Status")}</TableHead>
+                <TableHead className="text-right">{tx("অ্যাকশন", "Action")}</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {bills.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">{tx("কোনো বিল নেই।", "No bills.")}</TableCell></TableRow>}
+                {bills.length === 0 && <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">{tx("কোনো বিল নেই।", "No bills.")}</TableCell></TableRow>}
                 {bills.map((b) => (
                   <TableRow key={b.id}>
                     <TableCell className="font-mono text-xs">{b.bill_number}</TableCell>
@@ -205,6 +222,21 @@ function CustomerDetailPage() {
                     <TableCell>{fmtDate(b.due_date)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={BILL_TONE[b.status] ?? ""}>{b.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Select
+                        value={b.status}
+                        onValueChange={(v) => statusMut.mutate({ bill_id: b.id, status: v as "unpaid" | "partial" | "paid" | "overdue" })}
+                        disabled={statusMut.isPending}
+                      >
+                        <SelectTrigger className="h-8 w-[130px] ml-auto"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unpaid">{tx("অপরিশোধিত", "Unpaid")}</SelectItem>
+                          <SelectItem value="partial">{tx("আংশিক", "Partial")}</SelectItem>
+                          <SelectItem value="paid">{tx("পরিশোধিত", "Paid")}</SelectItem>
+                          <SelectItem value="overdue">{tx("মেয়াদোত্তীর্ণ", "Overdue")}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}
