@@ -31,6 +31,7 @@ import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBillsRouteImport } from './routes/_authenticated.admin.bills'
 import { Route as AuthenticatedAdminAddressRouteImport } from './routes/_authenticated.admin.address'
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
+import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers.$id'
 
@@ -152,6 +153,11 @@ const AuthenticatedAdminAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicCronRunRoute = ApiPublicCronRunRouteImport.update({
+  id: '/api/public/cron/run',
+  path: '/api/public/cron/run',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminReportsAddressRoute =
   AuthenticatedAdminReportsAddressRouteImport.update({
     id: '/reports/address',
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
+  '/api/public/cron/run': typeof ApiPublicCronRunRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
+  '/api/public/cron/run': typeof ApiPublicCronRunRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
+  '/api/public/cron/run': typeof ApiPublicCronRunRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/customers/$id'
     | '/admin/reports/address'
+    | '/api/public/cron/run'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/customers/$id'
     | '/admin/reports/address'
+    | '/api/public/cron/run'
   id:
     | '__root__'
     | '/'
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/customers/$id'
     | '/_authenticated/admin/reports/address'
+    | '/api/public/cron/run'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -325,6 +337,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   PayBillRoute: typeof PayBillRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicCronRunRoute: typeof ApiPublicCronRunRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -483,6 +496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAccountsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/cron/run': {
+      id: '/api/public/cron/run'
+      path: '/api/public/cron/run'
+      fullPath: '/api/public/cron/run'
+      preLoaderRoute: typeof ApiPublicCronRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/reports/address': {
       id: '/_authenticated/admin/reports/address'
       path: '/reports/address'
@@ -585,6 +605,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   PayBillRoute: PayBillRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicCronRunRoute: ApiPublicCronRunRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
