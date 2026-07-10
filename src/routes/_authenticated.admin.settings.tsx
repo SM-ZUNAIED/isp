@@ -335,3 +335,97 @@ function SettingsPage() {
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="space-y-1.5"><Label className="text-xs font-medium">{label}</Label>{children}</div>;
 }
+
+function LogoUploader({
+  value,
+  onChange,
+  tx,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  tx: (bn: string, en: string) => string;
+}) {
+  const { data: url } = useLogoUrl(value);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handlePick = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error(tx("শুধু ছবি আপলোড করুন", "Only images allowed"));
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(tx("সর্বোচ্চ আকার ২ MB", "Max size 2 MB"));
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("logos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      // Delete previous stored logo if any (best-effort)
+      if (value && !/^https?:\/\//i.test(value) && value !== path) {
+        await supabase.storage.from("logos").remove([value]).catch(() => {});
+      }
+      onChange(path);
+      toast.success(tx("লোগো আপলোড হয়েছে — সেভ করুন", "Logo uploaded — click Save"));
+    } catch (e) {
+      toast.error(tx("আপলোড ব্যর্থ", "Upload failed"), { description: (e as Error).message });
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const handleRemove = async () => {
+    if (value && !/^https?:\/\//i.test(value)) {
+      await supabase.storage.from("logos").remove([value]).catch(() => {});
+    }
+    onChange("");
+    toast.success(tx("লোগো সরানো হয়েছে — সেভ করুন", "Logo removed — click Save"));
+  };
+
+  return (
+    <div className="space-y-3">
+      <Label className="text-xs font-medium">{tx("লোগো", "Logo")}</Label>
+      <div className="flex items-center gap-4 rounded-xl border p-4">
+        <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-primary text-white">
+          {url ? (
+            <img src={url} alt="logo" className="h-full w-full object-contain" />
+          ) : (
+            <span className="text-lg font-bold">LOGO</span>
+          )}
+        </div>
+        <div className="flex-1 space-y-2">
+          <p className="text-xs text-muted-foreground">
+            {tx("PNG/JPG/SVG · সর্বোচ্চ ২ MB · বর্গাকৃতি বাঞ্ছনীয়", "PNG/JPG/SVG · max 2 MB · square recommended")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handlePick(file);
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileRef.current?.click()}>
+              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              {value ? tx("পরিবর্তন করুন", "Change") : tx("আপলোড করুন", "Upload")}
+            </Button>
+            {value && (
+              <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={handleRemove}>
+                <X className="mr-1 h-4 w-4" /> {tx("সরান", "Remove")}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
