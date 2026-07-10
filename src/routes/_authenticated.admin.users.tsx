@@ -205,6 +205,7 @@ function UserRowView({
               </SelectContent>
             </Select>
           )}
+          <EditUserDialog u={u} onSubmit={onUpdate} />
           <ResetPasswordDialog onSubmit={onReset} />
           {!isMe && (
             <AlertDialog>
