@@ -58,6 +58,7 @@ function LandingPage() {
   const pickLang = <B extends string, E extends string>(bn: B | undefined | null, en: E | undefined | null) =>
     (lang === "bn" ? (bn || en || "") : (en || bn || ""));
   const lc = (settings?.landing_content ?? {}) as {
+    hero_badge_bn?: string; hero_badge_en?: string;
     hero_title_en?: string; hero_subtitle_en?: string; about_text_en?: string;
     features?: Array<{ icon: string; title_bn?: string; title_en?: string; desc_bn?: string; desc_en?: string }>;
     about_stats?: Array<{ value: string; label_bn?: string; label_en?: string }>;
