@@ -358,6 +358,7 @@ function CustomerFormDialog({
         full_name: initial.full_name ?? "",
         mobile: initial.mobile ?? "",
         alt_mobile: initial.alt_mobile ?? "",
+        email: initial.email ?? "",
         address: initial.address ?? "",
         package_id: initial.package_id ?? "",
         zone_id: initial.zone_id ?? "",
