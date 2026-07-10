@@ -109,7 +109,7 @@ function EntrySection({
   kind, rows, loading, onChange,
 }: {
   kind: "income" | "expense";
-  rows: Array<{ id: string; amount: number; category: string; description: string | null; entry_date: string }>;
+  rows: EntryRow[];
   loading: boolean; onChange: () => void;
 }) {
   const tx = useTx();
