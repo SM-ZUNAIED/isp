@@ -35,6 +35,9 @@ export const updateMyAddress = createServerFn({ method: "POST" })
         area_id: data.area_id,
         road_id: data.road_id,
         building_id: data.building_id,
+        mohalla: data.mohalla ?? null,
+        road_name: data.road_name ?? null,
+        holding_no: data.holding_no ?? null,
         address_line: data.address_line,
         address: data.address_line, // keep legacy field in sync for older reports
       })
