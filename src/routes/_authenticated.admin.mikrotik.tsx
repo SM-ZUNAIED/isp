@@ -16,6 +16,7 @@ import {
 import {
   listMikrotiks, createMikrotik, updateMikrotik, pingMikrotik, deleteMikrotik,
 } from "@/lib/network.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/mikrotik")({
   head: () => ({ meta: [{ title: "MikroTik — Net Bill Pro" }] }),
@@ -30,6 +31,8 @@ type MtRow = {
 
 function MikrotikPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { lang } = useFmt();
   const list = useServerFn(listMikrotiks);
   const ping = useServerFn(pingMikrotik);
   const del = useServerFn(deleteMikrotik);
@@ -39,21 +42,21 @@ function MikrotikPage() {
 
   const pingMut = useMutation({
     mutationFn: (id: string) => ping({ data: { id } }),
-    onSuccess: (r) => { toast[r.online ? "success" : "error"](r.online ? "অনলাইন" : "অফলাইন"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: (r) => { toast[r.online ? "success" : "error"](r.online ? tx("অনলাইন", "Online") : tx("অফলাইন", "Offline")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">MikroTik রাউটার</h1>
-          <p className="text-muted-foreground">রাউটার যুক্ত করুন এবং স্ট্যাটাস পরীক্ষা করুন</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("MikroTik রাউটার", "MikroTik Routers")}</h1>
+          <p className="text-muted-foreground">{tx("রাউটার যুক্ত করুন এবং স্ট্যাটাস পরীক্ষা করুন", "Add routers and check status")}</p>
         </div>
         <MikrotikFormDialog mode="create" onSaved={invalidate} />
       </div>
@@ -62,7 +65,7 @@ function MikrotikPage() {
         <div className="grid place-items-center py-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
         <Card><CardContent className="p-10 text-center text-muted-foreground">
-          কোনো MikroTik যুক্ত নেই। উপরে "নতুন MikroTik" ক্লিক করে যোগ করুন।
+          {tx('কোনো MikroTik যুক্ত নেই। উপরে "নতুন MikroTik" ক্লিক করে যোগ করুন।', 'No MikroTik added. Click "New MikroTik" above to add.')}
         </CardContent></Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -80,9 +83,9 @@ function MikrotikPage() {
                     </div>
                   </div>
                   {m.is_online ? (
-                    <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />অনলাইন</Badge>
+                    <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />{tx("অনলাইন", "Online")}</Badge>
                   ) : (
-                    <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />অফলাইন</Badge>
+                    <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />{tx("অফলাইন", "Offline")}</Badge>
                   )}
                 </div>
 
@@ -92,14 +95,14 @@ function MikrotikPage() {
                 </div>
 
                 <div className="text-xs text-muted-foreground">
-                  শেষ চেক: {m.last_checked_at ? new Date(m.last_checked_at).toLocaleString("bn-BD") : "—"}
+                  {tx("শেষ চেক", "Last checked")}: {m.last_checked_at ? new Date(m.last_checked_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US") : "—"}
                 </div>
 
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="flex-1"
                     onClick={() => pingMut.mutate(m.id)} disabled={pingMut.isPending}>
                     {pingMut.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Activity className="h-4 w-4 mr-1" />}
-                    হেলথ চেক
+                    {tx("হেলথ চেক", "Health Check")}
                   </Button>
                   <MikrotikFormDialog
                     mode="edit"
@@ -142,6 +145,7 @@ function MikrotikFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createMikrotik);
   const update = useServerFn(updateMikrotik);
   const [open, setOpen] = useState(false);
@@ -165,39 +169,39 @@ function MikrotikFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "MikroTik যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("MikroTik যুক্ত হয়েছে", "MikroTik added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") setF(empty);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন MikroTik</Button>
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন MikroTik", "New MikroTik")}</Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "MikroTik যোগ করুন" : "MikroTik এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("MikroTik যোগ করুন", "Add MikroTik") : tx("MikroTik এডিট", "Edit MikroTik")}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
-          <div className="col-span-2 space-y-1.5"><Label>নাম *</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নাম", "Name")} *</Label>
             <Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Main Router" /></div>
-          <div className="space-y-1.5"><Label>IP অ্যাড্রেস *</Label>
+          <div className="space-y-1.5"><Label>{tx("IP অ্যাড্রেস", "IP Address")} *</Label>
             <Input required value={f.ip_address} onChange={(e) => setF({ ...f, ip_address: e.target.value })} placeholder="192.168.1.1" /></div>
-          <div className="space-y-1.5"><Label>API পোর্ট</Label>
+          <div className="space-y-1.5"><Label>{tx("API পোর্ট", "API Port")}</Label>
             <Input type="number" value={f.api_port} onChange={(e) => setF({ ...f, api_port: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>ইউজারনেম *</Label>
+          <div className="space-y-1.5"><Label>{tx("ইউজারনেম", "Username")} *</Label>
             <Input required value={f.username} onChange={(e) => setF({ ...f, username: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>পাসওয়ার্ড {mode === "create" ? "*" : "(পরিবর্তনে নতুন দিন)"}</Label>
+          <div className="space-y-1.5"><Label>{tx("পাসওয়ার্ড", "Password")} {mode === "create" ? "*" : tx("(পরিবর্তনে নতুন দিন)", "(enter new to change)")}</Label>
             <Input required={mode === "create"} type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-          <div className="col-span-2 space-y-1.5"><Label>নোট</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নোট", "Notes")}</Label>
             <Input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>

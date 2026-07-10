@@ -16,6 +16,7 @@ import {
 import {
   listNoticesAdmin, createNotice, updateNotice, toggleNotice, deleteNotice,
 } from "@/lib/support.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/notices")({
   head: () => ({ meta: [{ title: "নোটিশ — Net Bill Pro" }] }),
@@ -26,6 +27,8 @@ type NoticeRow = { id: string; title: string; body?: string | null; is_active?: 
 
 function NoticesPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { lang } = useFmt();
   const list = useServerFn(listNoticesAdmin);
   const toggle = useServerFn(toggleNotice);
   const del = useServerFn(deleteNotice);
@@ -36,20 +39,20 @@ function NoticesPage() {
   const toggleMut = useMutation({
     mutationFn: (v: { id: string; is_active: boolean }) => toggle({ data: v }),
     onSuccess: invalidate,
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">নোটিশ ও ঘোষণা</h1>
-          <p className="text-muted-foreground">হোম পেজে দেখানো নোটিশ ম্যানেজ করুন</p>
+          <h1 className="text-2xl md:text-3xl font-bold">{tx("নোটিশ ও ঘোষণা", "Notices & Announcements")}</h1>
+          <p className="text-muted-foreground">{tx("হোম পেজে দেখানো নোটিশ ম্যানেজ করুন", "Manage notices shown on the home page")}</p>
         </div>
         <NoticeFormDialog mode="create" onSaved={invalidate} />
       </div>
@@ -57,7 +60,7 @@ function NoticesPage() {
       {q.isLoading ? (
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
-        <Card><CardContent className="p-10 text-center text-muted-foreground">কোনো নোটিশ নেই।</CardContent></Card>
+        <Card><CardContent className="p-10 text-center text-muted-foreground">{tx("কোনো নোটিশ নেই।", "No notices.")}</CardContent></Card>
       ) : (
         <div className="grid gap-3">
           {(q.data ?? []).map((n) => (
@@ -70,7 +73,7 @@ function NoticesPage() {
                   <div className="font-semibold">{n.title}</div>
                   <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{n.body || "—"}</p>
                   <div className="text-xs text-muted-foreground mt-2">
-                    {new Date(n.created_at).toLocaleString("bn-BD")}
+                    {new Date(n.created_at).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
@@ -100,6 +103,7 @@ function NoticeFormDialog({
   initial?: NoticeRow;
   onSaved: () => void;
 }) {
+  const tx = useTx();
   const create = useServerFn(createNotice);
   const update = useServerFn(updateNotice);
   const [open, setOpen] = useState(false);
@@ -114,11 +118,11 @@ function NoticeFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "নোটিশ যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("নোটিশ যুক্ত হয়েছে", "Notice added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") { setTitle(""); setBody(""); setIsActive(true); }
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => {
@@ -127,23 +131,23 @@ function NoticeFormDialog({
     }}>
       <DialogTrigger asChild>
         {mode === "create"
-          ? <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন নোটিশ</Button>
+          ? <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন নোটিশ", "New Notice")}</Button>
           : <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "নতুন নোটিশ" : "নোটিশ এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("নতুন নোটিশ", "New Notice") : tx("নোটিশ এডিট", "Edit Notice")}</DialogTitle></DialogHeader>
         <form onSubmit={(e) => { e.preventDefault(); if (title.trim()) mut.mutate(); }} className="space-y-3">
-          <div className="space-y-1.5"><Label>শিরোনাম *</Label>
+          <div className="space-y-1.5"><Label>{tx("শিরোনাম", "Title")} *</Label>
             <Input required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label>বিস্তারিত</Label>
+          <div className="space-y-1.5"><Label>{tx("বিস্তারিত", "Details")}</Label>
             <Textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} /></div>
           <label className="flex items-center gap-2 text-sm">
-            <Switch checked={isActive} onCheckedChange={setIsActive} /> সক্রিয়
+            <Switch checked={isActive} onCheckedChange={setIsActive} /> {tx("সক্রিয়", "Active")}
           </label>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>

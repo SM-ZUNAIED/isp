@@ -18,6 +18,7 @@ import {
 import {
   listAccounts, addIncome, addExpense, updateEntry, deleteEntry,
 } from "@/lib/support.functions";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 type EntryRow = { id: string; amount: number; category: string; description: string | null; entry_date: string };
 
@@ -26,12 +27,12 @@ export const Route = createFileRoute("/_authenticated/admin/accounts")({
   component: AccountsPage,
 });
 
-const bn = new Intl.NumberFormat("bn-BD");
-const bdt = (n: number) => `৳ ${bn.format(Math.round(n))}`;
 const today = () => new Date().toISOString().slice(0, 10);
 
 function AccountsPage() {
   const qc = useQueryClient();
+  const tx = useTx();
+  const { n, bdt } = useFmt();
   const list = useServerFn(listAccounts);
   const q = useQuery({ queryKey: ["accounts"], queryFn: () => list() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["accounts"] });
@@ -45,20 +46,20 @@ function AccountsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">একাউন্টস</h1>
-        <p className="text-muted-foreground">অন্যান্য আয় ও ব্যয় ম্যানেজ করুন</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("একাউন্টস", "Accounts")}</h1>
+        <p className="text-muted-foreground">{tx("অন্যান্য আয় ও ব্যয় ম্যানেজ করুন", "Manage other income and expenses")}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatMini label="মোট আয়" value={bdt(totals.inc)} icon={TrendingUp} tone="emerald" />
-        <StatMini label="মোট ব্যয়" value={bdt(totals.exp)} icon={TrendingDown} tone="rose" />
-        <StatMini label="নেট প্রফিট" value={bdt(totals.net)} icon={Wallet} tone={totals.net >= 0 ? "indigo" : "rose"} />
+        <StatMini label={tx("মোট আয়", "Total Income")} value={bdt(totals.inc)} icon={TrendingUp} tone="emerald" />
+        <StatMini label={tx("মোট ব্যয়", "Total Expense")} value={bdt(totals.exp)} icon={TrendingDown} tone="rose" />
+        <StatMini label={tx("নেট প্রফিট", "Net Profit")} value={bdt(totals.net)} icon={Wallet} tone={totals.net >= 0 ? "indigo" : "rose"} />
       </div>
 
       <Tabs defaultValue="income">
         <TabsList>
-          <TabsTrigger value="income">আয়</TabsTrigger>
-          <TabsTrigger value="expense">ব্যয়</TabsTrigger>
+          <TabsTrigger value="income">{tx("আয়", "Income")}</TabsTrigger>
+          <TabsTrigger value="expense">{tx("ব্যয়", "Expense")}</TabsTrigger>
         </TabsList>
         <TabsContent value="income" className="mt-4">
           <EntrySection kind="income" rows={q.data?.incomes ?? []} loading={q.isLoading} onChange={invalidate} />
@@ -96,6 +97,8 @@ function EntrySection({
   rows: Array<{ id: string; amount: number; category: string; description: string | null; entry_date: string }>;
   loading: boolean; onChange: () => void;
 }) {
+  const tx = useTx();
+  const { n } = useFmt();
   const addFn = useServerFn(kind === "income" ? addIncome : addExpense);
   const del = useServerFn(deleteEntry);
   const [amount, setAmount] = useState("");
@@ -108,14 +111,14 @@ function EntrySection({
       data: { amount: Number(amount), category: category.trim(), description: description || null, entry_date: date },
     }),
     onSuccess: () => {
-      toast.success("সংরক্ষিত"); setAmount(""); setCategory(""); setDescription(""); setDate(today()); onChange();
+      toast.success(tx("সংরক্ষিত", "Saved")); setAmount(""); setCategory(""); setDescription(""); setDate(today()); onChange();
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id, kind } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); onChange(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); onChange(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
@@ -124,18 +127,18 @@ function EntrySection({
         <CardContent className="p-4">
           <form onSubmit={(e) => { e.preventDefault(); if (amount && category.trim()) addMut.mutate(); }}
             className="grid grid-cols-1 md:grid-cols-5 gap-3">
-            <div className="space-y-1"><Label className="text-xs">টাকা (৳)</Label>
+            <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
               <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
-            <div className="space-y-1"><Label className="text-xs">বিভাগ</Label>
+            <div className="space-y-1"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
               <Input required value={category} onChange={(e) => setCategory(e.target.value)}
-                placeholder={kind === "income" ? "কানেকশন ফি" : "বিদ্যুৎ বিল"} /></div>
-            <div className="space-y-1 md:col-span-2"><Label className="text-xs">বর্ণনা</Label>
+                placeholder={kind === "income" ? tx("কানেকশন ফি", "Connection Fee") : tx("বিদ্যুৎ বিল", "Electricity Bill")} /></div>
+            <div className="space-y-1 md:col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
               <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-            <div className="space-y-1"><Label className="text-xs">তারিখ</Label>
+            <div className="space-y-1"><Label className="text-xs">{tx("তারিখ", "Date")}</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
             <Button type="submit" disabled={addMut.isPending} className="bg-gradient-primary text-white md:col-span-5">
               {addMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-              যোগ করুন
+              {tx("যোগ করুন", "Add")}
             </Button>
           </form>
         </CardContent>
@@ -147,10 +150,10 @@ function EntrySection({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>তারিখ</TableHead>
-                  <TableHead>বিভাগ</TableHead>
-                  <TableHead>বর্ণনা</TableHead>
-                  <TableHead className="text-right">পরিমাণ (৳)</TableHead>
+                  <TableHead>{tx("তারিখ", "Date")}</TableHead>
+                  <TableHead>{tx("বিভাগ", "Category")}</TableHead>
+                  <TableHead>{tx("বর্ণনা", "Description")}</TableHead>
+                  <TableHead className="text-right">{tx("পরিমাণ (৳)", "Amount (BDT)")}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -160,7 +163,7 @@ function EntrySection({
                 </TableCell></TableRow>}
                 {!loading && rows.length === 0 && (
                   <TableRow><TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                    কোনো এন্ট্রি নেই।
+                    {tx("কোনো এন্ট্রি নেই।", "No entries.")}
                   </TableCell></TableRow>
                 )}
                 {rows.map((r) => (
@@ -168,7 +171,7 @@ function EntrySection({
                     <TableCell className="text-sm">{r.entry_date}</TableCell>
                     <TableCell className="font-medium">{r.category}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{r.description ?? "—"}</TableCell>
-                    <TableCell className="text-right font-semibold">{bn.format(Number(r.amount))}</TableCell>
+                    <TableCell className="text-right font-semibold">{n(Number(r.amount))}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
                       <EditEntryDialog kind={kind} row={r} onSaved={onChange} />
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => delMut.mutate(r.id)}>
@@ -193,6 +196,7 @@ function EditEntryDialog({
   row: EntryRow;
   onSaved: () => void;
 }) {
+  const tx = useTx();
   const update = useServerFn(updateEntry);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(String(row.amount));
@@ -207,8 +211,8 @@ function EditEntryDialog({
         description: description || null, entry_date: date,
       },
     }),
-    onSuccess: () => { toast.success("আপডেট হয়েছে"); setOpen(false); onSaved(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("আপডেট হয়েছে", "Updated")); setOpen(false); onSaved(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => {
@@ -219,20 +223,20 @@ function EditEntryDialog({
         <Button size="sm" variant="ghost"><Pencil className="h-4 w-4" /></Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>এন্ট্রি এডিট</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("এন্ট্রি এডিট", "Edit Entry")}</DialogTitle></DialogHeader>
         <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="grid grid-cols-2 gap-3">
-          <div className="space-y-1"><Label className="text-xs">টাকা (৳)</Label>
+          <div className="space-y-1"><Label className="text-xs">{tx("টাকা (৳)", "Amount (BDT)")}</Label>
             <Input required type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
-          <div className="space-y-1"><Label className="text-xs">তারিখ</Label>
+          <div className="space-y-1"><Label className="text-xs">{tx("তারিখ", "Date")}</Label>
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-          <div className="space-y-1 col-span-2"><Label className="text-xs">বিভাগ</Label>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বিভাগ", "Category")}</Label>
             <Input required value={category} onChange={(e) => setCategory(e.target.value)} /></div>
-          <div className="space-y-1 col-span-2"><Label className="text-xs">বর্ণনা</Label>
+          <div className="space-y-1 col-span-2"><Label className="text-xs">{tx("বর্ণনা", "Description")}</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>

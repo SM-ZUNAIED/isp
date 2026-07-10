@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSettings, updateSettings } from "@/lib/support.functions";
+import { useTx } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   head: () => ({ meta: [{ title: "সেটিংস — Net Bill Pro" }] }),
@@ -29,6 +30,7 @@ type SettingsForm = {
 };
 
 function SettingsPage() {
+  const tx = useTx();
   const get = useServerFn(getSettings);
   const update = useServerFn(updateSettings);
   const q = useQuery({ queryKey: ["settings"], queryFn: () => get() });
@@ -56,8 +58,8 @@ function SettingsPage() {
 
   const mut = useMutation({
     mutationFn: () => update({ data: f }),
-    onSuccess: () => toast.success("সেটিংস সংরক্ষিত"),
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => toast.success(tx("সেটিংস সংরক্ষিত", "Settings saved")),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   if (q.isLoading) {
@@ -70,36 +72,36 @@ function SettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">সেটিংস</h1>
-        <p className="text-muted-foreground">ISP এর সাধারণ তথ্য কনফিগার করুন</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("সেটিংস", "Settings")}</h1>
+        <p className="text-muted-foreground">{tx("ISP এর সাধারণ তথ্য কনফিগার করুন", "Configure ISP general information")}</p>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="space-y-6">
         <Card>
-          <CardHeader><CardTitle>প্রতিষ্ঠান তথ্য</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{tx("প্রতিষ্ঠান তথ্য", "Organization Info")}</CardTitle></CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <F label="ISP এর নাম"><Input value={f.isp_name} onChange={set("isp_name")} /></F>
-            <F label="ওয়েবসাইট"><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
-            <F label="হটলাইন"><Input value={f.hotline} onChange={set("hotline")} /></F>
+            <F label={tx("ISP এর নাম", "ISP Name")}><Input value={f.isp_name} onChange={set("isp_name")} /></F>
+            <F label={tx("ওয়েবসাইট", "Website")}><Input value={f.website} onChange={set("website")} placeholder="https://..." /></F>
+            <F label={tx("হটলাইন", "Hotline")}><Input value={f.hotline} onChange={set("hotline")} /></F>
             <F label="WhatsApp"><Input value={f.whatsapp} onChange={set("whatsapp")} /></F>
-            <F label="ইমেইল"><Input type="email" value={f.email} onChange={set("email")} /></F>
-            <F label="ঠিকানা"><Input value={f.address} onChange={set("address")} /></F>
+            <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
+            <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>হোম পেজ কনটেন্ট</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{tx("হোম পেজ কনটেন্ট", "Home Page Content")}</CardTitle></CardHeader>
           <CardContent className="grid gap-4">
-            <F label="Hero শিরোনাম"><Input value={f.hero_title} onChange={set("hero_title")} /></F>
-            <F label="Hero সাব-টাইটেল"><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
-            <F label="আমাদের সম্পর্কে"><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
+            <F label={tx("Hero শিরোনাম", "Hero Title")}><Input value={f.hero_title} onChange={set("hero_title")} /></F>
+            <F label={tx("Hero সাব-টাইটেল", "Hero Subtitle")}><Textarea rows={2} value={f.hero_subtitle} onChange={set("hero_subtitle")} /></F>
+            <F label={tx("আমাদের সম্পর্কে", "About Us")}><Textarea rows={4} value={f.about_text} onChange={set("about_text")} /></F>
           </CardContent>
         </Card>
 
         <div className="flex justify-end">
           <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
             {mut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            সংরক্ষণ করুন
+            {tx("সংরক্ষণ করুন", "Save")}
           </Button>
         </div>
       </form>

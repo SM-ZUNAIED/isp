@@ -24,6 +24,7 @@ import {
   listOlts, createOlt, updateOlt, deleteOlt,
   listOnus, createOnu, updateOnu, toggleOnu, deleteOnu, listOltsAndCustomers,
 } from "@/lib/network.functions";
+import { useTx } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/olt")({
   head: () => ({ meta: [{ title: "OLT / ONU — Net Bill Pro" }] }),
@@ -46,21 +47,22 @@ type OnuRow = {
 
 const BRANDS = [
   { v: "vsol", l: "VSOL" }, { v: "cdata", l: "C-Data" }, { v: "huawei", l: "Huawei" },
-  { v: "bdcom", l: "BDCOM" }, { v: "zte", l: "ZTE" }, { v: "other", l: "অন্যান্য" },
-];
+  { v: "bdcom", l: "BDCOM" }, { v: "zte", l: "ZTE" }, { v: "other", l_bn: "অন্যান্য", l_en: "Other" },
+] as Array<{ v: string; l?: string; l_bn?: string; l_en?: string }>;
 
 function OltPage() {
+  const tx = useTx();
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">OLT ও ONU ব্যবস্থাপনা</h1>
-        <p className="text-muted-foreground">PON নেটওয়ার্ক ডিভাইস কনফিগার ও মনিটর করুন</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{tx("OLT ও ONU ব্যবস্থাপনা", "OLT & ONU Management")}</h1>
+        <p className="text-muted-foreground">{tx("PON নেটওয়ার্ক ডিভাইস কনফিগার ও মনিটর করুন", "Configure and monitor PON network devices")}</p>
       </div>
 
       <Tabs defaultValue="olt">
         <TabsList>
-          <TabsTrigger value="olt">OLT ডিভাইস</TabsTrigger>
-          <TabsTrigger value="onu">ONU ডিভাইস</TabsTrigger>
+          <TabsTrigger value="olt">{tx("OLT ডিভাইস", "OLT Devices")}</TabsTrigger>
+          <TabsTrigger value="onu">{tx("ONU ডিভাইস", "ONU Devices")}</TabsTrigger>
         </TabsList>
         <TabsContent value="olt" className="mt-4"><OltList /></TabsContent>
         <TabsContent value="onu" className="mt-4"><OnuList /></TabsContent>
@@ -71,14 +73,15 @@ function OltPage() {
 
 function OltList() {
   const qc = useQueryClient();
+  const tx = useTx();
   const list = useServerFn(listOlts);
   const del = useServerFn(deleteOlt);
   const q = useQuery({ queryKey: ["olts"], queryFn: () => list() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["olts"] });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
@@ -87,7 +90,7 @@ function OltList() {
       {q.isLoading ? (
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (q.data ?? []).length === 0 ? (
-        <Card><CardContent className="p-10 text-center text-muted-foreground">কোনো OLT নেই।</CardContent></Card>
+        <Card><CardContent className="p-10 text-center text-muted-foreground">{tx("কোনো OLT নেই।", "No OLT found.")}</CardContent></Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(q.data ?? []).map((o) => (
@@ -106,19 +109,19 @@ function OltList() {
                   <Badge variant="outline" className="uppercase">{o.brand}</Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <Info label="PON পোর্ট" value={String(o.pon_ports ?? 0)} />
-                  <Info label="স্ট্যাটাস" value={o.is_online ? "অনলাইন" : "অফলাইন"} tone={o.is_online ? "emerald" : "rose"} />
+                  <Info label={tx("PON পোর্ট", "PON Ports")} value={String(o.pon_ports ?? 0)} />
+                  <Info label={tx("স্ট্যাটাস", "Status")} value={o.is_online ? tx("অনলাইন", "Online") : tx("অফলাইন", "Offline")} tone={o.is_online ? "emerald" : "rose"} />
                 </div>
                 <div className="flex gap-2">
                   <OltFormDialog
                     mode="edit"
                     initial={o as unknown as OltRow}
                     onSaved={invalidate}
-                    trigger={<Button variant="outline" size="sm" className="flex-1"><Pencil className="h-4 w-4 mr-1" /> এডিট</Button>}
+                    trigger={<Button variant="outline" size="sm" className="flex-1"><Pencil className="h-4 w-4 mr-1" /> {tx("এডিট", "Edit")}</Button>}
                   />
                   <Button variant="ghost" size="sm" className="text-destructive flex-1"
                     onClick={() => delMut.mutate(o.id)}>
-                    <Trash2 className="h-4 w-4 mr-1" /> মুছুন
+                    <Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Delete")}
                   </Button>
                 </div>
               </CardContent>
@@ -147,6 +150,7 @@ function OltFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createOlt);
   const update = useServerFn(updateOlt);
   const [open, setOpen] = useState(false);
@@ -173,44 +177,44 @@ function OltFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "OLT যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("OLT যুক্ত হয়েছে", "OLT added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") setF(empty);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন OLT</Button>
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন OLT", "New OLT")}</Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "OLT যোগ করুন" : "OLT এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("OLT যোগ করুন", "Add OLT") : tx("OLT এডিট", "Edit OLT")}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
-          <div className="col-span-2 space-y-1.5"><Label>নাম *</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নাম", "Name")} *</Label>
             <Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>IP *</Label>
             <Input required value={f.ip_address} onChange={(e) => setF({ ...f, ip_address: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>ব্র্যান্ড</Label>
+          <div className="space-y-1.5"><Label>{tx("ব্র্যান্ড", "Brand")}</Label>
             <Select value={f.brand} onValueChange={(v) => setF({ ...f, brand: v as OltBrand })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{BRANDS.map((b) => <SelectItem key={b.v} value={b.v}>{b.l}</SelectItem>)}</SelectContent>
+              <SelectContent>{BRANDS.map((b) => <SelectItem key={b.v} value={b.v}>{b.l ?? tx(b.l_bn!, b.l_en!)}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5"><Label>PON পোর্ট সংখ্যা</Label>
+          <div className="space-y-1.5"><Label>{tx("PON পোর্ট সংখ্যা", "PON Port Count")}</Label>
             <Input type="number" value={f.pon_ports} onChange={(e) => setF({ ...f, pon_ports: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>ইউজারনেম</Label>
+          <div className="space-y-1.5"><Label>{tx("ইউজারনেম", "Username")}</Label>
             <Input value={f.username} onChange={(e) => setF({ ...f, username: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>পাসওয়ার্ড {mode === "edit" && "(পরিবর্তনে নতুন দিন)"}</Label>
+          <div className="space-y-1.5"><Label>{tx("পাসওয়ার্ড", "Password")} {mode === "edit" && tx("(পরিবর্তনে নতুন দিন)", "(enter new to change)")}</Label>
             <Input type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-          <div className="col-span-2 space-y-1.5"><Label>নোট</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("নোট", "Notes")}</Label>
             <Input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
@@ -221,6 +225,7 @@ function OltFormDialog({
 
 function OnuList() {
   const qc = useQueryClient();
+  const tx = useTx();
   const list = useServerFn(listOnus);
   const toggle = useServerFn(toggleOnu);
   const del = useServerFn(deleteOnu);
@@ -233,12 +238,12 @@ function OnuList() {
   const toggleMut = useMutation({
     mutationFn: (v: { id: string; is_enabled: boolean }) => toggle({ data: v }),
     onSuccess: invalidate,
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   const delMut = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); invalidate(); },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onSuccess: () => { toast.success(tx("মুছে ফেলা হয়েছে", "Deleted")); invalidate(); },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
 
   return (
@@ -261,10 +266,10 @@ function OnuList() {
                   <TableHead>Serial</TableHead>
                   <TableHead>MAC</TableHead>
                   <TableHead>OLT / PON</TableHead>
-                  <TableHead>কাস্টমার</TableHead>
-                  <TableHead className="text-right">সিগন্যাল</TableHead>
-                  <TableHead>স্ট্যাটাস</TableHead>
-                  <TableHead>সক্রিয়</TableHead>
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
+                  <TableHead className="text-right">{tx("সিগন্যাল", "Signal")}</TableHead>
+                  <TableHead>{tx("স্ট্যাটাস", "Status")}</TableHead>
+                  <TableHead>{tx("সক্রিয়", "Active")}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -276,7 +281,7 @@ function OnuList() {
                 )}
                 {!q.isLoading && (q.data ?? []).length === 0 && (
                   <TableRow><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
-                    কোনো ONU নেই।
+                    {tx("কোনো ONU নেই।", "No ONU found.")}
                   </TableCell></TableRow>
                 )}
                 {(q.data ?? []).map((o) => (
@@ -297,9 +302,9 @@ function OnuList() {
                     </TableCell>
                     <TableCell>
                       {o.is_online ? (
-                        <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />অনলাইন</Badge>
+                        <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200"><Wifi className="h-3 w-3 mr-1" />{tx("অনলাইন", "Online")}</Badge>
                       ) : (
-                        <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />অফলাইন</Badge>
+                        <Badge className="bg-rose-100 text-rose-700 border border-rose-200"><WifiOff className="h-3 w-3 mr-1" />{tx("অফলাইন", "Offline")}</Badge>
                       )}
                     </TableCell>
                     <TableCell>
@@ -341,6 +346,7 @@ function OnuFormDialog({
   onSaved: () => void;
   trigger?: React.ReactNode;
 }) {
+  const tx = useTx();
   const create = useServerFn(createOnu);
   const update = useServerFn(updateOnu);
   const [open, setOpen] = useState(false);
@@ -368,39 +374,39 @@ function OnuFormDialog({
       else await update({ data: { id: initial!.id, ...payload } });
     },
     onSuccess: () => {
-      toast.success(mode === "create" ? "ONU যুক্ত হয়েছে" : "আপডেট হয়েছে");
+      toast.success(mode === "create" ? tx("ONU যুক্ত হয়েছে", "ONU added") : tx("আপডেট হয়েছে", "Updated"));
       setOpen(false); onSaved();
       if (mode === "create") setF(empty);
     },
-    onError: (e: Error) => toast.error("ব্যর্থ", { description: e.message }),
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v && initial) setF(seed); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />নতুন ONU</Button>
+          <Button className="bg-gradient-primary text-white"><Plus className="mr-2 h-4 w-4" />{tx("নতুন ONU", "New ONU")}</Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "create" ? "ONU যোগ করুন" : "ONU এডিট"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "create" ? tx("ONU যোগ করুন", "Add ONU") : tx("ONU এডিট", "Edit ONU")}</DialogTitle></DialogHeader>
         <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
           <div className="col-span-2 space-y-1.5"><Label>Serial *</Label>
             <Input required value={f.serial_number} onChange={(e) => setF({ ...f, serial_number: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>MAC</Label>
             <Input value={f.mac_address} onChange={(e) => setF({ ...f, mac_address: e.target.value })} /></div>
-          <div className="space-y-1.5"><Label>PON পোর্ট</Label>
+          <div className="space-y-1.5"><Label>{tx("PON পোর্ট", "PON Port")}</Label>
             <Input value={f.pon_port} onChange={(e) => setF({ ...f, pon_port: e.target.value })} placeholder="1/1" /></div>
           <div className="space-y-1.5"><Label>OLT</Label>
             <Select value={f.olt_id} onValueChange={(v) => setF({ ...f, olt_id: v })}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={tx("নির্বাচন করুন", "Select")} /></SelectTrigger>
               <SelectContent>{olts.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5"><Label>সিগন্যাল (dBm)</Label>
+          <div className="space-y-1.5"><Label>{tx("সিগন্যাল (dBm)", "Signal (dBm)")}</Label>
             <Input type="number" step="0.1" value={f.signal_strength} onChange={(e) => setF({ ...f, signal_strength: e.target.value })} placeholder="-24" /></div>
-          <div className="col-span-2 space-y-1.5"><Label>কাস্টমার</Label>
+          <div className="col-span-2 space-y-1.5"><Label>{tx("কাস্টমার", "Customer")}</Label>
             <Select value={f.customer_id} onValueChange={(v) => setF({ ...f, customer_id: v })}>
-              <SelectTrigger><SelectValue placeholder="নির্বাচন করুন" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={tx("নির্বাচন করুন", "Select")} /></SelectTrigger>
               <SelectContent>
                 {customers.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.full_name} ({c.customer_code})</SelectItem>
@@ -409,9 +415,9 @@ function OnuFormDialog({
             </Select>
           </div>
           <DialogFooter className="col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>বাতিল</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
             <Button type="submit" disabled={mut.isPending} className="bg-gradient-primary text-white">
-              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} সংরক্ষণ
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {tx("সংরক্ষণ", "Save")}
             </Button>
           </DialogFooter>
         </form>
