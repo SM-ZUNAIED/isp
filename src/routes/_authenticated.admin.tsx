@@ -32,6 +32,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useI18n } from "@/hooks/use-i18n";
 
 const getMyRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
