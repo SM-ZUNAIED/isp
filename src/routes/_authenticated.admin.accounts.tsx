@@ -30,6 +30,7 @@ type EntryRow = {
   id: string; amount: number; category: string;
   description: string | null; entry_date: string;
   source?: string | null;
+  party_name?: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/accounts")({
@@ -119,14 +120,21 @@ function EntrySection({
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [partyName, setPartyName] = useState("");
   const [date, setDate] = useState(today());
 
   const addMut = useMutation({
     mutationFn: () => addFn({
-      data: { amount: Number(amount), category: category.trim(), description: description || null, entry_date: date },
+      data: {
+        amount: Number(amount), category: category.trim(),
+        description: description || null,
+        party_name: partyName.trim() || null,
+        entry_date: date,
+      },
     }),
     onSuccess: () => {
-      toast.success(tx("সংরক্ষিত", "Saved")); setAmount(""); setCategory(""); setDescription(""); setDate(today()); onChange();
+      toast.success(tx("সংরক্ষিত", "Saved"));
+      setAmount(""); setCategory(""); setDescription(""); setPartyName(""); setDate(today()); onChange();
     },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
