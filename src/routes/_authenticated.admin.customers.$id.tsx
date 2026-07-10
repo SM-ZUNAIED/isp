@@ -141,14 +141,9 @@ function CustomerDetailPage() {
               <AddrItem icon={<Milestone className="h-4 w-4" />} label="পোস্ট অফিস"
                 value={label(a.post_office)} extra={a.post_office?.code ? `কোড ${a.post_office.code}` : undefined} />
               <AddrItem icon={<Milestone className="h-4 w-4" />} label="গ্রাম" value={label(a.village)} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="এরিয়া" value={label(a.area)} />
-              <AddrItem icon={<Milestone className="h-4 w-4" />} label="রোড" value={label(a.road)} />
-              <AddrItem icon={<Building2 className="h-4 w-4" />} label="বিল্ডিং"
-                value={a.building?.name ?? "—"}
-                extra={[
-                  a.building?.holding_number && `হোল্ডিং ${a.building.holding_number}`,
-                  a.building?.house_number && `বাসা ${a.building.house_number}`,
-                ].filter(Boolean).join(" · ") || undefined} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label="মহল্লা / এরিয়া" value={c.mohalla || "—"} />
+              <AddrItem icon={<Milestone className="h-4 w-4" />} label="রোড" value={c.road_name || "—"} />
+              <AddrItem icon={<Building2 className="h-4 w-4" />} label="হোল্ডিং / বিল্ডিং" value={c.holding_no || "—"} />
             </div>
 
             {a.building?.google_map_url && (
