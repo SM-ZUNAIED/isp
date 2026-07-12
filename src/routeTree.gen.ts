@@ -39,6 +39,7 @@ import { Route as AuthenticatedAdminPurchaseVendorsRouteImport } from './routes/
 import { Route as AuthenticatedAdminPurchaseOrdersRouteImport } from './routes/_authenticated.admin.purchase.orders'
 import { Route as AuthenticatedAdminInventoryMovementsRouteImport } from './routes/_authenticated.admin.inventory.movements'
 import { Route as AuthenticatedAdminInventoryItemsRouteImport } from './routes/_authenticated.admin.inventory.items'
+import { Route as AuthenticatedAdminHrPayrollRouteImport } from './routes/_authenticated.admin.hr.payroll'
 import { Route as AuthenticatedAdminHrLeavesRouteImport } from './routes/_authenticated.admin.hr.leaves'
 import { Route as AuthenticatedAdminHrAttendanceRouteImport } from './routes/_authenticated.admin.hr.attendance'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
@@ -210,6 +211,12 @@ const AuthenticatedAdminInventoryItemsRoute =
     path: '/inventory/items',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminHrPayrollRoute =
+  AuthenticatedAdminHrPayrollRouteImport.update({
+    id: '/hr/payroll',
+    path: '/hr/payroll',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminHrLeavesRoute =
   AuthenticatedAdminHrLeavesRouteImport.update({
     id: '/hr/leaves',
@@ -276,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
+  '/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
   '/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
   '/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
   '/admin/purchase/orders': typeof AuthenticatedAdminPurchaseOrdersRoute
@@ -312,6 +320,7 @@ export interface FileRoutesByTo {
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
+  '/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
   '/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
   '/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
   '/admin/purchase/orders': typeof AuthenticatedAdminPurchaseOrdersRoute
@@ -351,6 +360,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/_authenticated/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/_authenticated/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
+  '/_authenticated/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
   '/_authenticated/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
   '/_authenticated/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
   '/_authenticated/admin/purchase/orders': typeof AuthenticatedAdminPurchaseOrdersRoute
@@ -390,6 +400,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$id'
     | '/admin/hr/attendance'
     | '/admin/hr/leaves'
+    | '/admin/hr/payroll'
     | '/admin/inventory/items'
     | '/admin/inventory/movements'
     | '/admin/purchase/orders'
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$id'
     | '/admin/hr/attendance'
     | '/admin/hr/leaves'
+    | '/admin/hr/payroll'
     | '/admin/inventory/items'
     | '/admin/inventory/movements'
     | '/admin/purchase/orders'
@@ -464,6 +476,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/customers_/$id'
     | '/_authenticated/admin/hr/attendance'
     | '/_authenticated/admin/hr/leaves'
+    | '/_authenticated/admin/hr/payroll'
     | '/_authenticated/admin/inventory/items'
     | '/_authenticated/admin/inventory/movements'
     | '/_authenticated/admin/purchase/orders'
@@ -694,6 +707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInventoryItemsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/hr/payroll': {
+      id: '/_authenticated/admin/hr/payroll'
+      path: '/hr/payroll'
+      fullPath: '/admin/hr/payroll'
+      preLoaderRoute: typeof AuthenticatedAdminHrPayrollRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/hr/leaves': {
       id: '/_authenticated/admin/hr/leaves'
       path: '/hr/leaves'
@@ -761,6 +781,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
   AuthenticatedAdminHrAttendanceRoute: typeof AuthenticatedAdminHrAttendanceRoute
   AuthenticatedAdminHrLeavesRoute: typeof AuthenticatedAdminHrLeavesRoute
+  AuthenticatedAdminHrPayrollRoute: typeof AuthenticatedAdminHrPayrollRoute
   AuthenticatedAdminInventoryItemsRoute: typeof AuthenticatedAdminInventoryItemsRoute
   AuthenticatedAdminInventoryMovementsRoute: typeof AuthenticatedAdminInventoryMovementsRoute
   AuthenticatedAdminPurchaseOrdersRoute: typeof AuthenticatedAdminPurchaseOrdersRoute
@@ -794,6 +815,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCustomersIdRoute: AuthenticatedAdminCustomersIdRoute,
   AuthenticatedAdminHrAttendanceRoute: AuthenticatedAdminHrAttendanceRoute,
   AuthenticatedAdminHrLeavesRoute: AuthenticatedAdminHrLeavesRoute,
+  AuthenticatedAdminHrPayrollRoute: AuthenticatedAdminHrPayrollRoute,
   AuthenticatedAdminInventoryItemsRoute: AuthenticatedAdminInventoryItemsRoute,
   AuthenticatedAdminInventoryMovementsRoute:
     AuthenticatedAdminInventoryMovementsRoute,
