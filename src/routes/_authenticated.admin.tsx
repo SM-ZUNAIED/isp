@@ -234,7 +234,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
             ? location.pathname === item.to
             : location.pathname.startsWith(item.to) && !item.exact;
           const Icon = item.icon;
-          const label = "labelKey" in item ? t(item.labelKey) : (typeof document !== "undefined" && document.documentElement.lang === "en" ? item.label.en : item.label.bn);
+          const label = "labelKey" in item ? t(item.labelKey) : (lang === "en" ? item.label.en : item.label.bn);
           return (
             <button
               key={i}
