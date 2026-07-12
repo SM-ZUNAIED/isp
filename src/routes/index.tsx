@@ -591,7 +591,11 @@ function LandingPage() {
                 <form onSubmit={handleInquiry} className="mt-4 space-y-3">
                   <input ref={nameRef} required maxLength={100} placeholder={t("contact.name")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
                   <input ref={phoneRef} required maxLength={11} inputMode="tel" pattern="01[3-9][0-9]{8}" placeholder={t("contact.phone")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input ref={addressRef} maxLength={300} placeholder={t("contact.address")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <input ref={areaRef} maxLength={100} placeholder={lang === "bn" ? "এলাকা" : "Area"} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                    <input ref={roadRef} maxLength={100} placeholder={lang === "bn" ? "রোড" : "Road"} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                    <input ref={houseRef} maxLength={100} placeholder={lang === "bn" ? "বাসা নম্বর" : "House No."} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  </div>
                   <select
                     value={selectedPkg?.id ?? ""}
                     onChange={(e) => {
