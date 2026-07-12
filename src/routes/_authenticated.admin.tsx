@@ -19,7 +19,7 @@ import {
   UserCircle2,
   Users2,
   CalendarCheck2, Palmtree, PackageOpen, ArrowLeftRight, Truck, ShoppingCart, BookOpen, NotebookPen, TrendingUp,
-  Briefcase, ChevronDown,
+  Briefcase, ChevronDown, Home,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
