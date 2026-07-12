@@ -374,6 +374,58 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Order Dialog */}
+      <Dialog open={orderOpen} onOpenChange={setOrderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {lang === "bn" ? "নতুন সংযোগ অর্ডার" : "Order New Connection"}
+              {selectedPkg && <span className="ml-2 text-primary">— {selectedPkg.name}</span>}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedPkg?.price
+                ? (lang === "bn"
+                    ? `৳${Math.round(selectedPkg.price)}/মাস — নিচের তথ্য দিন, আমরা যোগাযোগ করব।`
+                    : `৳${Math.round(selectedPkg.price)}/mo — Fill in your details and we'll reach out.`)
+                : (lang === "bn"
+                    ? "নিচের তথ্য দিন, আমরা শীঘ্রই যোগাযোগ করব।"
+                    : "Fill in your details and we'll contact you shortly.")}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleOrderSubmit} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="order-name">{lang === "bn" ? "নাম *" : "Name *"}</Label>
+              <Input id="order-name" required value={orderForm.name}
+                onChange={(e) => setOrderForm({ ...orderForm, name: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="order-phone">{lang === "bn" ? "মোবাইল নম্বর *" : "Mobile Number *"}</Label>
+              <Input id="order-phone" required placeholder="01XXXXXXXXX" value={orderForm.phone}
+                onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="order-address">{lang === "bn" ? "ঠিকানা" : "Address"}</Label>
+              <Input id="order-address" value={orderForm.address}
+                onChange={(e) => setOrderForm({ ...orderForm, address: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="order-message">{lang === "bn" ? "মন্তব্য" : "Message"}</Label>
+              <Textarea id="order-message" rows={3} value={orderForm.message}
+                onChange={(e) => setOrderForm({ ...orderForm, message: e.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOrderOpen(false)}>
+                {lang === "bn" ? "বাতিল" : "Cancel"}
+              </Button>
+              <Button type="submit" disabled={orderSubmitting} className="bg-gradient-primary shadow-glow">
+                {orderSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {lang === "bn" ? "অর্ডার সাবমিট" : "Submit Order"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Coverage */}
       <section id="coverage" className="py-20">
         <div className="container mx-auto px-4">
