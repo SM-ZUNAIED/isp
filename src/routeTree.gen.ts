@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminErpIndexRouteImport } from './routes/_authenticated.admin.erp.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
+import { Route as AuthenticatedAdminHrAttendanceRouteImport } from './routes/_authenticated.admin.hr.attendance'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -177,6 +178,12 @@ const AuthenticatedAdminReportsAddressRoute =
     path: '/reports/address',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminHrAttendanceRoute =
+  AuthenticatedAdminHrAttendanceRouteImport.update({
+    id: '/hr/attendance',
+    path: '/hr/attendance',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCustomersIdRoute =
   AuthenticatedAdminCustomersIdRouteImport.update({
     id: '/customers_/$id',
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
@@ -235,6 +243,7 @@ export interface FileRoutesByTo {
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/erp': typeof AuthenticatedAdminErpIndexRoute
@@ -265,6 +274,7 @@ export interface FileRoutesById {
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/_authenticated/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/_authenticated/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
     | '/admin/customers/$id'
+    | '/admin/hr/attendance'
     | '/admin/reports/address'
     | '/api/public/cron/run'
     | '/admin/erp/'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
     | '/admin/customers/$id'
+    | '/admin/hr/attendance'
     | '/admin/reports/address'
     | '/api/public/cron/run'
     | '/admin/erp'
@@ -351,6 +363,7 @@ export interface FileRouteTypes {
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/customers_/$id'
+    | '/_authenticated/admin/hr/attendance'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
     | '/_authenticated/admin/erp/'
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminReportsAddressRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/hr/attendance': {
+      id: '/_authenticated/admin/hr/attendance'
+      path: '/hr/attendance'
+      fullPath: '/admin/hr/attendance'
+      preLoaderRoute: typeof AuthenticatedAdminHrAttendanceRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/customers_/$id': {
       id: '/_authenticated/admin/customers_/$id'
       path: '/customers/$id'
@@ -576,6 +596,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminZonesRoute: typeof AuthenticatedAdminZonesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
+  AuthenticatedAdminHrAttendanceRoute: typeof AuthenticatedAdminHrAttendanceRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
   AuthenticatedAdminErpIndexRoute: typeof AuthenticatedAdminErpIndexRoute
 }
@@ -597,6 +618,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminZonesRoute: AuthenticatedAdminZonesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminCustomersIdRoute: AuthenticatedAdminCustomersIdRoute,
+  AuthenticatedAdminHrAttendanceRoute: AuthenticatedAdminHrAttendanceRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
   AuthenticatedAdminErpIndexRoute: AuthenticatedAdminErpIndexRoute,
 }
