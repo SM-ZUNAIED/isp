@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminErpIndexRouteImport } from './routes/_authenticated.admin.erp.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
+import { Route as AuthenticatedAdminInventoryMovementsRouteImport } from './routes/_authenticated.admin.inventory.movements'
 import { Route as AuthenticatedAdminInventoryItemsRouteImport } from './routes/_authenticated.admin.inventory.items'
 import { Route as AuthenticatedAdminHrLeavesRouteImport } from './routes/_authenticated.admin.hr.leaves'
 import { Route as AuthenticatedAdminHrAttendanceRouteImport } from './routes/_authenticated.admin.hr.attendance'
@@ -180,6 +181,12 @@ const AuthenticatedAdminReportsAddressRoute =
     path: '/reports/address',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminInventoryMovementsRoute =
+  AuthenticatedAdminInventoryMovementsRouteImport.update({
+    id: '/inventory/movements',
+    path: '/inventory/movements',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminInventoryItemsRoute =
   AuthenticatedAdminInventoryItemsRouteImport.update({
     id: '/inventory/items',
@@ -232,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
   '/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
+  '/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
@@ -262,6 +270,7 @@ export interface FileRoutesByTo {
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
   '/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
+  '/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/erp': typeof AuthenticatedAdminErpIndexRoute
@@ -295,6 +304,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/_authenticated/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
   '/_authenticated/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
+  '/_authenticated/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/_authenticated/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/admin/hr/attendance'
     | '/admin/hr/leaves'
     | '/admin/inventory/items'
+    | '/admin/inventory/movements'
     | '/admin/reports/address'
     | '/api/public/cron/run'
     | '/admin/erp/'
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/admin/hr/attendance'
     | '/admin/hr/leaves'
     | '/admin/inventory/items'
+    | '/admin/inventory/movements'
     | '/admin/reports/address'
     | '/api/public/cron/run'
     | '/admin/erp'
@@ -390,6 +402,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/hr/attendance'
     | '/_authenticated/admin/hr/leaves'
     | '/_authenticated/admin/inventory/items'
+    | '/_authenticated/admin/inventory/movements'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
     | '/_authenticated/admin/erp/'
@@ -588,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminReportsAddressRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/inventory/movements': {
+      id: '/_authenticated/admin/inventory/movements'
+      path: '/inventory/movements'
+      fullPath: '/admin/inventory/movements'
+      preLoaderRoute: typeof AuthenticatedAdminInventoryMovementsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/inventory/items': {
       id: '/_authenticated/admin/inventory/items'
       path: '/inventory/items'
@@ -639,6 +659,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminHrAttendanceRoute: typeof AuthenticatedAdminHrAttendanceRoute
   AuthenticatedAdminHrLeavesRoute: typeof AuthenticatedAdminHrLeavesRoute
   AuthenticatedAdminInventoryItemsRoute: typeof AuthenticatedAdminInventoryItemsRoute
+  AuthenticatedAdminInventoryMovementsRoute: typeof AuthenticatedAdminInventoryMovementsRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
   AuthenticatedAdminErpIndexRoute: typeof AuthenticatedAdminErpIndexRoute
 }
@@ -663,6 +684,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminHrAttendanceRoute: AuthenticatedAdminHrAttendanceRoute,
   AuthenticatedAdminHrLeavesRoute: AuthenticatedAdminHrLeavesRoute,
   AuthenticatedAdminInventoryItemsRoute: AuthenticatedAdminInventoryItemsRoute,
+  AuthenticatedAdminInventoryMovementsRoute:
+    AuthenticatedAdminInventoryMovementsRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
   AuthenticatedAdminErpIndexRoute: AuthenticatedAdminErpIndexRoute,
 }
