@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { listLeaves, createLeave, setLeaveStatus, deleteLeave } from "@/lib/hr.functions";
-import { listStaff } from "@/lib/staff.functions";
+import { listStaffBrief } from "@/lib/hr.functions";
 import { useTx } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/hr/leaves")({
@@ -119,7 +119,7 @@ function LeavesPage() {
 function NewLeaveDialog({ onSaved }: { onSaved: () => void }) {
   const tx = useTx();
   const [open, setOpen] = useState(false);
-  const listS = useServerFn(listStaff);
+  const listS = useServerFn(listStaffBrief);
   const create = useServerFn(createLeave);
   const staffQ = useQuery({ queryKey: ["staff-brief"], queryFn: () => listS(), enabled: open });
   const [f, setF] = useState({
