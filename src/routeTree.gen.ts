@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminErpIndexRouteImport } from './routes/_authenticated.admin.erp.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
+import { Route as AuthenticatedAdminHrLeavesRouteImport } from './routes/_authenticated.admin.hr.leaves'
 import { Route as AuthenticatedAdminHrAttendanceRouteImport } from './routes/_authenticated.admin.hr.attendance'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
 
@@ -178,6 +179,12 @@ const AuthenticatedAdminReportsAddressRoute =
     path: '/reports/address',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminHrLeavesRoute =
+  AuthenticatedAdminHrLeavesRouteImport.update({
+    id: '/hr/leaves',
+    path: '/hr/leaves',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminHrAttendanceRoute =
   AuthenticatedAdminHrAttendanceRouteImport.update({
     id: '/hr/attendance',
@@ -216,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
@@ -244,6 +252,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/erp': typeof AuthenticatedAdminErpIndexRoute
@@ -275,6 +284,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/_authenticated/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/_authenticated/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/_authenticated/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/customers/$id'
     | '/admin/hr/attendance'
+    | '/admin/hr/leaves'
     | '/admin/reports/address'
     | '/api/public/cron/run'
     | '/admin/erp/'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/customers/$id'
     | '/admin/hr/attendance'
+    | '/admin/hr/leaves'
     | '/admin/reports/address'
     | '/api/public/cron/run'
     | '/admin/erp'
@@ -364,6 +376,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/customers_/$id'
     | '/_authenticated/admin/hr/attendance'
+    | '/_authenticated/admin/hr/leaves'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
     | '/_authenticated/admin/erp/'
@@ -562,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminReportsAddressRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/hr/leaves': {
+      id: '/_authenticated/admin/hr/leaves'
+      path: '/hr/leaves'
+      fullPath: '/admin/hr/leaves'
+      preLoaderRoute: typeof AuthenticatedAdminHrLeavesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/hr/attendance': {
       id: '/_authenticated/admin/hr/attendance'
       path: '/hr/attendance'
@@ -597,6 +617,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
   AuthenticatedAdminHrAttendanceRoute: typeof AuthenticatedAdminHrAttendanceRoute
+  AuthenticatedAdminHrLeavesRoute: typeof AuthenticatedAdminHrLeavesRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
   AuthenticatedAdminErpIndexRoute: typeof AuthenticatedAdminErpIndexRoute
 }
@@ -619,6 +640,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminCustomersIdRoute: AuthenticatedAdminCustomersIdRoute,
   AuthenticatedAdminHrAttendanceRoute: AuthenticatedAdminHrAttendanceRoute,
+  AuthenticatedAdminHrLeavesRoute: AuthenticatedAdminHrLeavesRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
   AuthenticatedAdminErpIndexRoute: AuthenticatedAdminErpIndexRoute,
 }
