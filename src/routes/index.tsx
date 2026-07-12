@@ -96,16 +96,42 @@ function LandingPage() {
   const phoneRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string } | null>(null);
+  const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string; price?: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "", message: "" });
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
 
-  const handleOrder = (pkg: { id: string; name: string }) => {
-    setSelectedPkg({ id: pkg.id, name: pkg.name });
-    toast.success(`${pkg.name} — ${t("contact.subtitle")}`);
-    setTimeout(() => {
-      scrollToId("contact");
-      messageRef.current?.focus();
-    }, 100);
+  const handleOrder = (pkg: { id: string; name: string; price?: number }) => {
+    setSelectedPkg(pkg);
+    setOrderOpen(true);
+  };
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = orderForm.name.trim();
+    const phone = orderForm.phone.trim();
+    if (name.length < 2) return toast.error(lang === "bn" ? "নাম দিন" : "Enter your name");
+    if (!/^01[3-9][0-9]{8}$/.test(phone)) return toast.error(lang === "bn" ? "সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)" : "Enter a valid mobile (01XXXXXXXXX)");
+    setOrderSubmitting(true);
+    try {
+      await submitInquiryFn({
+        data: {
+          name, phone,
+          address: orderForm.address.trim() || null,
+          package_id: selectedPkg?.id ?? null,
+          package_name: selectedPkg?.name ?? null,
+          message: orderForm.message.trim() || (selectedPkg ? `Order request for ${selectedPkg.name}` : null),
+        },
+      });
+      toast.success(lang === "bn" ? "অর্ডার গ্রহণ করা হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।" : "Order received! We'll contact you shortly.");
+      setOrderOpen(false);
+      setOrderForm({ name: "", phone: "", address: "", message: "" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to submit");
+    } finally {
+      setOrderSubmitting(false);
+    }
   };
 
   const handleInquiry = async (e: React.FormEvent) => {
