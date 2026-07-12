@@ -205,7 +205,7 @@ function TopBarActions() {
 
 function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
   const { user, signOut } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
 
