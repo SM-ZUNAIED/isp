@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       areas: {
         Row: {
           bn_name: string | null
@@ -54,6 +98,53 @@ export type Database = {
             columns: ["village_id"]
             isOneToOne: false
             referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          id: string
+          remarks: string | null
+          staff_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          id?: string
+          remarks?: string | null
+          staff_id: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          id?: string
+          remarks?: string | null
+          staff_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -544,6 +635,141 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_items: {
+        Row: {
+          category: string | null
+          cost_price: number
+          created_at: string
+          current_stock: number
+          id: string
+          name: string
+          notes: string | null
+          reorder_level: number
+          sale_price: number
+          sku: string | null
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          cost_price?: number
+          created_at?: string
+          current_stock?: number
+          id?: string
+          name: string
+          notes?: string | null
+          reorder_level?: number
+          sale_price?: number
+          sku?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          cost_price?: number
+          created_at?: string
+          current_stock?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          reorder_level?: number
+          sale_price?: number
+          sku?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      journal_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entry_date: string
+          entry_no: string
+          id: string
+          reference: string | null
+          source: string | null
+          source_id: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_no: string
+          id?: string
+          reference?: string | null
+          source?: string | null
+          source_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_no?: string
+          id?: string
+          reference?: string | null
+          source?: string | null
+          source_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      journal_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit: number
+          debit: number
+          entry_id: string
+          id: string
+          memo: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id: string
+          id?: string
+          memo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id?: string
+          id?: string
+          memo?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_lines_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           address: string | null
@@ -584,6 +810,56 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leaves: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          from_date: string
+          id: string
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          reason: string | null
+          staff_id: string
+          status: Database["public"]["Enums"]["leave_status"]
+          to_date: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          from_date: string
+          id?: string
+          leave_type?: Database["public"]["Enums"]["leave_type"]
+          reason?: string | null
+          staff_id: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          to_date: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          from_date?: string
+          id?: string
+          leave_type?: Database["public"]["Enums"]["leave_type"]
+          reason?: string | null
+          staff_id?: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          to_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaves_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -920,6 +1196,99 @@ export type Database = {
           },
         ]
       }
+      payroll_items: {
+        Row: {
+          allowances: number
+          basic: number
+          created_at: string
+          deductions: number
+          id: string
+          net_amount: number
+          paid: boolean
+          paid_at: string | null
+          run_id: string
+          staff_id: string
+          updated_at: string
+        }
+        Insert: {
+          allowances?: number
+          basic?: number
+          created_at?: string
+          deductions?: number
+          id?: string
+          net_amount?: number
+          paid?: boolean
+          paid_at?: string | null
+          run_id: string
+          staff_id: string
+          updated_at?: string
+        }
+        Update: {
+          allowances?: number
+          basic?: number
+          created_at?: string
+          deductions?: number
+          id?: string
+          net_amount?: number
+          paid?: boolean
+          paid_at?: string | null
+          run_id?: string
+          staff_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_items_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_items_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_runs: {
+        Row: {
+          created_at: string
+          finalized_at: string | null
+          generated_by: string | null
+          id: string
+          notes: string | null
+          period_month: string
+          status: Database["public"]["Enums"]["payroll_status"]
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          finalized_at?: string | null
+          generated_by?: string | null
+          id?: string
+          notes?: string | null
+          period_month: string
+          status?: Database["public"]["Enums"]["payroll_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          finalized_at?: string | null
+          generated_by?: string | null
+          id?: string
+          notes?: string | null
+          period_month?: string
+          status?: Database["public"]["Enums"]["payroll_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_offices: {
         Row: {
           bn_name: string | null
@@ -988,6 +1357,116 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_order_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          item_id: string | null
+          po_id: string
+          quantity: number
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          po_id: string
+          quantity?: number
+          rate?: number
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          po_id?: string
+          quantity?: number
+          rate?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          discount: number
+          expected_date: string | null
+          id: string
+          notes: string | null
+          order_date: string
+          po_number: string
+          status: Database["public"]["Enums"]["po_status"]
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          po_number: string
+          status?: Database["public"]["Enums"]["po_status"]
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          po_number?: string
+          status?: Database["public"]["Enums"]["po_status"]
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roads: {
         Row: {
           area_id: string
@@ -1028,6 +1507,62 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_structures: {
+        Row: {
+          basic: number
+          created_at: string
+          effective_from: string
+          house_rent: number
+          id: string
+          medical: number
+          notes: string | null
+          other_allowance: number
+          other_deduction: number
+          staff_id: string
+          tax_deduction: number
+          transport: number
+          updated_at: string
+        }
+        Insert: {
+          basic?: number
+          created_at?: string
+          effective_from?: string
+          house_rent?: number
+          id?: string
+          medical?: number
+          notes?: string | null
+          other_allowance?: number
+          other_deduction?: number
+          staff_id: string
+          tax_deduction?: number
+          transport?: number
+          updated_at?: string
+        }
+        Update: {
+          basic?: number
+          created_at?: string
+          effective_from?: string
+          house_rent?: number
+          id?: string
+          medical?: number
+          notes?: string | null
+          other_allowance?: number
+          other_deduction?: number
+          staff_id?: string
+          tax_deduction?: number
+          transport?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_structures_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -1166,6 +1701,69 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          move_type: Database["public"]["Enums"]["stock_move_type"]
+          moved_at: string
+          moved_by: string | null
+          notes: string | null
+          quantity: number
+          reference_id: string | null
+          reference_type: string | null
+          unit_cost: number
+          updated_at: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          move_type: Database["public"]["Enums"]["stock_move_type"]
+          moved_at?: string
+          moved_by?: string | null
+          notes?: string | null
+          quantity: number
+          reference_id?: string | null
+          reference_type?: string | null
+          unit_cost?: number
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          move_type?: Database["public"]["Enums"]["stock_move_type"]
+          moved_at?: string
+          moved_by?: string | null
+          notes?: string | null
+          quantity?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          unit_cost?: number
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ticket_replies: {
         Row: {
@@ -1364,6 +1962,102 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_bills: {
+        Row: {
+          amount: number
+          bill_date: string
+          bill_number: string
+          created_at: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          paid_amount: number
+          po_id: string | null
+          status: Database["public"]["Enums"]["vendor_bill_status"]
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          amount?: number
+          bill_date?: string
+          bill_number: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          po_id?: string | null
+          status?: Database["public"]["Enums"]["vendor_bill_status"]
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          amount?: number
+          bill_date?: string
+          bill_number?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          po_id?: string | null
+          status?: Database["public"]["Enums"]["vendor_bill_status"]
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_bills_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_bills_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          mobile: string | null
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          mobile?: string | null
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          mobile?: string | null
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       villages: {
         Row: {
           bn_name: string | null
@@ -1402,6 +2096,33 @@ export type Database = {
           },
         ]
       }
+      warehouses: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          location: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          location?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          location?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       zones: {
         Row: {
           created_at: string
@@ -1438,6 +2159,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_privileged: { Args: { _user_id: string }; Returns: boolean }
       public_get_receipt: { Args: { _receipt: string }; Returns: Json }
       public_lookup_bill: { Args: { _code: string }; Returns: Json }
       public_submit_payment: {
@@ -1451,11 +2173,18 @@ export type Database = {
       }
     }
     Enums: {
+      account_type: "asset" | "liability" | "equity" | "income" | "expense"
       app_role: "admin" | "staff" | "customer"
+      attendance_status: "present" | "absent" | "leave" | "half_day" | "late"
       bill_status: "paid" | "unpaid" | "partial" | "overdue"
       customer_status: "active" | "pending" | "suspended" | "expired"
+      leave_status: "pending" | "approved" | "rejected" | "cancelled"
+      leave_type: "casual" | "sick" | "annual" | "unpaid" | "other"
       olt_brand: "vsol" | "cdata" | "huawei" | "bdcom" | "zte" | "other"
       payment_method: "cash" | "bkash" | "nagad" | "rocket" | "bank" | "other"
+      payroll_status: "draft" | "finalized" | "paid"
+      po_status: "draft" | "ordered" | "received" | "cancelled"
+      stock_move_type: "in" | "out" | "transfer" | "adjust"
       ticket_category:
         | "no_internet"
         | "slow_speed"
@@ -1464,6 +2193,7 @@ export type Database = {
         | "onu_issue"
         | "other"
       ticket_status: "pending" | "in_progress" | "solved" | "closed"
+      vendor_bill_status: "unpaid" | "partial" | "paid" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1591,11 +2321,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["asset", "liability", "equity", "income", "expense"],
       app_role: ["admin", "staff", "customer"],
+      attendance_status: ["present", "absent", "leave", "half_day", "late"],
       bill_status: ["paid", "unpaid", "partial", "overdue"],
       customer_status: ["active", "pending", "suspended", "expired"],
+      leave_status: ["pending", "approved", "rejected", "cancelled"],
+      leave_type: ["casual", "sick", "annual", "unpaid", "other"],
       olt_brand: ["vsol", "cdata", "huawei", "bdcom", "zte", "other"],
       payment_method: ["cash", "bkash", "nagad", "rocket", "bank", "other"],
+      payroll_status: ["draft", "finalized", "paid"],
+      po_status: ["draft", "ordered", "received", "cancelled"],
+      stock_move_type: ["in", "out", "transfer", "adjust"],
       ticket_category: [
         "no_internet",
         "slow_speed",
@@ -1605,6 +2342,7 @@ export const Constants = {
         "other",
       ],
       ticket_status: ["pending", "in_progress", "solved", "closed"],
+      vendor_bill_status: ["unpaid", "partial", "paid", "cancelled"],
     },
   },
 } as const
