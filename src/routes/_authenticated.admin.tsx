@@ -19,7 +19,7 @@ import {
   UserCircle2,
   Users2,
   CalendarCheck2, Palmtree, PackageOpen, ArrowLeftRight, Truck, ShoppingCart, BookOpen, NotebookPen, TrendingUp,
-  Briefcase, ChevronDown,
+  Briefcase, ChevronDown, Home,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -227,14 +227,23 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-5">
-        <Link to="/" className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <BrandLogo size={10} />
-          <div>
-            <div className="font-bold leading-tight">Net Bill Pro</div>
-            <div className="text-xs text-muted-foreground">{t("admin.brand.sub")}</div>
+          <div className="flex-1 min-w-0">
+            <div className="font-bold leading-tight truncate">Net Bill Pro</div>
+            <div className="text-xs text-muted-foreground truncate">{t("admin.brand.sub")}</div>
           </div>
-        </Link>
+          <Link
+            to="/"
+            title="Home"
+            aria-label="Home"
+            className="grid h-8 w-8 place-items-center rounded-lg border bg-background text-muted-foreground hover:bg-gradient-primary hover:text-white hover:border-transparent transition shadow-soft"
+          >
+            <Home className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
+
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {NAV.filter((n) => n.kind === "section" || n.kind === "group" || !n.adminOnly || isAdmin).map((item, i) => {
