@@ -32,6 +32,7 @@ import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBillsRouteImport } from './routes/_authenticated.admin.bills'
 import { Route as AuthenticatedAdminAddressRouteImport } from './routes/_authenticated.admin.address'
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
+import { Route as AuthenticatedAdminErpIndexRouteImport } from './routes/_authenticated.admin.erp.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
@@ -159,6 +160,12 @@ const AuthenticatedAdminAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminErpIndexRoute =
+  AuthenticatedAdminErpIndexRouteImport.update({
+    id: '/erp/',
+    path: '/erp/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicCronRunRoute = ApiPublicCronRunRouteImport.update({
   id: '/api/public/cron/run',
   path: '/api/public/cron/run',
@@ -203,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -229,6 +237,7 @@ export interface FileRoutesByTo {
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/admin/erp': typeof AuthenticatedAdminErpIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -258,6 +267,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/_authenticated/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$id'
     | '/admin/reports/address'
     | '/api/public/cron/run'
+    | '/admin/erp/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$id'
     | '/admin/reports/address'
     | '/api/public/cron/run'
+    | '/admin/erp'
   id:
     | '__root__'
     | '/'
@@ -341,6 +353,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/customers_/$id'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
+    | '/_authenticated/admin/erp/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -515,6 +528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAccountsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/erp/': {
+      id: '/_authenticated/admin/erp/'
+      path: '/erp'
+      fullPath: '/admin/erp/'
+      preLoaderRoute: typeof AuthenticatedAdminErpIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/cron/run': {
       id: '/api/public/cron/run'
       path: '/api/public/cron/run'
@@ -557,6 +577,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
+  AuthenticatedAdminErpIndexRoute: typeof AuthenticatedAdminErpIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -577,6 +598,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminCustomersIdRoute: AuthenticatedAdminCustomersIdRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
+  AuthenticatedAdminErpIndexRoute: AuthenticatedAdminErpIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
