@@ -57,10 +57,14 @@ type NavKey =
   | "admin.nav.mikrotik" | "admin.nav.olt" | "admin.nav.accounts" | "admin.nav.tickets"
   | "admin.nav.notices" | "admin.nav.users" | "admin.nav.settings";
 
-type NavItem =
+type NavLink =
   | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; labelKey: NavKey }
-  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; label: { bn: string; en: string } }
-  | { kind: "section"; label: { bn: string; en: string } };
+  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; label: { bn: string; en: string } };
+
+type NavItem =
+  | NavLink
+  | { kind: "section"; label: { bn: string; en: string } }
+  | { kind: "group"; id: string; icon: typeof LayoutDashboard; label: { bn: string; en: string }; children: NavLink[] };
 
 const NAV: Array<NavItem> = [
   { kind: "section", label: { bn: "কোর", en: "Core" } },
@@ -77,18 +81,22 @@ const NAV: Array<NavItem> = [
   { kind: "link", to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket },
   { kind: "link", to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell },
 
-  { kind: "section", label: { bn: "ERP", en: "ERP" } },
-  { kind: "link", to: "/admin/erp", icon: LayoutDashboard, exact: true, label: { bn: "ERP ওভারভিউ", en: "ERP Overview" } },
-  { kind: "link", to: "/admin/hr/attendance", icon: CalendarCheck2, label: { bn: "অ্যাটেন্ডেন্স", en: "Attendance" } },
-  { kind: "link", to: "/admin/hr/leaves", icon: Palmtree, label: { bn: "ছুটি", en: "Leaves" } },
-  { kind: "link", to: "/admin/hr/payroll", icon: Wallet, label: { bn: "পেরোল", en: "Payroll" } },
-  { kind: "link", to: "/admin/inventory/items", icon: PackageOpen, label: { bn: "ইনভেন্টরি আইটেম", en: "Inventory Items" } },
-  { kind: "link", to: "/admin/inventory/movements", icon: ArrowLeftRight, label: { bn: "স্টক মুভমেন্ট", en: "Stock Movements" } },
-  { kind: "link", to: "/admin/purchase/vendors", icon: Truck, label: { bn: "ভেন্ডর", en: "Vendors" } },
-  { kind: "link", to: "/admin/purchase/orders", icon: ShoppingCart, label: { bn: "পারচেজ অর্ডার", en: "Purchase Orders" } },
-  { kind: "link", to: "/admin/accounting/chart", icon: BookOpen, label: { bn: "চার্ট অফ অ্যাকাউন্টস", en: "Chart of Accounts" } },
-  { kind: "link", to: "/admin/accounting/journal", icon: NotebookPen, label: { bn: "জার্নাল", en: "Journal" } },
-  { kind: "link", to: "/admin/accounting/reports", icon: TrendingUp, label: { bn: "রিপোর্ট", en: "Reports" } },
+  {
+    kind: "group", id: "erp", icon: Briefcase, label: { bn: "ERP", en: "ERP" },
+    children: [
+      { kind: "link", to: "/admin/erp", icon: LayoutDashboard, exact: true, label: { bn: "ERP ওভারভিউ", en: "ERP Overview" } },
+      { kind: "link", to: "/admin/hr/attendance", icon: CalendarCheck2, label: { bn: "অ্যাটেন্ডেন্স", en: "Attendance" } },
+      { kind: "link", to: "/admin/hr/leaves", icon: Palmtree, label: { bn: "ছুটি", en: "Leaves" } },
+      { kind: "link", to: "/admin/hr/payroll", icon: Wallet, label: { bn: "পেরোল", en: "Payroll" } },
+      { kind: "link", to: "/admin/inventory/items", icon: PackageOpen, label: { bn: "ইনভেন্টরি আইটেম", en: "Inventory Items" } },
+      { kind: "link", to: "/admin/inventory/movements", icon: ArrowLeftRight, label: { bn: "স্টক মুভমেন্ট", en: "Stock Movements" } },
+      { kind: "link", to: "/admin/purchase/vendors", icon: Truck, label: { bn: "ভেন্ডর", en: "Vendors" } },
+      { kind: "link", to: "/admin/purchase/orders", icon: ShoppingCart, label: { bn: "পারচেজ অর্ডার", en: "Purchase Orders" } },
+      { kind: "link", to: "/admin/accounting/chart", icon: BookOpen, label: { bn: "চার্ট অফ অ্যাকাউন্টস", en: "Chart of Accounts" } },
+      { kind: "link", to: "/admin/accounting/journal", icon: NotebookPen, label: { bn: "জার্নাল", en: "Journal" } },
+      { kind: "link", to: "/admin/accounting/reports", icon: TrendingUp, label: { bn: "রিপোর্ট", en: "Reports" } },
+    ],
+  },
 
   { kind: "section", label: { bn: "অ্যাডমিন", en: "Admin" } },
   { kind: "link", to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true },
