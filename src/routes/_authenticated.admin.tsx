@@ -222,11 +222,19 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.filter((n) => !n.adminOnly || isAdmin).map((item, i) => {
+        {NAV.filter((n) => n.kind === "section" || !n.adminOnly || isAdmin).map((item, i) => {
+          if (item.kind === "section") {
+            return (
+              <div key={`s-${i}`} className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                {item.label.bn === item.label.en ? item.label.en : (typeof document !== "undefined" && document.documentElement.lang === "en" ? item.label.en : item.label.bn)}
+              </div>
+            );
+          }
           const active = item.exact
             ? location.pathname === item.to
             : location.pathname.startsWith(item.to) && !item.exact;
           const Icon = item.icon;
+          const label = "labelKey" in item ? t(item.labelKey) : (typeof document !== "undefined" && document.documentElement.lang === "en" ? item.label.en : item.label.bn);
           return (
             <button
               key={i}
@@ -244,12 +252,13 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
               )}
             >
               <Icon className="h-4 w-4" />
-              <span className="flex-1 text-left">{t(item.labelKey)}</span>
+              <span className="flex-1 text-left">{label}</span>
               {item.disabled && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5">{t("admin.soon")}</span>}
             </button>
           );
         })}
       </nav>
+
 
       <div className="border-t p-3">
         <div className="mb-2 px-2 text-xs text-muted-foreground truncate">{user?.email}</div>
