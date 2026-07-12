@@ -586,7 +586,7 @@ function LandingPage() {
                       const p = packages.find((x) => x.id === e.target.value);
                       setSelectedPkg(p ? { id: p.id, name: p.name, price: Number(p.monthly_price) } : null);
                     }}
-                    className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white outline-none focus:bg-white/30 [&>option]:text-foreground"
+                    className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white outline-none focus:bg-white/30 [&>option]:bg-background [&>option]:text-foreground"
                   >
                     <option value="">{lang === "bn" ? "প্যাকেজ নির্বাচন করুন (ঐচ্ছিক)" : "Select a package (optional)"}</option>
                     {packages.map((p) => (
