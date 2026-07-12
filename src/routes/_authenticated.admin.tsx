@@ -226,7 +226,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           if (item.kind === "section") {
             return (
               <div key={`s-${i}`} className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-                {item.label.bn === item.label.en ? item.label.en : (typeof document !== "undefined" && document.documentElement.lang === "en" ? item.label.en : item.label.bn)}
+                {lang === "en" ? item.label.en : item.label.bn}
               </div>
             );
           }
