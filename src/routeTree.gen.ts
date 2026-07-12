@@ -42,6 +42,7 @@ import { Route as AuthenticatedAdminInventoryItemsRouteImport } from './routes/_
 import { Route as AuthenticatedAdminHrLeavesRouteImport } from './routes/_authenticated.admin.hr.leaves'
 import { Route as AuthenticatedAdminHrAttendanceRouteImport } from './routes/_authenticated.admin.hr.attendance'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
+import { Route as AuthenticatedAdminAccountingJournalRouteImport } from './routes/_authenticated.admin.accounting.journal'
 import { Route as AuthenticatedAdminAccountingChartRouteImport } from './routes/_authenticated.admin.accounting.chart'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -226,6 +227,12 @@ const AuthenticatedAdminCustomersIdRoute =
     path: '/customers/$id',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAccountingJournalRoute =
+  AuthenticatedAdminAccountingJournalRouteImport.update({
+    id: '/accounting/journal',
+    path: '/accounting/journal',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAccountingChartRoute =
   AuthenticatedAdminAccountingChartRouteImport.update({
     id: '/accounting/chart',
@@ -257,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/accounting/chart': typeof AuthenticatedAdminAccountingChartRoute
+  '/admin/accounting/journal': typeof AuthenticatedAdminAccountingJournalRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
@@ -291,6 +299,7 @@ export interface FileRoutesByTo {
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/accounting/chart': typeof AuthenticatedAdminAccountingChartRoute
+  '/admin/accounting/journal': typeof AuthenticatedAdminAccountingJournalRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
@@ -328,6 +337,7 @@ export interface FileRoutesById {
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/accounting/chart': typeof AuthenticatedAdminAccountingChartRoute
+  '/_authenticated/admin/accounting/journal': typeof AuthenticatedAdminAccountingJournalRoute
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
   '/_authenticated/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
   '/_authenticated/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
@@ -365,6 +375,7 @@ export interface FileRouteTypes {
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
     | '/admin/accounting/chart'
+    | '/admin/accounting/journal'
     | '/admin/customers/$id'
     | '/admin/hr/attendance'
     | '/admin/hr/leaves'
@@ -399,6 +410,7 @@ export interface FileRouteTypes {
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
     | '/admin/accounting/chart'
+    | '/admin/accounting/journal'
     | '/admin/customers/$id'
     | '/admin/hr/attendance'
     | '/admin/hr/leaves'
@@ -435,6 +447,7 @@ export interface FileRouteTypes {
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/accounting/chart'
+    | '/_authenticated/admin/accounting/journal'
     | '/_authenticated/admin/customers_/$id'
     | '/_authenticated/admin/hr/attendance'
     | '/_authenticated/admin/hr/leaves'
@@ -689,6 +702,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomersIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/accounting/journal': {
+      id: '/_authenticated/admin/accounting/journal'
+      path: '/accounting/journal'
+      fullPath: '/admin/accounting/journal'
+      preLoaderRoute: typeof AuthenticatedAdminAccountingJournalRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/accounting/chart': {
       id: '/_authenticated/admin/accounting/chart'
       path: '/accounting/chart'
@@ -716,6 +736,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminZonesRoute: typeof AuthenticatedAdminZonesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminAccountingChartRoute: typeof AuthenticatedAdminAccountingChartRoute
+  AuthenticatedAdminAccountingJournalRoute: typeof AuthenticatedAdminAccountingJournalRoute
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
   AuthenticatedAdminHrAttendanceRoute: typeof AuthenticatedAdminHrAttendanceRoute
   AuthenticatedAdminHrLeavesRoute: typeof AuthenticatedAdminHrLeavesRoute
@@ -745,6 +766,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminAccountingChartRoute:
     AuthenticatedAdminAccountingChartRoute,
+  AuthenticatedAdminAccountingJournalRoute:
+    AuthenticatedAdminAccountingJournalRoute,
   AuthenticatedAdminCustomersIdRoute: AuthenticatedAdminCustomersIdRoute,
   AuthenticatedAdminHrAttendanceRoute: AuthenticatedAdminHrAttendanceRoute,
   AuthenticatedAdminHrLeavesRoute: AuthenticatedAdminHrLeavesRoute,
