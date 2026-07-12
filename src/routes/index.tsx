@@ -99,7 +99,7 @@ function LandingPage() {
   const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string; price?: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [orderOpen, setOrderOpen] = useState(false);
-  const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "", message: "" });
+  const [orderForm, setOrderForm] = useState({ name: "", phone: "", area: "", road: "", house: "", message: "" });
   const [orderSubmitting, setOrderSubmitting] = useState(false);
 
   const handleOrder = (pkg: { id: string; name: string; price?: number }) => {
@@ -113,12 +113,21 @@ function LandingPage() {
     const phone = orderForm.phone.trim();
     if (name.length < 2) return toast.error(lang === "bn" ? "নাম দিন" : "Enter your name");
     if (!/^01[3-9][0-9]{8}$/.test(phone)) return toast.error(lang === "bn" ? "সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)" : "Enter a valid mobile (01XXXXXXXXX)");
+    const area = orderForm.area.trim();
+    const road = orderForm.road.trim();
+    const house = orderForm.house.trim();
+    const addressParts = [
+      house ? (lang === "bn" ? `বাসা: ${house}` : `House: ${house}`) : "",
+      road ? (lang === "bn" ? `রোড: ${road}` : `Road: ${road}`) : "",
+      area ? (lang === "bn" ? `এলাকা: ${area}` : `Area: ${area}`) : "",
+    ].filter(Boolean);
+    const address = addressParts.join(", ");
     setOrderSubmitting(true);
     try {
       await submitInquiryFn({
         data: {
           name, phone,
-          address: orderForm.address.trim() || null,
+          address: address || null,
           package_id: selectedPkg?.id ?? null,
           package_name: selectedPkg?.name ?? null,
           message: orderForm.message.trim() || (selectedPkg ? `Order request for ${selectedPkg.name}` : null),
@@ -126,7 +135,7 @@ function LandingPage() {
       });
       toast.success(lang === "bn" ? "অর্ডার গ্রহণ করা হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।" : "Order received! We'll contact you shortly.");
       setOrderOpen(false);
-      setOrderForm({ name: "", phone: "", address: "", message: "" });
+      setOrderForm({ name: "", phone: "", area: "", road: "", house: "", message: "" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit");
     } finally {
@@ -403,10 +412,22 @@ function LandingPage() {
               <Input id="order-phone" required placeholder="01XXXXXXXXX" value={orderForm.phone}
                 onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="order-address">{lang === "bn" ? "ঠিকানা" : "Address"}</Label>
-              <Input id="order-address" value={orderForm.address}
-                onChange={(e) => setOrderForm({ ...orderForm, address: e.target.value })} />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="order-area">{lang === "bn" ? "এলাকা" : "Area"}</Label>
+                <Input id="order-area" value={orderForm.area}
+                  onChange={(e) => setOrderForm({ ...orderForm, area: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="order-road">{lang === "bn" ? "রোড" : "Road"}</Label>
+                <Input id="order-road" value={orderForm.road}
+                  onChange={(e) => setOrderForm({ ...orderForm, road: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="order-house">{lang === "bn" ? "বাসা নম্বর" : "House No."}</Label>
+                <Input id="order-house" value={orderForm.house}
+                  onChange={(e) => setOrderForm({ ...orderForm, house: e.target.value })} />
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="order-message">{lang === "bn" ? "মন্তব্য" : "Message"}</Label>
