@@ -412,10 +412,22 @@ function LandingPage() {
               <Input id="order-phone" required placeholder="01XXXXXXXXX" value={orderForm.phone}
                 onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="order-address">{lang === "bn" ? "ঠিকানা" : "Address"}</Label>
-              <Input id="order-address" value={orderForm.address}
-                onChange={(e) => setOrderForm({ ...orderForm, address: e.target.value })} />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="order-area">{lang === "bn" ? "এলাকা" : "Area"}</Label>
+                <Input id="order-area" value={orderForm.area}
+                  onChange={(e) => setOrderForm({ ...orderForm, area: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="order-road">{lang === "bn" ? "রোড" : "Road"}</Label>
+                <Input id="order-road" value={orderForm.road}
+                  onChange={(e) => setOrderForm({ ...orderForm, road: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="order-house">{lang === "bn" ? "বাসা নম্বর" : "House No."}</Label>
+                <Input id="order-house" value={orderForm.house}
+                  onChange={(e) => setOrderForm({ ...orderForm, house: e.target.value })} />
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="order-message">{lang === "bn" ? "মন্তব্য" : "Message"}</Label>
