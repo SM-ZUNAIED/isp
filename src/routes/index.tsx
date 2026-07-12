@@ -365,7 +365,7 @@ function LandingPage() {
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.unlimited")}</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.support247")}</li>
                 </ul>
-                <Button onClick={() => handleOrder({ id: pkg.id, name: pkg.name })} className={`mt-6 w-full ${pkg.is_popular ? "bg-gradient-primary shadow-glow" : ""}`} variant={pkg.is_popular ? "default" : "outline"}>
+                <Button onClick={() => handleOrder({ id: pkg.id, name: pkg.name, price: Number(pkg.monthly_price) })} className={`mt-6 w-full ${pkg.is_popular ? "bg-gradient-primary shadow-glow" : ""}`} variant={pkg.is_popular ? "default" : "outline"}>
                   {t("packages.order")}
                 </Button>
               </div>
