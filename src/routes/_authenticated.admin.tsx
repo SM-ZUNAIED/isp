@@ -18,6 +18,7 @@ import {
   BarChart3,
   UserCircle2,
   Users2,
+  CalendarCheck2, Palmtree, PackageOpen, ArrowLeftRight, Truck, ShoppingCart, BookOpen, NotebookPen, TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -55,24 +56,46 @@ type NavKey =
   | "admin.nav.mikrotik" | "admin.nav.olt" | "admin.nav.accounts" | "admin.nav.tickets"
   | "admin.nav.notices" | "admin.nav.users" | "admin.nav.settings";
 
-const NAV: Array<{ to: string; labelKey: NavKey; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean }> = [
-  { to: "/admin", labelKey: "admin.nav.dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/customers", labelKey: "admin.nav.customers", icon: Users },
-  { to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true },
-  { to: "/admin/packages", labelKey: "admin.nav.packages", icon: Package },
-  { to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio },
-  { to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true },
-  { to: "/admin/reports/address", labelKey: "admin.nav.addressReport", icon: BarChart3 },
-  { to: "/admin/bills", labelKey: "admin.nav.bills", icon: Receipt },
-  { to: "/admin/payments", labelKey: "admin.nav.payments", icon: Wallet },
-  { to: "/admin/mikrotik", labelKey: "admin.nav.mikrotik", icon: RouterIcon },
-  { to: "/admin/olt", labelKey: "admin.nav.olt", icon: Radio },
-  { to: "/admin/accounts", labelKey: "admin.nav.accounts", icon: Wallet },
-  { to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket },
-  { to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell },
-  { to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true },
-  { to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true },
+type NavItem =
+  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; labelKey: NavKey }
+  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; label: { bn: string; en: string } }
+  | { kind: "section"; label: { bn: string; en: string } };
+
+const NAV: Array<NavItem> = [
+  { kind: "section", label: { bn: "কোর", en: "Core" } },
+  { kind: "link", to: "/admin", labelKey: "admin.nav.dashboard", icon: LayoutDashboard, exact: true },
+  { kind: "link", to: "/admin/customers", labelKey: "admin.nav.customers", icon: Users },
+  { kind: "link", to: "/admin/packages", labelKey: "admin.nav.packages", icon: Package },
+  { kind: "link", to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio },
+  { kind: "link", to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true },
+  { kind: "link", to: "/admin/reports/address", labelKey: "admin.nav.addressReport", icon: BarChart3 },
+  { kind: "link", to: "/admin/bills", labelKey: "admin.nav.bills", icon: Receipt },
+  { kind: "link", to: "/admin/payments", labelKey: "admin.nav.payments", icon: Wallet },
+  { kind: "link", to: "/admin/mikrotik", labelKey: "admin.nav.mikrotik", icon: RouterIcon },
+  { kind: "link", to: "/admin/olt", labelKey: "admin.nav.olt", icon: Radio },
+  { kind: "link", to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket },
+  { kind: "link", to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell },
+
+  { kind: "section", label: { bn: "ERP", en: "ERP" } },
+  { kind: "link", to: "/admin/erp", icon: LayoutDashboard, exact: true, label: { bn: "ERP ওভারভিউ", en: "ERP Overview" } },
+  { kind: "link", to: "/admin/hr/attendance", icon: CalendarCheck2, label: { bn: "অ্যাটেন্ডেন্স", en: "Attendance" } },
+  { kind: "link", to: "/admin/hr/leaves", icon: Palmtree, label: { bn: "ছুটি", en: "Leaves" } },
+  { kind: "link", to: "/admin/hr/payroll", icon: Wallet, label: { bn: "পেরোল", en: "Payroll" } },
+  { kind: "link", to: "/admin/inventory/items", icon: PackageOpen, label: { bn: "ইনভেন্টরি আইটেম", en: "Inventory Items" } },
+  { kind: "link", to: "/admin/inventory/movements", icon: ArrowLeftRight, label: { bn: "স্টক মুভমেন্ট", en: "Stock Movements" } },
+  { kind: "link", to: "/admin/purchase/vendors", icon: Truck, label: { bn: "ভেন্ডর", en: "Vendors" } },
+  { kind: "link", to: "/admin/purchase/orders", icon: ShoppingCart, label: { bn: "পারচেজ অর্ডার", en: "Purchase Orders" } },
+  { kind: "link", to: "/admin/accounting/chart", icon: BookOpen, label: { bn: "চার্ট অফ অ্যাকাউন্টস", en: "Chart of Accounts" } },
+  { kind: "link", to: "/admin/accounting/journal", icon: NotebookPen, label: { bn: "জার্নাল", en: "Journal" } },
+  { kind: "link", to: "/admin/accounting/reports", icon: TrendingUp, label: { bn: "রিপোর্ট", en: "Reports" } },
+
+  { kind: "section", label: { bn: "অ্যাডমিন", en: "Admin" } },
+  { kind: "link", to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true },
+  { kind: "link", to: "/admin/accounts", labelKey: "admin.nav.accounts", icon: Wallet },
+  { kind: "link", to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true },
+  { kind: "link", to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true },
 ];
+
 
 function AdminLayout() {
   const [open, setOpen] = useState(false);
@@ -182,7 +205,7 @@ function TopBarActions() {
 
 function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
   const { user, signOut } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -199,11 +222,19 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.filter((n) => !n.adminOnly || isAdmin).map((item, i) => {
+        {NAV.filter((n) => n.kind === "section" || !n.adminOnly || isAdmin).map((item, i) => {
+          if (item.kind === "section") {
+            return (
+              <div key={`s-${i}`} className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                {lang === "en" ? item.label.en : item.label.bn}
+              </div>
+            );
+          }
           const active = item.exact
             ? location.pathname === item.to
             : location.pathname.startsWith(item.to) && !item.exact;
           const Icon = item.icon;
+          const label = "labelKey" in item ? t(item.labelKey) : (lang === "en" ? item.label.en : item.label.bn);
           return (
             <button
               key={i}
@@ -221,12 +252,13 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
               )}
             >
               <Icon className="h-4 w-4" />
-              <span className="flex-1 text-left">{t(item.labelKey)}</span>
+              <span className="flex-1 text-left">{label}</span>
               {item.disabled && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5">{t("admin.soon")}</span>}
             </button>
           );
         })}
       </nav>
+
 
       <div className="border-t p-3">
         <div className="mb-2 px-2 text-xs text-muted-foreground truncate">{user?.email}</div>

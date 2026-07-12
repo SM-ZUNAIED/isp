@@ -32,9 +32,20 @@ import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBillsRouteImport } from './routes/_authenticated.admin.bills'
 import { Route as AuthenticatedAdminAddressRouteImport } from './routes/_authenticated.admin.address'
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
+import { Route as AuthenticatedAdminErpIndexRouteImport } from './routes/_authenticated.admin.erp.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
+import { Route as AuthenticatedAdminPurchaseVendorsRouteImport } from './routes/_authenticated.admin.purchase.vendors'
+import { Route as AuthenticatedAdminPurchaseOrdersRouteImport } from './routes/_authenticated.admin.purchase.orders'
+import { Route as AuthenticatedAdminInventoryMovementsRouteImport } from './routes/_authenticated.admin.inventory.movements'
+import { Route as AuthenticatedAdminInventoryItemsRouteImport } from './routes/_authenticated.admin.inventory.items'
+import { Route as AuthenticatedAdminHrPayrollRouteImport } from './routes/_authenticated.admin.hr.payroll'
+import { Route as AuthenticatedAdminHrLeavesRouteImport } from './routes/_authenticated.admin.hr.leaves'
+import { Route as AuthenticatedAdminHrAttendanceRouteImport } from './routes/_authenticated.admin.hr.attendance'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
+import { Route as AuthenticatedAdminAccountingReportsRouteImport } from './routes/_authenticated.admin.accounting.reports'
+import { Route as AuthenticatedAdminAccountingJournalRouteImport } from './routes/_authenticated.admin.accounting.journal'
+import { Route as AuthenticatedAdminAccountingChartRouteImport } from './routes/_authenticated.admin.accounting.chart'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -159,6 +170,12 @@ const AuthenticatedAdminAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminErpIndexRoute =
+  AuthenticatedAdminErpIndexRouteImport.update({
+    id: '/erp/',
+    path: '/erp/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicCronRunRoute = ApiPublicCronRunRouteImport.update({
   id: '/api/public/cron/run',
   path: '/api/public/cron/run',
@@ -170,10 +187,70 @@ const AuthenticatedAdminReportsAddressRoute =
     path: '/reports/address',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPurchaseVendorsRoute =
+  AuthenticatedAdminPurchaseVendorsRouteImport.update({
+    id: '/purchase/vendors',
+    path: '/purchase/vendors',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPurchaseOrdersRoute =
+  AuthenticatedAdminPurchaseOrdersRouteImport.update({
+    id: '/purchase/orders',
+    path: '/purchase/orders',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminInventoryMovementsRoute =
+  AuthenticatedAdminInventoryMovementsRouteImport.update({
+    id: '/inventory/movements',
+    path: '/inventory/movements',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminInventoryItemsRoute =
+  AuthenticatedAdminInventoryItemsRouteImport.update({
+    id: '/inventory/items',
+    path: '/inventory/items',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHrPayrollRoute =
+  AuthenticatedAdminHrPayrollRouteImport.update({
+    id: '/hr/payroll',
+    path: '/hr/payroll',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHrLeavesRoute =
+  AuthenticatedAdminHrLeavesRouteImport.update({
+    id: '/hr/leaves',
+    path: '/hr/leaves',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHrAttendanceRoute =
+  AuthenticatedAdminHrAttendanceRouteImport.update({
+    id: '/hr/attendance',
+    path: '/hr/attendance',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCustomersIdRoute =
   AuthenticatedAdminCustomersIdRouteImport.update({
     id: '/customers_/$id',
     path: '/customers/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAccountingReportsRoute =
+  AuthenticatedAdminAccountingReportsRouteImport.update({
+    id: '/accounting/reports',
+    path: '/accounting/reports',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAccountingJournalRoute =
+  AuthenticatedAdminAccountingJournalRouteImport.update({
+    id: '/accounting/journal',
+    path: '/accounting/journal',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAccountingChartRoute =
+  AuthenticatedAdminAccountingChartRouteImport.update({
+    id: '/accounting/chart',
+    path: '/accounting/chart',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 
@@ -200,9 +277,20 @@ export interface FileRoutesByFullPath {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/accounting/chart': typeof AuthenticatedAdminAccountingChartRoute
+  '/admin/accounting/journal': typeof AuthenticatedAdminAccountingJournalRoute
+  '/admin/accounting/reports': typeof AuthenticatedAdminAccountingReportsRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
+  '/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
+  '/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
+  '/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
+  '/admin/purchase/orders': typeof AuthenticatedAdminPurchaseOrdersRoute
+  '/admin/purchase/vendors': typeof AuthenticatedAdminPurchaseVendorsRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -226,9 +314,20 @@ export interface FileRoutesByTo {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/accounting/chart': typeof AuthenticatedAdminAccountingChartRoute
+  '/admin/accounting/journal': typeof AuthenticatedAdminAccountingJournalRoute
+  '/admin/accounting/reports': typeof AuthenticatedAdminAccountingReportsRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
+  '/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
+  '/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
+  '/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
+  '/admin/purchase/orders': typeof AuthenticatedAdminPurchaseOrdersRoute
+  '/admin/purchase/vendors': typeof AuthenticatedAdminPurchaseVendorsRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/admin/erp': typeof AuthenticatedAdminErpIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -255,9 +354,20 @@ export interface FileRoutesById {
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/accounting/chart': typeof AuthenticatedAdminAccountingChartRoute
+  '/_authenticated/admin/accounting/journal': typeof AuthenticatedAdminAccountingJournalRoute
+  '/_authenticated/admin/accounting/reports': typeof AuthenticatedAdminAccountingReportsRoute
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/_authenticated/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/_authenticated/admin/hr/leaves': typeof AuthenticatedAdminHrLeavesRoute
+  '/_authenticated/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
+  '/_authenticated/admin/inventory/items': typeof AuthenticatedAdminInventoryItemsRoute
+  '/_authenticated/admin/inventory/movements': typeof AuthenticatedAdminInventoryMovementsRoute
+  '/_authenticated/admin/purchase/orders': typeof AuthenticatedAdminPurchaseOrdersRoute
+  '/_authenticated/admin/purchase/vendors': typeof AuthenticatedAdminPurchaseVendorsRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/_authenticated/admin/erp/': typeof AuthenticatedAdminErpIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -284,9 +394,20 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
+    | '/admin/accounting/chart'
+    | '/admin/accounting/journal'
+    | '/admin/accounting/reports'
     | '/admin/customers/$id'
+    | '/admin/hr/attendance'
+    | '/admin/hr/leaves'
+    | '/admin/hr/payroll'
+    | '/admin/inventory/items'
+    | '/admin/inventory/movements'
+    | '/admin/purchase/orders'
+    | '/admin/purchase/vendors'
     | '/admin/reports/address'
     | '/api/public/cron/run'
+    | '/admin/erp/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -310,9 +431,20 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
+    | '/admin/accounting/chart'
+    | '/admin/accounting/journal'
+    | '/admin/accounting/reports'
     | '/admin/customers/$id'
+    | '/admin/hr/attendance'
+    | '/admin/hr/leaves'
+    | '/admin/hr/payroll'
+    | '/admin/inventory/items'
+    | '/admin/inventory/movements'
+    | '/admin/purchase/orders'
+    | '/admin/purchase/vendors'
     | '/admin/reports/address'
     | '/api/public/cron/run'
+    | '/admin/erp'
   id:
     | '__root__'
     | '/'
@@ -338,9 +470,20 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/accounting/chart'
+    | '/_authenticated/admin/accounting/journal'
+    | '/_authenticated/admin/accounting/reports'
     | '/_authenticated/admin/customers_/$id'
+    | '/_authenticated/admin/hr/attendance'
+    | '/_authenticated/admin/hr/leaves'
+    | '/_authenticated/admin/hr/payroll'
+    | '/_authenticated/admin/inventory/items'
+    | '/_authenticated/admin/inventory/movements'
+    | '/_authenticated/admin/purchase/orders'
+    | '/_authenticated/admin/purchase/vendors'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
+    | '/_authenticated/admin/erp/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -515,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAccountsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/erp/': {
+      id: '/_authenticated/admin/erp/'
+      path: '/erp'
+      fullPath: '/admin/erp/'
+      preLoaderRoute: typeof AuthenticatedAdminErpIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/cron/run': {
       id: '/api/public/cron/run'
       path: '/api/public/cron/run'
@@ -529,11 +679,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminReportsAddressRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/purchase/vendors': {
+      id: '/_authenticated/admin/purchase/vendors'
+      path: '/purchase/vendors'
+      fullPath: '/admin/purchase/vendors'
+      preLoaderRoute: typeof AuthenticatedAdminPurchaseVendorsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/purchase/orders': {
+      id: '/_authenticated/admin/purchase/orders'
+      path: '/purchase/orders'
+      fullPath: '/admin/purchase/orders'
+      preLoaderRoute: typeof AuthenticatedAdminPurchaseOrdersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/inventory/movements': {
+      id: '/_authenticated/admin/inventory/movements'
+      path: '/inventory/movements'
+      fullPath: '/admin/inventory/movements'
+      preLoaderRoute: typeof AuthenticatedAdminInventoryMovementsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/inventory/items': {
+      id: '/_authenticated/admin/inventory/items'
+      path: '/inventory/items'
+      fullPath: '/admin/inventory/items'
+      preLoaderRoute: typeof AuthenticatedAdminInventoryItemsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/hr/payroll': {
+      id: '/_authenticated/admin/hr/payroll'
+      path: '/hr/payroll'
+      fullPath: '/admin/hr/payroll'
+      preLoaderRoute: typeof AuthenticatedAdminHrPayrollRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/hr/leaves': {
+      id: '/_authenticated/admin/hr/leaves'
+      path: '/hr/leaves'
+      fullPath: '/admin/hr/leaves'
+      preLoaderRoute: typeof AuthenticatedAdminHrLeavesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/hr/attendance': {
+      id: '/_authenticated/admin/hr/attendance'
+      path: '/hr/attendance'
+      fullPath: '/admin/hr/attendance'
+      preLoaderRoute: typeof AuthenticatedAdminHrAttendanceRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/customers_/$id': {
       id: '/_authenticated/admin/customers_/$id'
       path: '/customers/$id'
       fullPath: '/admin/customers/$id'
       preLoaderRoute: typeof AuthenticatedAdminCustomersIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/accounting/reports': {
+      id: '/_authenticated/admin/accounting/reports'
+      path: '/accounting/reports'
+      fullPath: '/admin/accounting/reports'
+      preLoaderRoute: typeof AuthenticatedAdminAccountingReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/accounting/journal': {
+      id: '/_authenticated/admin/accounting/journal'
+      path: '/accounting/journal'
+      fullPath: '/admin/accounting/journal'
+      preLoaderRoute: typeof AuthenticatedAdminAccountingJournalRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/accounting/chart': {
+      id: '/_authenticated/admin/accounting/chart'
+      path: '/accounting/chart'
+      fullPath: '/admin/accounting/chart'
+      preLoaderRoute: typeof AuthenticatedAdminAccountingChartRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
   }
@@ -555,8 +775,19 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminZonesRoute: typeof AuthenticatedAdminZonesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminAccountingChartRoute: typeof AuthenticatedAdminAccountingChartRoute
+  AuthenticatedAdminAccountingJournalRoute: typeof AuthenticatedAdminAccountingJournalRoute
+  AuthenticatedAdminAccountingReportsRoute: typeof AuthenticatedAdminAccountingReportsRoute
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
+  AuthenticatedAdminHrAttendanceRoute: typeof AuthenticatedAdminHrAttendanceRoute
+  AuthenticatedAdminHrLeavesRoute: typeof AuthenticatedAdminHrLeavesRoute
+  AuthenticatedAdminHrPayrollRoute: typeof AuthenticatedAdminHrPayrollRoute
+  AuthenticatedAdminInventoryItemsRoute: typeof AuthenticatedAdminInventoryItemsRoute
+  AuthenticatedAdminInventoryMovementsRoute: typeof AuthenticatedAdminInventoryMovementsRoute
+  AuthenticatedAdminPurchaseOrdersRoute: typeof AuthenticatedAdminPurchaseOrdersRoute
+  AuthenticatedAdminPurchaseVendorsRoute: typeof AuthenticatedAdminPurchaseVendorsRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
+  AuthenticatedAdminErpIndexRoute: typeof AuthenticatedAdminErpIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -575,8 +806,24 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminZonesRoute: AuthenticatedAdminZonesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminAccountingChartRoute:
+    AuthenticatedAdminAccountingChartRoute,
+  AuthenticatedAdminAccountingJournalRoute:
+    AuthenticatedAdminAccountingJournalRoute,
+  AuthenticatedAdminAccountingReportsRoute:
+    AuthenticatedAdminAccountingReportsRoute,
   AuthenticatedAdminCustomersIdRoute: AuthenticatedAdminCustomersIdRoute,
+  AuthenticatedAdminHrAttendanceRoute: AuthenticatedAdminHrAttendanceRoute,
+  AuthenticatedAdminHrLeavesRoute: AuthenticatedAdminHrLeavesRoute,
+  AuthenticatedAdminHrPayrollRoute: AuthenticatedAdminHrPayrollRoute,
+  AuthenticatedAdminInventoryItemsRoute: AuthenticatedAdminInventoryItemsRoute,
+  AuthenticatedAdminInventoryMovementsRoute:
+    AuthenticatedAdminInventoryMovementsRoute,
+  AuthenticatedAdminPurchaseOrdersRoute: AuthenticatedAdminPurchaseOrdersRoute,
+  AuthenticatedAdminPurchaseVendorsRoute:
+    AuthenticatedAdminPurchaseVendorsRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
+  AuthenticatedAdminErpIndexRoute: AuthenticatedAdminErpIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
