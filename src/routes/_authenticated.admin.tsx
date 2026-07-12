@@ -237,11 +237,65 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.filter((n) => n.kind === "section" || !n.adminOnly || isAdmin).map((item, i) => {
+        {NAV.filter((n) => n.kind === "section" || n.kind === "group" || !n.adminOnly || isAdmin).map((item, i) => {
           if (item.kind === "section") {
             return (
               <div key={`s-${i}`} className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                 {lang === "en" ? item.label.en : item.label.bn}
+              </div>
+            );
+          }
+          if (item.kind === "group") {
+            const GIcon = item.icon;
+            const isOpen = !!openGroups[item.id];
+            const groupLabel = lang === "en" ? item.label.en : item.label.bn;
+            const anyChildActive = item.children.some((c) =>
+              c.exact ? location.pathname === c.to : location.pathname.startsWith(c.to),
+            );
+            return (
+              <div key={`g-${item.id}`} className="space-y-1">
+                <button
+                  onClick={() => setOpenGroups((s) => ({ ...s, [item.id]: !s[item.id] }))}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+                    anyChildActive && !isOpen
+                      ? "bg-gradient-primary text-white shadow-soft"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  <GIcon className="h-4 w-4" />
+                  <span className="flex-1 text-left">{groupLabel}</span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                </button>
+                {isOpen && (
+                  <div className="ml-3 border-l pl-2 space-y-1">
+                    {item.children.map((child, ci) => {
+                      const cActive = child.exact
+                        ? location.pathname === child.to
+                        : location.pathname.startsWith(child.to);
+                      const CIcon = child.icon;
+                      const clabel = "labelKey" in child ? t(child.labelKey) : (lang === "en" ? child.label.en : child.label.bn);
+                      return (
+                        <button
+                          key={ci}
+                          onClick={() => {
+                            navigate({ to: child.to as "/admin" });
+                            onNavigate?.();
+                          }}
+                          className={cn(
+                            "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
+                            cActive
+                              ? "bg-gradient-primary text-white shadow-soft"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          )}
+                        >
+                          <CIcon className="h-4 w-4" />
+                          <span className="flex-1 text-left">{clabel}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           }
@@ -273,6 +327,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           );
         })}
       </nav>
+
 
 
       <div className="border-t p-3">
