@@ -19,6 +19,7 @@ import {
   UserCircle2,
   Users2,
   CalendarCheck2, Palmtree, PackageOpen, ArrowLeftRight, Truck, ShoppingCart, BookOpen, NotebookPen, TrendingUp,
+  Briefcase, ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -56,10 +57,14 @@ type NavKey =
   | "admin.nav.mikrotik" | "admin.nav.olt" | "admin.nav.accounts" | "admin.nav.tickets"
   | "admin.nav.notices" | "admin.nav.users" | "admin.nav.settings";
 
-type NavItem =
+type NavLink =
   | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; labelKey: NavKey }
-  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; label: { bn: string; en: string } }
-  | { kind: "section"; label: { bn: string; en: string } };
+  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; label: { bn: string; en: string } };
+
+type NavItem =
+  | NavLink
+  | { kind: "section"; label: { bn: string; en: string } }
+  | { kind: "group"; id: string; icon: typeof LayoutDashboard; label: { bn: string; en: string }; children: NavLink[] };
 
 const NAV: Array<NavItem> = [
   { kind: "section", label: { bn: "কোর", en: "Core" } },
@@ -76,18 +81,22 @@ const NAV: Array<NavItem> = [
   { kind: "link", to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket },
   { kind: "link", to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell },
 
-  { kind: "section", label: { bn: "ERP", en: "ERP" } },
-  { kind: "link", to: "/admin/erp", icon: LayoutDashboard, exact: true, label: { bn: "ERP ওভারভিউ", en: "ERP Overview" } },
-  { kind: "link", to: "/admin/hr/attendance", icon: CalendarCheck2, label: { bn: "অ্যাটেন্ডেন্স", en: "Attendance" } },
-  { kind: "link", to: "/admin/hr/leaves", icon: Palmtree, label: { bn: "ছুটি", en: "Leaves" } },
-  { kind: "link", to: "/admin/hr/payroll", icon: Wallet, label: { bn: "পেরোল", en: "Payroll" } },
-  { kind: "link", to: "/admin/inventory/items", icon: PackageOpen, label: { bn: "ইনভেন্টরি আইটেম", en: "Inventory Items" } },
-  { kind: "link", to: "/admin/inventory/movements", icon: ArrowLeftRight, label: { bn: "স্টক মুভমেন্ট", en: "Stock Movements" } },
-  { kind: "link", to: "/admin/purchase/vendors", icon: Truck, label: { bn: "ভেন্ডর", en: "Vendors" } },
-  { kind: "link", to: "/admin/purchase/orders", icon: ShoppingCart, label: { bn: "পারচেজ অর্ডার", en: "Purchase Orders" } },
-  { kind: "link", to: "/admin/accounting/chart", icon: BookOpen, label: { bn: "চার্ট অফ অ্যাকাউন্টস", en: "Chart of Accounts" } },
-  { kind: "link", to: "/admin/accounting/journal", icon: NotebookPen, label: { bn: "জার্নাল", en: "Journal" } },
-  { kind: "link", to: "/admin/accounting/reports", icon: TrendingUp, label: { bn: "রিপোর্ট", en: "Reports" } },
+  {
+    kind: "group", id: "erp", icon: Briefcase, label: { bn: "ERP", en: "ERP" },
+    children: [
+      { kind: "link", to: "/admin/erp", icon: LayoutDashboard, exact: true, label: { bn: "ERP ওভারভিউ", en: "ERP Overview" } },
+      { kind: "link", to: "/admin/hr/attendance", icon: CalendarCheck2, label: { bn: "অ্যাটেন্ডেন্স", en: "Attendance" } },
+      { kind: "link", to: "/admin/hr/leaves", icon: Palmtree, label: { bn: "ছুটি", en: "Leaves" } },
+      { kind: "link", to: "/admin/hr/payroll", icon: Wallet, label: { bn: "পেরোল", en: "Payroll" } },
+      { kind: "link", to: "/admin/inventory/items", icon: PackageOpen, label: { bn: "ইনভেন্টরি আইটেম", en: "Inventory Items" } },
+      { kind: "link", to: "/admin/inventory/movements", icon: ArrowLeftRight, label: { bn: "স্টক মুভমেন্ট", en: "Stock Movements" } },
+      { kind: "link", to: "/admin/purchase/vendors", icon: Truck, label: { bn: "ভেন্ডর", en: "Vendors" } },
+      { kind: "link", to: "/admin/purchase/orders", icon: ShoppingCart, label: { bn: "পারচেজ অর্ডার", en: "Purchase Orders" } },
+      { kind: "link", to: "/admin/accounting/chart", icon: BookOpen, label: { bn: "চার্ট অফ অ্যাকাউন্টস", en: "Chart of Accounts" } },
+      { kind: "link", to: "/admin/accounting/journal", icon: NotebookPen, label: { bn: "জার্নাল", en: "Journal" } },
+      { kind: "link", to: "/admin/accounting/reports", icon: TrendingUp, label: { bn: "রিপোর্ট", en: "Reports" } },
+    ],
+  },
 
   { kind: "section", label: { bn: "অ্যাডমিন", en: "Admin" } },
   { kind: "link", to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true },
@@ -208,6 +217,12 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
+  const erpActive = location.pathname.startsWith("/admin/erp")
+    || location.pathname.startsWith("/admin/hr")
+    || location.pathname.startsWith("/admin/inventory")
+    || location.pathname.startsWith("/admin/purchase")
+    || location.pathname.startsWith("/admin/accounting");
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ erp: erpActive });
 
   return (
     <div className="flex h-full flex-col">
@@ -222,11 +237,65 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.filter((n) => n.kind === "section" || !n.adminOnly || isAdmin).map((item, i) => {
+        {NAV.filter((n) => n.kind === "section" || n.kind === "group" || !n.adminOnly || isAdmin).map((item, i) => {
           if (item.kind === "section") {
             return (
               <div key={`s-${i}`} className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                 {lang === "en" ? item.label.en : item.label.bn}
+              </div>
+            );
+          }
+          if (item.kind === "group") {
+            const GIcon = item.icon;
+            const isOpen = !!openGroups[item.id];
+            const groupLabel = lang === "en" ? item.label.en : item.label.bn;
+            const anyChildActive = item.children.some((c) =>
+              c.exact ? location.pathname === c.to : location.pathname.startsWith(c.to),
+            );
+            return (
+              <div key={`g-${item.id}`} className="space-y-1">
+                <button
+                  onClick={() => setOpenGroups((s) => ({ ...s, [item.id]: !s[item.id] }))}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+                    anyChildActive && !isOpen
+                      ? "bg-gradient-primary text-white shadow-soft"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  <GIcon className="h-4 w-4" />
+                  <span className="flex-1 text-left">{groupLabel}</span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                </button>
+                {isOpen && (
+                  <div className="ml-3 border-l pl-2 space-y-1">
+                    {item.children.map((child, ci) => {
+                      const cActive = child.exact
+                        ? location.pathname === child.to
+                        : location.pathname.startsWith(child.to);
+                      const CIcon = child.icon;
+                      const clabel = "labelKey" in child ? t(child.labelKey) : (lang === "en" ? child.label.en : child.label.bn);
+                      return (
+                        <button
+                          key={ci}
+                          onClick={() => {
+                            navigate({ to: child.to as "/admin" });
+                            onNavigate?.();
+                          }}
+                          className={cn(
+                            "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
+                            cActive
+                              ? "bg-gradient-primary text-white shadow-soft"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          )}
+                        >
+                          <CIcon className="h-4 w-4" />
+                          <span className="flex-1 text-left">{clabel}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           }
@@ -258,6 +327,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           );
         })}
       </nav>
+
 
 
       <div className="border-t p-3">
