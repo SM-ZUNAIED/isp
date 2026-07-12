@@ -235,7 +235,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           </div>
           <Link
             to="/"
-            title={t("admin.brand.home") ?? "Home"}
+            title="Home"
             aria-label="Home"
             className="grid h-8 w-8 place-items-center rounded-lg border bg-background text-muted-foreground hover:bg-gradient-primary hover:text-white hover:border-transparent transition shadow-soft"
           >
