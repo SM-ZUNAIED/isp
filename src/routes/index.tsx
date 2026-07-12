@@ -17,6 +17,10 @@ import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
@@ -92,16 +96,42 @@ function LandingPage() {
   const phoneRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string } | null>(null);
+  const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string; price?: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "", message: "" });
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
 
-  const handleOrder = (pkg: { id: string; name: string }) => {
-    setSelectedPkg({ id: pkg.id, name: pkg.name });
-    toast.success(`${pkg.name} — ${t("contact.subtitle")}`);
-    setTimeout(() => {
-      scrollToId("contact");
-      messageRef.current?.focus();
-    }, 100);
+  const handleOrder = (pkg: { id: string; name: string; price?: number }) => {
+    setSelectedPkg(pkg);
+    setOrderOpen(true);
+  };
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = orderForm.name.trim();
+    const phone = orderForm.phone.trim();
+    if (name.length < 2) return toast.error(lang === "bn" ? "নাম দিন" : "Enter your name");
+    if (!/^01[3-9][0-9]{8}$/.test(phone)) return toast.error(lang === "bn" ? "সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)" : "Enter a valid mobile (01XXXXXXXXX)");
+    setOrderSubmitting(true);
+    try {
+      await submitInquiryFn({
+        data: {
+          name, phone,
+          address: orderForm.address.trim() || null,
+          package_id: selectedPkg?.id ?? null,
+          package_name: selectedPkg?.name ?? null,
+          message: orderForm.message.trim() || (selectedPkg ? `Order request for ${selectedPkg.name}` : null),
+        },
+      });
+      toast.success(lang === "bn" ? "অর্ডার গ্রহণ করা হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।" : "Order received! We'll contact you shortly.");
+      setOrderOpen(false);
+      setOrderForm({ name: "", phone: "", address: "", message: "" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to submit");
+    } finally {
+      setOrderSubmitting(false);
+    }
   };
 
   const handleInquiry = async (e: React.FormEvent) => {
@@ -335,7 +365,7 @@ function LandingPage() {
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.unlimited")}</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.support247")}</li>
                 </ul>
-                <Button onClick={() => handleOrder({ id: pkg.id, name: pkg.name })} className={`mt-6 w-full ${pkg.is_popular ? "bg-gradient-primary shadow-glow" : ""}`} variant={pkg.is_popular ? "default" : "outline"}>
+                <Button onClick={() => handleOrder({ id: pkg.id, name: pkg.name, price: Number(pkg.monthly_price) })} className={`mt-6 w-full ${pkg.is_popular ? "bg-gradient-primary shadow-glow" : ""}`} variant={pkg.is_popular ? "default" : "outline"}>
                   {t("packages.order")}
                 </Button>
               </div>
@@ -343,6 +373,58 @@ function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Order Dialog */}
+      <Dialog open={orderOpen} onOpenChange={setOrderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {lang === "bn" ? "নতুন সংযোগ অর্ডার" : "Order New Connection"}
+              {selectedPkg && <span className="ml-2 text-primary">— {selectedPkg.name}</span>}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedPkg?.price
+                ? (lang === "bn"
+                    ? `৳${Math.round(selectedPkg.price)}/মাস — নিচের তথ্য দিন, আমরা যোগাযোগ করব।`
+                    : `৳${Math.round(selectedPkg.price)}/mo — Fill in your details and we'll reach out.`)
+                : (lang === "bn"
+                    ? "নিচের তথ্য দিন, আমরা শীঘ্রই যোগাযোগ করব।"
+                    : "Fill in your details and we'll contact you shortly.")}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleOrderSubmit} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="order-name">{lang === "bn" ? "নাম *" : "Name *"}</Label>
+              <Input id="order-name" required value={orderForm.name}
+                onChange={(e) => setOrderForm({ ...orderForm, name: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="order-phone">{lang === "bn" ? "মোবাইল নম্বর *" : "Mobile Number *"}</Label>
+              <Input id="order-phone" required placeholder="01XXXXXXXXX" value={orderForm.phone}
+                onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="order-address">{lang === "bn" ? "ঠিকানা" : "Address"}</Label>
+              <Input id="order-address" value={orderForm.address}
+                onChange={(e) => setOrderForm({ ...orderForm, address: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="order-message">{lang === "bn" ? "মন্তব্য" : "Message"}</Label>
+              <Textarea id="order-message" rows={3} value={orderForm.message}
+                onChange={(e) => setOrderForm({ ...orderForm, message: e.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOrderOpen(false)}>
+                {lang === "bn" ? "বাতিল" : "Cancel"}
+              </Button>
+              <Button type="submit" disabled={orderSubmitting} className="bg-gradient-primary shadow-glow">
+                {orderSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {lang === "bn" ? "অর্ডার সাবমিট" : "Submit Order"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Coverage */}
       <section id="coverage" className="py-20">
