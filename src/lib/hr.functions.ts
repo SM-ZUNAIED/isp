@@ -2,6 +2,17 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// Lightweight staff picker (accessible to admin+staff for HR pages)
+export const listStaffBrief = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("staff").select("id,full_name,staff_code,designation,salary,status").order("full_name");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+
 // ============ ATTENDANCE ============
 export const listAttendance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
