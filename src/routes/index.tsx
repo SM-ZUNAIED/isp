@@ -94,7 +94,9 @@ function LandingPage() {
   const submitInquiryFn = useServerFn(submitInquiry);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
-  const addressRef = useRef<HTMLInputElement>(null);
+  const areaRef = useRef<HTMLInputElement>(null);
+  const roadRef = useRef<HTMLInputElement>(null);
+  const houseRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string; price?: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -147,7 +149,15 @@ function LandingPage() {
     e.preventDefault();
     const name = nameRef.current?.value.trim() ?? "";
     const phone = phoneRef.current?.value.trim() ?? "";
-    const address = addressRef.current?.value.trim() ?? "";
+    const area = areaRef.current?.value.trim() ?? "";
+    const road = roadRef.current?.value.trim() ?? "";
+    const house = houseRef.current?.value.trim() ?? "";
+    const addressParts = [
+      house ? (lang === "bn" ? `বাসা: ${house}` : `House: ${house}`) : "",
+      road ? (lang === "bn" ? `রোড: ${road}` : `Road: ${road}`) : "",
+      area ? (lang === "bn" ? `এলাকা: ${area}` : `Area: ${area}`) : "",
+    ].filter(Boolean);
+    const address = addressParts.join(", ");
     const message = messageRef.current?.value.trim() ?? "";
     if (name.length < 2) return toast.error("নাম দিন / Enter your name");
     if (!/^01[3-9][0-9]{8}$/.test(phone)) return toast.error("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)");
@@ -165,7 +175,9 @@ function LandingPage() {
       toast.success("আপনার তথ্য গ্রহণ করা হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।");
       if (nameRef.current) nameRef.current.value = "";
       if (phoneRef.current) phoneRef.current.value = "";
-      if (addressRef.current) addressRef.current.value = "";
+      if (areaRef.current) areaRef.current.value = "";
+      if (roadRef.current) roadRef.current.value = "";
+      if (houseRef.current) houseRef.current.value = "";
       if (messageRef.current) messageRef.current.value = "";
       setSelectedPkg(null);
     } catch (err) {
@@ -579,7 +591,11 @@ function LandingPage() {
                 <form onSubmit={handleInquiry} className="mt-4 space-y-3">
                   <input ref={nameRef} required maxLength={100} placeholder={t("contact.name")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
                   <input ref={phoneRef} required maxLength={11} inputMode="tel" pattern="01[3-9][0-9]{8}" placeholder={t("contact.phone")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
-                  <input ref={addressRef} maxLength={300} placeholder={t("contact.address")} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <input ref={areaRef} maxLength={100} placeholder={lang === "bn" ? "এলাকা" : "Area"} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                    <input ref={roadRef} maxLength={100} placeholder={lang === "bn" ? "রোড" : "Road"} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                    <input ref={houseRef} maxLength={100} placeholder={lang === "bn" ? "বাসা নম্বর" : "House No."} className="w-full rounded-xl border-0 bg-white/20 px-4 py-3 text-white placeholder:text-white/60 outline-none focus:bg-white/30" />
+                  </div>
                   <select
                     value={selectedPkg?.id ?? ""}
                     onChange={(e) => {
