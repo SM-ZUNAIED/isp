@@ -94,7 +94,9 @@ function LandingPage() {
   const submitInquiryFn = useServerFn(submitInquiry);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
-  const addressRef = useRef<HTMLInputElement>(null);
+  const areaRef = useRef<HTMLInputElement>(null);
+  const roadRef = useRef<HTMLInputElement>(null);
+  const houseRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string; price?: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
