@@ -217,6 +217,12 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
+  const erpActive = location.pathname.startsWith("/admin/erp")
+    || location.pathname.startsWith("/admin/hr")
+    || location.pathname.startsWith("/admin/inventory")
+    || location.pathname.startsWith("/admin/purchase")
+    || location.pathname.startsWith("/admin/accounting");
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ erp: erpActive });
 
   return (
     <div className="flex h-full flex-col">
