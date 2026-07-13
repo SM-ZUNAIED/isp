@@ -71,41 +71,40 @@ function CustomersPage() {
   const del = useServerFn(deleteCustomer);
 
   const [q, setQ] = useState("");
-  const [divisionId, setDivisionId] = useState<number | null>(null);
-  const [districtId, setDistrictId] = useState<number | null>(null);
-  const [upazilaId, setUpazilaId] = useState<number | null>(null);
+  const [zoneId, setZoneId] = useState<string | null>(null);
+  const [mohalla, setMohalla] = useState<string | null>(null);
+  const [roadName, setRoadName] = useState<string | null>(null);
 
   const customersQ = useQuery({ queryKey: ["customers"], queryFn: () => list() });
   const optsQ = useQuery({ queryKey: ["catalog", "customers-opts"], queryFn: () => opts() });
 
-  const divisionsQ = useQuery({
-    queryKey: ["addr", "divisions"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("divisions").select("id,name,bn_name").order("name");
-      if (error) throw error; return data ?? [];
-    },
-    staleTime: 10 * 60_000,
-  });
-  const districtsQ = useQuery({
-    queryKey: ["addr", "districts", divisionId],
-    enabled: divisionId != null,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("districts")
-        .select("id,name,bn_name").eq("division_id", divisionId!).order("name");
-      if (error) throw error; return data ?? [];
-    },
-    staleTime: 10 * 60_000,
-  });
-  const upazilasQ = useQuery({
-    queryKey: ["addr", "upazilas", districtId],
-    enabled: districtId != null,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("upazilas")
-        .select("id,name,bn_name").eq("district_id", districtId!).order("name");
-      if (error) throw error; return data ?? [];
-    },
-    staleTime: 10 * 60_000,
-  });
+  // Auto-sync filter options from the current customers list + zones catalog.
+  const zoneOptions = useMemo(() => {
+    const zonesById = new Map((optsQ.data?.zones ?? []).map((z) => [z.id, z.name]));
+    const usedIds = new Set<string>();
+    for (const r of customersQ.data ?? []) if (r.zone_id) usedIds.add(r.zone_id);
+    return Array.from(usedIds)
+      .map((id) => ({ id, name: zonesById.get(id) ?? id }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [customersQ.data, optsQ.data?.zones]);
+
+  const mohallaOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of customersQ.data ?? []) {
+      const v = (r.mohalla ?? "").trim();
+      if (v) set.add(v);
+    }
+    return Array.from(set).sort().map((v) => ({ id: v, name: v }));
+  }, [customersQ.data]);
+
+  const roadOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of customersQ.data ?? []) {
+      const v = (r.road_name ?? "").trim();
+      if (v) set.add(v);
+    }
+    return Array.from(set).sort().map((v) => ({ id: v, name: v }));
+  }, [customersQ.data]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["customers"] });
 
@@ -123,9 +122,9 @@ function CustomersPage() {
 
   const rows = useMemo(() => {
     let all = customersQ.data ?? [];
-    if (divisionId != null) all = all.filter((r) => r.division_id === divisionId);
-    if (districtId != null) all = all.filter((r) => r.district_id === districtId);
-    if (upazilaId != null) all = all.filter((r) => r.upazila_id === upazilaId);
+    if (zoneId) all = all.filter((r) => r.zone_id === zoneId);
+    if (mohalla) all = all.filter((r) => (r.mohalla ?? "").trim() === mohalla);
+    if (roadName) all = all.filter((r) => (r.road_name ?? "").trim() === roadName);
     if (!q.trim()) return all;
     const s = q.toLowerCase();
     return all.filter(
@@ -136,10 +135,10 @@ function CustomersPage() {
         r.address_line?.toLowerCase().includes(s) ||
         r.address?.toLowerCase().includes(s),
     );
-  }, [customersQ.data, q, divisionId, districtId, upazilaId]);
+  }, [customersQ.data, q, zoneId, mohalla, roadName]);
 
-  const clearFilters = () => { setDivisionId(null); setDistrictId(null); setUpazilaId(null); };
-  const hasFilter = divisionId != null || districtId != null || upazilaId != null || q.trim() !== "";
+  const clearFilters = () => { setZoneId(null); setMohalla(null); setRoadName(null); };
+  const hasFilter = zoneId != null || mohalla != null || roadName != null || q.trim() !== "";
 
   return (
     <div className="space-y-6">
@@ -175,29 +174,25 @@ function CustomersPage() {
                 </div>
               </div>
               <FilterSelect
-                label={tx("বিভাগ", "Division")}
-                loading={divisionsQ.isLoading}
-                rows={divisionsQ.data ?? []}
-                value={divisionId}
-                onChange={(v) => { setDivisionId(v as number | null); setDistrictId(null); setUpazilaId(null); }}
+                label={tx("জোন", "Zone")}
+                loading={customersQ.isLoading}
+                rows={zoneOptions}
+                value={zoneId}
+                onChange={(v) => setZoneId(v as string | null)}
               />
               <FilterSelect
-                label={tx("জেলা", "District")}
-                loading={districtsQ.isFetching}
-                rows={districtsQ.data ?? []}
-                value={districtId}
-                disabled={divisionId == null}
-                depHint={tx("প্রথমে বিভাগ", "Division first")}
-                onChange={(v) => { setDistrictId(v as number | null); setUpazilaId(null); }}
+                label={tx("মহল্লা / এরিয়া", "Mohalla / Area")}
+                loading={customersQ.isLoading}
+                rows={mohallaOptions}
+                value={mohalla}
+                onChange={(v) => setMohalla(v as string | null)}
               />
               <FilterSelect
-                label={tx("উপজেলা", "Upazila")}
-                loading={upazilasQ.isFetching}
-                rows={upazilasQ.data ?? []}
-                value={upazilaId}
-                disabled={districtId == null}
-                depHint={tx("প্রথমে জেলা", "District first")}
-                onChange={(v) => setUpazilaId(v as number | null)}
+                label={tx("রোড / রাস্তা", "Road / Street")}
+                loading={customersQ.isLoading}
+                rows={roadOptions}
+                value={roadName}
+                onChange={(v) => setRoadName(v as string | null)}
               />
             </div>
             {hasFilter && (
