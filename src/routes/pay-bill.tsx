@@ -58,7 +58,7 @@ function PayBillPage() {
   const [method, setMethod] = useState<Method>("bkash");
   const [msisdn, setMsisdn] = useState("");
   const [txnId, setTxnId] = useState("");
-  const [success, setSuccess] = useState<null | { receipt: string; amount: number }>(null);
+  const [success, setSuccess] = useState<null | { reference: string; amount: number }>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [payError, setPayError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{ msisdn?: string; txnId?: string }>({});
@@ -146,12 +146,12 @@ function PayBillPage() {
           msisdn: method === "card" || method === "bank" ? null : msisdn,
         },
       });
-      setSuccess({ receipt: res.receipt, amount: res.amount });
-      toast.success(lang === "bn" ? "পেমেন্ট সফল হয়েছে" : "Payment successful");
-      // Navigate to full receipt page
-      setTimeout(() => {
-        navigate({ to: "/pay-bill/receipt/$receiptNo", params: { receiptNo: res.receipt } });
-      }, 600);
+      setSuccess({ reference: res.reference, amount: res.amount });
+      toast.success(
+        lang === "bn"
+          ? "পেমেন্ট জমা হয়েছে, যাচাইয়ের অপেক্ষায়"
+          : "Payment submitted for verification",
+      );
     } catch (err: any) {
       const raw = String(err?.message ?? err);
       const label = raw.includes("already paid")
