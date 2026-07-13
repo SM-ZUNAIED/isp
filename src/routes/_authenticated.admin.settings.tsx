@@ -167,6 +167,18 @@ function SettingsPage() {
                   <F label={tx("ইমেইল", "Email")}><Input type="email" value={f.email} onChange={set("email")} /></F>
                   <F label={tx("ঠিকানা", "Address")}><Input value={f.address} onChange={set("address")} /></F>
                 </div>
+                <div className="space-y-4 rounded-xl border p-4">
+                  <div>
+                    <h3 className="text-sm font-semibold">{tx("ব্রাউজার ট্যাব / SEO", "Browser Tab / SEO")}</h3>
+                    <p className="text-xs text-muted-foreground">{tx("ব্রাউজার ট্যাবের টাইটেল ও সার্চ ইঞ্জিনের বিবরণ পরিবর্তন করুন", "Change the browser tab title and search engine description")}</p>
+                  </div>
+                  <F label={tx("সাইট টাইটেল (ব্রাউজার ট্যাব)", "Site Title (Browser Tab)")}>
+                    <Input value={f.site_title} onChange={set("site_title")} placeholder="Net Bill Pro — ISP বিলিং সফটওয়্যার" />
+                  </F>
+                  <F label={tx("সাইট বিবরণ (Meta Description)", "Site Description (Meta)")}>
+                    <Textarea rows={2} value={f.site_description} onChange={set("site_description")} placeholder={tx("সাইট সম্পর্কে সংক্ষিপ্ত বিবরণ", "Short description of your site")} />
+                  </F>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
