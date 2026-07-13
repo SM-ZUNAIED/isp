@@ -15,6 +15,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { I18nProvider } from "@/hooks/use-i18n";
+import { getSiteMeta } from "@/lib/site-meta.functions";
 
 function NotFoundComponent() {
   return (
@@ -77,15 +78,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  loader: async ({ context }) =>
+    context.queryClient.ensureQueryData({
+      queryKey: ["site-meta"],
+      queryFn: () => getSiteMeta(),
+      staleTime: 5 * 60 * 1000,
+    }),
+  head: ({ loaderData }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Net Bill Pro — ISP বিলিং ও নেটওয়ার্ক অটোমেশন সফটওয়্যার" },
-      { name: "description", content: "বাংলাদেশের ISP ব্যবসার জন্য সম্পূর্ণ বিলিং, MikroTik, OLT, ONU অটোমেশন সফটওয়্যার।" },
+      { title: loaderData?.title ?? "Net Bill Pro — ISP বিলিং ও নেটওয়ার্ক অটোমেশন সফটওয়্যার" },
+      { name: "description", content: loaderData?.description ?? "বাংলাদেশের ISP ব্যবসার জন্য সম্পূর্ণ বিলিং, MikroTik, OLT, ONU অটোমেশন সফটওয়্যার।" },
       { name: "author", content: "TechnoNex" },
-      { property: "og:title", content: "Net Bill Pro — ISP বিলিং সফটওয়্যার" },
-      { property: "og:description", content: "বাংলাদেশের ISP ব্যবসার জন্য সম্পূর্ণ সফটওয়্যার সমাধান।" },
+      { property: "og:title", content: loaderData?.title ?? "Net Bill Pro — ISP বিলিং সফটওয়্যার" },
+      { property: "og:description", content: loaderData?.description ?? "বাংলাদেশের ISP ব্যবসার জন্য সম্পূর্ণ সফটওয়্যার সমাধান।" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
