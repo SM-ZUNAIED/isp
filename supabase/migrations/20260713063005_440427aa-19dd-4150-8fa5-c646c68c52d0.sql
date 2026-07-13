@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS public.payroll_items CASCADE;
+DROP TABLE IF EXISTS public.payroll_runs CASCADE;
+DROP TABLE IF EXISTS public.attendance CASCADE;
+DROP TABLE IF EXISTS public.leaves CASCADE;
+DROP TABLE IF EXISTS public.stock_movements CASCADE;
+DROP TABLE IF EXISTS public.inventory_items CASCADE;
+DROP TABLE IF EXISTS public.warehouses CASCADE;
+DROP TABLE IF EXISTS public.purchase_orders CASCADE;
+DROP TABLE IF EXISTS public.vendors CASCADE;
+DROP TABLE IF EXISTS public.journal_lines CASCADE;
+DROP TABLE IF EXISTS public.journal_entries CASCADE;
+DROP TABLE IF EXISTS public.accounts CASCADE;
