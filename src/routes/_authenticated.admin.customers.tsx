@@ -262,23 +262,27 @@ function CustomersPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-1 whitespace-nowrap">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
+                        <Select
+                          value={r.status}
+                          onValueChange={(v) =>
                             statusMut.mutate({
                               id: r.id,
-                              status: isActive ? "suspended" : "active",
+                              status: v as "active" | "pending" | "suspended" | "expired" | "no_payment",
                             })
                           }
                           disabled={statusMut.isPending}
                         >
-                          {isActive ? (
-                            <><PowerOff className="h-4 w-4 mr-1" /> {tx("স্থগিত", "Suspend")}</>
-                          ) : (
-                            <><Power className="h-4 w-4 mr-1" /> {tx("সক্রিয়", "Activate")}</>
-                          )}
-                        </Button>
+                          <SelectTrigger className="h-8 w-[140px] inline-flex">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">{tx("অপেক্ষমাণ", "Pending")}</SelectItem>
+                            <SelectItem value="active">{tx("সক্রিয়", "Active")}</SelectItem>
+                            <SelectItem value="suspended">{tx("স্থগিত", "Suspended")}</SelectItem>
+                            <SelectItem value="expired">{tx("মেয়াদ শেষ", "Expired")}</SelectItem>
+                            <SelectItem value="no_payment">{tx("পেমেন্ট নেই", "No Payment")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Button size="sm" variant="ghost" asChild title={tx("বিস্তারিত দেখুন", "View details")}>
                           <Link to="/admin/customers/$id" params={{ id: r.id }}>
                             <Eye className="h-4 w-4" />
