@@ -54,7 +54,7 @@ export const submitPublicPayment = createServerFn({ method: "POST" })
       _msisdn: data.msisdn ?? "",
     });
     if (error) throw new Error(error.message);
-    return res as { ok: boolean; receipt: string; amount: number; status: string };
+    return res as { ok: boolean; reference: string; amount: number; status: "pending" };
   });
 
 /** Public receipt lookup by receipt number (shareable link). */
