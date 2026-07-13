@@ -139,3 +139,77 @@ export const getCustomerDetail = createServerFn({ method: "POST" })
       payments: pays.data ?? [],
     };
   });
+
+const BulkRow = z.object({
+  customer_code: z.string().min(1).max(64),
+  full_name: z.string().min(1).max(200),
+  package_name: z.string().min(1).max(200),
+});
+
+export const bulkImportCustomers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ rows: z.array(BulkRow).min(1).max(500) }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase } = context;
+
+    const [pkgRes, custRes] = await Promise.all([
+      supabase.from("packages").select("id, name, monthly_price"),
+      supabase.from("customers").select("customer_code"),
+    ]);
+    if (pkgRes.error) throw new Error(pkgRes.error.message);
+    if (custRes.error) throw new Error(custRes.error.message);
+
+    const pkgByName = new Map<string, { id: string; monthly_price: number | string }>();
+    for (const p of pkgRes.data ?? []) {
+      pkgByName.set(String(p.name).trim().toLowerCase(), { id: p.id, monthly_price: p.monthly_price });
+    }
+    const existing = new Set<string>(
+      (custRes.data ?? []).map((c) => String(c.customer_code).trim().toLowerCase()),
+    );
+
+    const toInsert: Array<Record<string, unknown>> = [];
+    const failed: Array<{ line: number; reason: string }> = [];
+    let skipped = 0;
+    const seenInBatch = new Set<string>();
+
+    data.rows.forEach((r, idx) => {
+      const line = idx + 1;
+      const code = r.customer_code.trim();
+      const name = r.full_name.trim();
+      const pkgKey = r.package_name.trim().toLowerCase();
+      const codeKey = code.toLowerCase();
+
+      if (existing.has(codeKey) || seenInBatch.has(codeKey)) {
+        skipped++;
+        return;
+      }
+      const pkg = pkgByName.get(pkgKey);
+      if (!pkg) {
+        failed.push({ line, reason: `Package not found: ${r.package_name}` });
+        return;
+      }
+      seenInBatch.add(codeKey);
+      toInsert.push({
+        customer_code: code,
+        full_name: name,
+        mobile: "",
+        package_id: pkg.id,
+        monthly_bill: Number(pkg.monthly_price) || 0,
+        status: "pending",
+      });
+    });
+
+    let added = 0;
+    if (toInsert.length > 0) {
+      const { error, data: inserted } = await supabase
+        .from("customers")
+        .insert(toInsert)
+        .select("id");
+      if (error) throw new Error(error.message);
+      added = inserted?.length ?? 0;
+    }
+
+    return { added, skipped, failed };
+  });
