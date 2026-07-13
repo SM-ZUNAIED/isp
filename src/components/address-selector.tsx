@@ -39,20 +39,22 @@ type Row = { id: string | number; name: string; bn_name?: string | null };
 
 /** Cascading Bangladesh address selector. Reset children when a parent changes. */
 export function AddressSelector({
-  value, onChange, disabled,
+  value, onChange, disabled, zoneId, onZoneChange,
 }: {
   value: AddressValue;
   onChange: (v: AddressValue) => void;
   disabled?: boolean;
+  zoneId?: string | null;
+  onZoneChange?: (id: string | null) => void;
 }) {
   const tx = useTx();
 
-  // Village dropdown reads all villages (no parent filter).
-  const villages = useQuery({
-    queryKey: ["addr", "villages", "all"],
+  // Zone dropdown reads all zones from the zones table.
+  const zones = useQuery({
+    queryKey: ["addr", "zones", "all"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("villages").select("id,name,bn_name").order("name");
+        .from("zones").select("id,name").order("name");
       if (error) throw error;
       return (data ?? []) as Row[];
     },
@@ -60,14 +62,13 @@ export function AddressSelector({
   });
 
   const patch = (p: Partial<AddressValue>) => onChange({ ...value, ...p });
-  const setVillage = (id: string | null) => patch({ village_id: id });
 
   const composed = useMemo(() => composeAddress({
     holding: value.holding_no,
     road: value.road_name,
     mohalla: value.mohalla,
-    village: pickName(villages.data, value.village_id),
-  }), [value, villages.data]);
+    village: pickName(zones.data, zoneId ?? null),
+  }), [value, zones.data, zoneId]);
 
   useEffect(() => {
     if (composed && composed !== value.address_line) {
@@ -79,13 +80,13 @@ export function AddressSelector({
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <PickField
-          label={tx("গ্রাম", "Village")} icon
-          rows={villages.data} loading={villages.isLoading}
-          value={value.village_id}
-          onSelect={(v) => setVillage(v as string | null)}
-          disabled={disabled}
-          placeholderLabel={tx("গ্রাম বাছাই করুন", "Select village")}
-          searchLabel={tx("গ্রাম সার্চ করুন...", "Search village...")}
+          label={tx("জোন", "Zone")} icon
+          rows={zones.data} loading={zones.isLoading}
+          value={zoneId ?? null}
+          onSelect={(v) => onZoneChange?.(v as string | null)}
+          disabled={disabled || !onZoneChange}
+          placeholderLabel={tx("জোন বাছাই করুন", "Select zone")}
+          searchLabel={tx("জোন সার্চ করুন...", "Search zone...")}
           emptyLabel={tx("কিছু পাওয়া যায়নি।", "No results.")}
         />
         <div className="space-y-1.5">
