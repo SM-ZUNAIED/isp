@@ -259,6 +259,8 @@ const SettingsInput = z.object({
   email: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   website: z.string().optional().nullable(),
+  site_title: z.string().optional().nullable(),
+  site_description: z.string().optional().nullable(),
   landing_content: LandingContent.optional().nullable(),
 });
 

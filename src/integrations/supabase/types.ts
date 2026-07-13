@@ -1332,6 +1332,8 @@ export type Database = {
           logo_url: string | null
           notification_toggles: Json | null
           overdue_notice_days: number[]
+          site_description: string | null
+          site_title: string | null
           sms_api_config: Json | null
           updated_at: string
           website: string | null
@@ -1356,6 +1358,8 @@ export type Database = {
           logo_url?: string | null
           notification_toggles?: Json | null
           overdue_notice_days?: number[]
+          site_description?: string | null
+          site_title?: string | null
           sms_api_config?: Json | null
           updated_at?: string
           website?: string | null
@@ -1380,6 +1384,8 @@ export type Database = {
           logo_url?: string | null
           notification_toggles?: Json | null
           overdue_notice_days?: number[]
+          site_description?: string | null
+          site_title?: string | null
           sms_api_config?: Json | null
           updated_at?: string
           website?: string | null
