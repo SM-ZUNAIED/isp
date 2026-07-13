@@ -321,8 +321,13 @@ function PayBillPage() {
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="h-8 w-8 text-success" />
                   <div>
-                    <div className="text-lg font-bold">{lang === "bn" ? "পেমেন্ট সফল" : "Payment Successful"}</div>
-                    <div className="text-xs text-muted-foreground">{lang === "bn" ? "রিসিট নম্বর" : "Receipt No."}: <b>{success.receipt}</b></div>
+                    <div className="text-lg font-bold">{lang === "bn" ? "পেমেন্ট জমা হয়েছে" : "Payment Submitted"}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {lang === "bn"
+                        ? "যাচাইয়ের পর রিসিট ইস্যু হবে। রেফারেন্স"
+                        : "Receipt will be issued after verification. Reference"}
+                      : <b>{success.reference}</b>
+                    </div>
                   </div>
                 </div>
                 <div className="mt-4 flex items-baseline justify-between border-t pt-4">
