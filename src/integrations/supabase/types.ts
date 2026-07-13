@@ -14,50 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      accounts: {
-        Row: {
-          account_type: Database["public"]["Enums"]["account_type"]
-          code: string
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          notes: string | null
-          parent_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          account_type: Database["public"]["Enums"]["account_type"]
-          code: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          notes?: string | null
-          parent_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          account_type?: Database["public"]["Enums"]["account_type"]
-          code?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          notes?: string | null
-          parent_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "accounts_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       areas: {
         Row: {
           bn_name: string | null
@@ -86,50 +42,6 @@ export type Database = {
             columns: ["village_id"]
             isOneToOne: false
             referencedRelation: "villages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      attendance: {
-        Row: {
-          check_in: string | null
-          check_out: string | null
-          created_at: string
-          date: string
-          id: string
-          remarks: string | null
-          staff_id: string
-          status: Database["public"]["Enums"]["attendance_status"]
-          updated_at: string
-        }
-        Insert: {
-          check_in?: string | null
-          check_out?: string | null
-          created_at?: string
-          date: string
-          id?: string
-          remarks?: string | null
-          staff_id: string
-          status: Database["public"]["Enums"]["attendance_status"]
-          updated_at?: string
-        }
-        Update: {
-          check_in?: string | null
-          check_out?: string | null
-          created_at?: string
-          date?: string
-          id?: string
-          remarks?: string | null
-          staff_id?: string
-          status?: Database["public"]["Enums"]["attendance_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "attendance_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -506,135 +418,6 @@ export type Database = {
         }
         Relationships: []
       }
-      inventory_items: {
-        Row: {
-          category: string | null
-          cost_price: number
-          created_at: string
-          current_stock: number
-          id: string
-          name: string
-          notes: string | null
-          reorder_level: number
-          sale_price: number
-          sku: string | null
-          unit: string | null
-          unit_cost: number
-          updated_at: string
-        }
-        Insert: {
-          category?: string | null
-          cost_price?: number
-          created_at?: string
-          current_stock?: number
-          id?: string
-          name: string
-          notes?: string | null
-          reorder_level?: number
-          sale_price?: number
-          sku?: string | null
-          unit?: string | null
-          unit_cost?: number
-          updated_at?: string
-        }
-        Update: {
-          category?: string | null
-          cost_price?: number
-          created_at?: string
-          current_stock?: number
-          id?: string
-          name?: string
-          notes?: string | null
-          reorder_level?: number
-          sale_price?: number
-          sku?: string | null
-          unit?: string | null
-          unit_cost?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      journal_entries: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          entry_date: string
-          entry_no: string
-          id: string
-          reference: string | null
-          total_amount: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          entry_date: string
-          entry_no: string
-          id?: string
-          reference?: string | null
-          total_amount?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          entry_date?: string
-          entry_no?: string
-          id?: string
-          reference?: string | null
-          total_amount?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      journal_lines: {
-        Row: {
-          account_id: string
-          created_at: string
-          credit: number
-          debit: number
-          entry_id: string
-          id: string
-          memo: string | null
-        }
-        Insert: {
-          account_id: string
-          created_at?: string
-          credit?: number
-          debit?: number
-          entry_id: string
-          id?: string
-          memo?: string | null
-        }
-        Update: {
-          account_id?: string
-          created_at?: string
-          credit?: number
-          debit?: number
-          entry_id?: string
-          id?: string
-          memo?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "journal_lines_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "journal_lines_entry_id_fkey"
-            columns: ["entry_id"]
-            isOneToOne: false
-            referencedRelation: "journal_entries"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       leads: {
         Row: {
           address: string | null
@@ -675,56 +458,6 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      leaves: {
-        Row: {
-          approved_at: string | null
-          approved_by: string | null
-          created_at: string
-          from_date: string
-          id: string
-          leave_type: Database["public"]["Enums"]["leave_type"]
-          reason: string | null
-          staff_id: string
-          status: Database["public"]["Enums"]["leave_status"]
-          to_date: string
-          updated_at: string
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string
-          from_date: string
-          id?: string
-          leave_type: Database["public"]["Enums"]["leave_type"]
-          reason?: string | null
-          staff_id: string
-          status?: Database["public"]["Enums"]["leave_status"]
-          to_date: string
-          updated_at?: string
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string
-          from_date?: string
-          id?: string
-          leave_type?: Database["public"]["Enums"]["leave_type"]
-          reason?: string | null
-          staff_id?: string
-          status?: Database["public"]["Enums"]["leave_status"]
-          to_date?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "leaves_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -1073,90 +806,6 @@ export type Database = {
           },
         ]
       }
-      payroll_items: {
-        Row: {
-          allowances: number
-          basic: number
-          created_at: string
-          deductions: number
-          id: string
-          net_amount: number
-          paid: boolean
-          run_id: string
-          staff_id: string
-        }
-        Insert: {
-          allowances?: number
-          basic?: number
-          created_at?: string
-          deductions?: number
-          id?: string
-          net_amount?: number
-          paid?: boolean
-          run_id: string
-          staff_id: string
-        }
-        Update: {
-          allowances?: number
-          basic?: number
-          created_at?: string
-          deductions?: number
-          id?: string
-          net_amount?: number
-          paid?: boolean
-          run_id?: string
-          staff_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payroll_items_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_items_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "staff"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      payroll_runs: {
-        Row: {
-          created_at: string
-          finalized_at: string | null
-          generated_by: string | null
-          id: string
-          period_month: string
-          status: string
-          total_amount: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          finalized_at?: string | null
-          generated_by?: string | null
-          id?: string
-          period_month: string
-          status?: string
-          total_amount?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          finalized_at?: string | null
-          generated_by?: string | null
-          id?: string
-          period_month?: string
-          status?: string
-          total_amount?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       post_offices: {
         Row: {
           bn_name: string | null
@@ -1218,68 +867,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      purchase_orders: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          discount: number
-          expected_date: string | null
-          id: string
-          notes: string | null
-          order_date: string | null
-          po_number: string
-          status: string
-          subtotal: number
-          tax: number
-          total: number
-          total_amount: number
-          updated_at: string
-          vendor_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          discount?: number
-          expected_date?: string | null
-          id?: string
-          notes?: string | null
-          order_date?: string | null
-          po_number: string
-          status?: string
-          subtotal?: number
-          tax?: number
-          total?: number
-          total_amount?: number
-          updated_at?: string
-          vendor_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          discount?: number
-          expected_date?: string | null
-          id?: string
-          notes?: string | null
-          order_date?: string | null
-          po_number?: string
-          status?: string
-          subtotal?: number
-          tax?: number
-          total?: number
-          total_amount?: number
-          updated_at?: string
-          vendor_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "purchase_orders_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       roads: {
         Row: {
@@ -1454,66 +1041,6 @@ export type Database = {
         }
         Relationships: []
       }
-      stock_movements: {
-        Row: {
-          created_at: string
-          id: string
-          item_id: string | null
-          move_type: string | null
-          moved_at: string
-          moved_by: string | null
-          movement_type: string | null
-          notes: string | null
-          quantity: number
-          reference: string | null
-          unit_cost: number
-          warehouse_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          item_id?: string | null
-          move_type?: string | null
-          moved_at?: string
-          moved_by?: string | null
-          movement_type?: string | null
-          notes?: string | null
-          quantity?: number
-          reference?: string | null
-          unit_cost?: number
-          warehouse_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          item_id?: string | null
-          move_type?: string | null
-          moved_at?: string
-          moved_by?: string | null
-          movement_type?: string | null
-          notes?: string | null
-          quantity?: number
-          reference?: string | null
-          unit_cost?: number
-          warehouse_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "stock_movements_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "inventory_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "stock_movements_warehouse_fk"
-            columns: ["warehouse_id"]
-            isOneToOne: false
-            referencedRelation: "warehouses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       ticket_replies: {
         Row: {
           created_at: string
@@ -1681,42 +1208,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vendors: {
-        Row: {
-          address: string | null
-          contact_person: string | null
-          created_at: string
-          email: string | null
-          id: string
-          mobile: string | null
-          name: string
-          notes: string | null
-          updated_at: string
-        }
-        Insert: {
-          address?: string | null
-          contact_person?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          mobile?: string | null
-          name: string
-          notes?: string | null
-          updated_at?: string
-        }
-        Update: {
-          address?: string | null
-          contact_person?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          mobile?: string | null
-          name?: string
-          notes?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       villages: {
         Row: {
           bn_name: string | null
@@ -1748,36 +1239,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      warehouses: {
-        Row: {
-          address: string | null
-          code: string | null
-          created_at: string
-          id: string
-          name: string
-          notes: string | null
-          updated_at: string
-        }
-        Insert: {
-          address?: string | null
-          code?: string | null
-          created_at?: string
-          id?: string
-          name: string
-          notes?: string | null
-          updated_at?: string
-        }
-        Update: {
-          address?: string | null
-          code?: string | null
-          created_at?: string
-          id?: string
-          name?: string
-          notes?: string | null
-          updated_at?: string
-        }
-        Relationships: []
       }
       zones: {
         Row: {
