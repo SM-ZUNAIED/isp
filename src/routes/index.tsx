@@ -103,6 +103,7 @@ function LandingPage() {
   const [orderOpen, setOrderOpen] = useState(false);
   const [orderForm, setOrderForm] = useState({ name: "", phone: "", area: "", road: "", house: "", message: "" });
   const [orderSubmitting, setOrderSubmitting] = useState(false);
+  const [showAllPackages, setShowAllPackages] = useState(false);
 
   const handleOrder = (pkg: { id: string; name: string; price?: number }) => {
     setSelectedPkg(pkg);
