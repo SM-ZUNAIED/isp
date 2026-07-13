@@ -20,14 +20,14 @@ import {
   Users2,
   ChevronDown, Home,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
 import {
@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { getSettings } from "@/lib/support.functions";
 import { useLogoUrl } from "@/hooks/use-logo";
+import { supabase } from "@/integrations/supabase/client";
 
 const getMyRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -340,11 +341,31 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
 
 function BrandLogo({ size = 10 }: { size?: number }) {
   const fetchSettings = useServerFn(getSettings);
+  const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["settings"],
     queryFn: () => fetchSettings(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
+  useEffect(() => {
+    const ch = supabase
+      .channel("settings-sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "settings" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["settings"] });
+          qc.invalidateQueries({ queryKey: ["logo"] });
+          qc.invalidateQueries({ queryKey: ["landing"] });
+          qc.invalidateQueries({ queryKey: ["site-meta"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [qc]);
   const { data: url } = useLogoUrl(q.data?.logo_url ?? null);
   const cls = `grid place-items-center rounded-xl bg-gradient-primary text-white font-bold overflow-hidden h-${size} w-${size}`;
   return (
