@@ -211,34 +211,4 @@ function StatCard({ icon, label, value, sub, tone }: {
   );
 }
 
-function FilterCombo({
-  label, rows, value, onChange, disabled, lang,
-}: {
-  label: string;
-  rows: Array<{ id: number | string; name: string; bn_name: string | null }>;
-  value: number | null;
-  onChange: (v: number | null) => void;
-  disabled?: boolean;
-  lang: "bn" | "en";
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs">{label}</Label>
-      <Select disabled={disabled}
-        value={value == null ? "__all__" : String(value)}
-        onValueChange={(v) => onChange(v === "__all__" ? null : Number(v))}>
-        <SelectTrigger>
-          <SelectValue placeholder={disabled ? (lang === "bn" ? "নিষ্ক্রিয়" : "Disabled") : (lang === "bn" ? "সব" : "All")} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__all__">{lang === "bn" ? "সব " : "All "}{label}</SelectItem>
-          {rows.map((r) => (
-            <SelectItem key={String(r.id)} value={String(r.id)}>
-              {lang === "bn" ? (r.bn_name || r.name) : (r.name || r.bn_name)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
+
