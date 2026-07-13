@@ -76,18 +76,25 @@ export type Database = {
       customers: {
         Row: {
           address: string | null
+          address_line: string | null
           alt_mobile: string | null
+          area_id: string | null
           avatar_path: string | null
+          building_id: string | null
           connection_date: string | null
           created_at: string
           customer_code: string
+          district_id: number | null
+          division_id: number | null
           email: string | null
           expiry_date: string | null
           full_name: string
+          holding_no: string | null
           id: string
           ip_address: string | null
           mikrotik_id: string | null
           mobile: string
+          mohalla: string | null
           monthly_bill: number
           nid_number: string | null
           nid_url: string | null
@@ -98,29 +105,42 @@ export type Database = {
           onu_serial: string | null
           package_id: string | null
           photo_url: string | null
+          post_office_id: string | null
           pppoe_password: string | null
           pppoe_username: string | null
+          road_id: string | null
+          road_name: string | null
           router_info: string | null
           splitter_info: string | null
           status: Database["public"]["Enums"]["customer_status"]
+          union_id: string | null
+          upazila_id: number | null
           updated_at: string
           user_id: string | null
+          village_id: string | null
           zone_id: string | null
         }
         Insert: {
           address?: string | null
+          address_line?: string | null
           alt_mobile?: string | null
+          area_id?: string | null
           avatar_path?: string | null
+          building_id?: string | null
           connection_date?: string | null
           created_at?: string
           customer_code: string
+          district_id?: number | null
+          division_id?: number | null
           email?: string | null
           expiry_date?: string | null
           full_name: string
+          holding_no?: string | null
           id?: string
           ip_address?: string | null
           mikrotik_id?: string | null
           mobile: string
+          mohalla?: string | null
           monthly_bill?: number
           nid_number?: string | null
           nid_url?: string | null
@@ -131,29 +151,42 @@ export type Database = {
           onu_serial?: string | null
           package_id?: string | null
           photo_url?: string | null
+          post_office_id?: string | null
           pppoe_password?: string | null
           pppoe_username?: string | null
+          road_id?: string | null
+          road_name?: string | null
           router_info?: string | null
           splitter_info?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
+          union_id?: string | null
+          upazila_id?: number | null
           updated_at?: string
           user_id?: string | null
+          village_id?: string | null
           zone_id?: string | null
         }
         Update: {
           address?: string | null
+          address_line?: string | null
           alt_mobile?: string | null
+          area_id?: string | null
           avatar_path?: string | null
+          building_id?: string | null
           connection_date?: string | null
           created_at?: string
           customer_code?: string
+          district_id?: number | null
+          division_id?: number | null
           email?: string | null
           expiry_date?: string | null
           full_name?: string
+          holding_no?: string | null
           id?: string
           ip_address?: string | null
           mikrotik_id?: string | null
           mobile?: string
+          mohalla?: string | null
           monthly_bill?: number
           nid_number?: string | null
           nid_url?: string | null
@@ -164,13 +197,19 @@ export type Database = {
           onu_serial?: string | null
           package_id?: string | null
           photo_url?: string | null
+          post_office_id?: string | null
           pppoe_password?: string | null
           pppoe_username?: string | null
+          road_id?: string | null
+          road_name?: string | null
           router_info?: string | null
           splitter_info?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
+          union_id?: string | null
+          upazila_id?: number | null
           updated_at?: string
           user_id?: string | null
+          village_id?: string | null
           zone_id?: string | null
         }
         Relationships: [
