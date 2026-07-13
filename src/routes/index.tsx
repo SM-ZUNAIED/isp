@@ -194,7 +194,7 @@ function LandingPage() {
       <header className="sticky top-0 z-40 glass border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary shadow-glow overflow-hidden">
+            <div className={`grid h-10 w-10 place-items-center rounded-xl overflow-hidden ${logoUrl ? "" : "bg-gradient-primary shadow-glow"}`}>
               {logoUrl ? (
                 <img src={logoUrl} alt={ispName} className="h-full w-full object-contain" />
               ) : (
@@ -641,7 +641,7 @@ function LandingPage() {
         <div className="container mx-auto grid gap-8 px-4 md:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary overflow-hidden">
+              <div className={`grid h-10 w-10 place-items-center rounded-xl overflow-hidden ${logoUrl ? "" : "bg-gradient-primary"}`}>
                 {logoUrl ? (
                   <img src={logoUrl} alt={ispName} className="h-full w-full object-contain" />
                 ) : (
