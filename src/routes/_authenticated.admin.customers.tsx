@@ -78,6 +78,7 @@ function CustomersPage() {
   const [zoneId, setZoneId] = useState<string | null>(null);
   const [mohalla, setMohalla] = useState<string | null>(null);
   const [roadName, setRoadName] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const customersQ = useQuery({ queryKey: ["customers"], queryFn: () => list() });
   const optsQ = useQuery({ queryKey: ["catalog", "customers-opts"], queryFn: () => opts() });
@@ -110,6 +111,15 @@ function CustomersPage() {
     return Array.from(set).sort().map((v) => ({ id: v, name: v }));
   }, [customersQ.data]);
 
+  const statusOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of customersQ.data ?? []) if (r.status) set.add(r.status);
+    const order = ["active", "pending", "suspended", "expired", "no_payment"];
+    return Array.from(set)
+      .sort((a, b) => order.indexOf(a) - order.indexOf(b))
+      .map((s) => ({ id: s, name: STATUS_LABEL[s] ?? s }));
+  }, [customersQ.data, STATUS_LABEL]);
+
   const invalidate = () => qc.invalidateQueries({ queryKey: ["customers"] });
 
   const statusMut = useMutation({
@@ -129,6 +139,7 @@ function CustomersPage() {
     if (zoneId) all = all.filter((r) => r.zone_id === zoneId);
     if (mohalla) all = all.filter((r) => (r.mohalla ?? "").trim() === mohalla);
     if (roadName) all = all.filter((r) => (r.road_name ?? "").trim() === roadName);
+    if (statusFilter) all = all.filter((r) => r.status === statusFilter);
     if (!q.trim()) return all;
     const s = q.toLowerCase();
     return all.filter(
@@ -139,10 +150,10 @@ function CustomersPage() {
         r.address_line?.toLowerCase().includes(s) ||
         r.address?.toLowerCase().includes(s),
     );
-  }, [customersQ.data, q, zoneId, mohalla, roadName]);
+  }, [customersQ.data, q, zoneId, mohalla, roadName, statusFilter]);
 
-  const clearFilters = () => { setZoneId(null); setMohalla(null); setRoadName(null); };
-  const hasFilter = zoneId != null || mohalla != null || roadName != null || q.trim() !== "";
+  const clearFilters = () => { setZoneId(null); setMohalla(null); setRoadName(null); setStatusFilter(null); };
+  const hasFilter = zoneId != null || mohalla != null || roadName != null || statusFilter != null || q.trim() !== "";
 
   return (
     <div className="space-y-6">
@@ -165,7 +176,7 @@ function CustomersPage() {
       <Card>
         <CardContent className="p-4 space-y-4">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <div className="space-y-1.5">
                 <Label className="text-xs">{tx("খুঁজুন", "Search")}</Label>
                 <div className="relative">
@@ -198,6 +209,13 @@ function CustomersPage() {
                 rows={roadOptions}
                 value={roadName}
                 onChange={(v) => setRoadName(v as string | null)}
+              />
+              <FilterSelect
+                label={tx("স্ট্যাটাস", "Status")}
+                loading={customersQ.isLoading}
+                rows={statusOptions}
+                value={statusFilter}
+                onChange={(v) => setStatusFilter(v as string | null)}
               />
             </div>
             {hasFilter && (
