@@ -7,7 +7,9 @@ export type { SmsConfig };
 /**
  * Unified cron endpoint. Called by pg_cron with `?task=<name>`.
  * Tasks: generate-bills | send-reminders | auto-suspend
- * Auth: apikey header must match SUPABASE anon/publishable key.
+ * Auth: `x-cron-secret` header (or `Authorization: Bearer …`) must equal
+ * the server-only `CRON_SECRET` env var. The Supabase publishable key is
+ * public and MUST NOT be used to authenticate this endpoint.
  */
 export const Route = createFileRoute("/api/public/cron/run")({
   server: {
@@ -22,14 +24,20 @@ async function handle(request: Request) {
   const url = new URL(request.url);
   const task = url.searchParams.get("task");
 
-  const providedKey =
-    request.headers.get("apikey") ||
-    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  const expected =
-    process.env.SUPABASE_PUBLISHABLE_KEY ||
-    process.env.SB_PUBLISHABLE_KEY ||
-    process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!providedKey || !expected || providedKey !== expected) {
+  const provided =
+    request.headers.get("x-cron-secret") ||
+    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ||
+    "";
+  const expected = process.env.CRON_SECRET || "";
+  const a = new TextEncoder().encode(provided);
+  const b = new TextEncoder().encode(expected);
+  let ok = expected.length > 0 && a.length === b.length;
+  if (ok) {
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+    ok = diff === 0;
+  }
+  if (!ok) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {
       status: 401,
       headers: { "content-type": "application/json" },
