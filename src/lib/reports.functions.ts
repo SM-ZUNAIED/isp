@@ -3,9 +3,9 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const FilterInput = z.object({
-  division_id: z.number().int().nullable().optional(),
-  district_id: z.number().int().nullable().optional(),
-  upazila_id: z.number().int().nullable().optional(),
+  area_id: z.string().uuid().nullable().optional(),
+  road_id: z.string().uuid().nullable().optional(),
+  building_id: z.string().uuid().nullable().optional(),
   group_by: z.enum(["area", "road", "building"]).default("area"),
   from: z.string().nullable().optional(),
   to: z.string().nullable().optional(),
@@ -41,9 +41,9 @@ export const getAddressRevenue = createServerFn({ method: "POST" })
     let cq = supabase.from("customers").select(
       "id, division_id, district_id, upazila_id, union_id, area_id, road_id, building_id",
     ).limit(20000);
-    if (data.division_id != null) cq = cq.eq("division_id", data.division_id);
-    if (data.district_id != null) cq = cq.eq("district_id", data.district_id);
-    if (data.upazila_id != null) cq = cq.eq("upazila_id", data.upazila_id);
+    if (data.area_id) cq = cq.eq("area_id", data.area_id);
+    if (data.road_id) cq = cq.eq("road_id", data.road_id);
+    if (data.building_id) cq = cq.eq("building_id", data.building_id);
     const { data: custs, error: cErr } = await cq;
     if (cErr) throw new Error(cErr.message);
     const customers = (custs ?? []) as CustRow[];
