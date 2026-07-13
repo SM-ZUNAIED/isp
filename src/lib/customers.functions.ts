@@ -169,7 +169,7 @@ export const bulkImportCustomers = createServerFn({ method: "POST" })
       (custRes.data ?? []).map((c) => String(c.customer_code).trim().toLowerCase()),
     );
 
-    const toInsert: Array<{ customer_code: string; full_name: string; mobile: string; package_id: string; monthly_bill: number; status: "pending" }> = [];
+    const toInsert: Array<{ customer_code: string; full_name: string; mobile: string; package_id: string; monthly_bill: number; status: "active" }> = [];
     const failed: Array<{ line: number; reason: string }> = [];
     let skipped = 0;
     const seenInBatch = new Set<string>();
@@ -197,7 +197,7 @@ export const bulkImportCustomers = createServerFn({ method: "POST" })
         mobile: "",
         package_id: pkg.id,
         monthly_bill: Number(pkg.monthly_price) || 0,
-        status: "pending",
+        status: "active",
       });
     });
 
