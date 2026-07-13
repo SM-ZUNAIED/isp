@@ -6,7 +6,7 @@ const FilterInput = z.object({
   division_id: z.number().int().nullable().optional(),
   district_id: z.number().int().nullable().optional(),
   upazila_id: z.number().int().nullable().optional(),
-  group_by: z.enum(["division", "district", "upazila", "union", "area"]).default("district"),
+  group_by: z.enum(["area", "road", "building"]).default("area"),
   from: z.string().nullable().optional(),
   to: z.string().nullable().optional(),
 });
@@ -27,6 +27,8 @@ type CustRow = {
   upazila_id: number | null;
   union_id: string | null;
   area_id: string | null;
+  road_id: string | null;
+  building_id: string | null;
 };
 
 export const getAddressRevenue = createServerFn({ method: "POST" })
@@ -37,7 +39,7 @@ export const getAddressRevenue = createServerFn({ method: "POST" })
 
     // 1) fetch customers with address ids (apply upstream filters)
     let cq = supabase.from("customers").select(
-      "id, division_id, district_id, upazila_id, union_id, area_id",
+      "id, division_id, district_id, upazila_id, union_id, area_id, road_id, building_id",
     ).limit(20000);
     if (data.division_id != null) cq = cq.eq("division_id", data.division_id);
     if (data.district_id != null) cq = cq.eq("district_id", data.district_id);
@@ -61,21 +63,16 @@ export const getAddressRevenue = createServerFn({ method: "POST" })
     if (bErr) throw new Error(bErr.message);
 
     // 3) collect distinct address ids to fetch names
-    const divIds = new Set<number>(), disIds = new Set<number>(), upzIds = new Set<number>();
-    const unionIds = new Set<string>(), areaIds = new Set<string>();
+    const areaIds = new Set<string>(), roadIds = new Set<string>(), buildingIds = new Set<string>();
     for (const c of customers) {
-      if (c.division_id != null) divIds.add(c.division_id);
-      if (c.district_id != null) disIds.add(c.district_id);
-      if (c.upazila_id != null) upzIds.add(c.upazila_id);
-      if (c.union_id) unionIds.add(c.union_id);
       if (c.area_id) areaIds.add(c.area_id);
+      if (c.road_id) roadIds.add(c.road_id);
+      if (c.building_id) buildingIds.add(c.building_id);
     }
-    const [dv, ds, up, un, ar] = await Promise.all([
-      divIds.size ? supabase.from("divisions").select("id,name,bn_name").in("id", [...divIds]) : Promise.resolve({ data: [] as { id: number; name: string; bn_name: string | null }[] }),
-      disIds.size ? supabase.from("districts").select("id,name,bn_name").in("id", [...disIds]) : Promise.resolve({ data: [] as { id: number; name: string; bn_name: string | null }[] }),
-      upzIds.size ? supabase.from("upazilas").select("id,name,bn_name").in("id", [...upzIds]) : Promise.resolve({ data: [] as { id: number; name: string; bn_name: string | null }[] }),
-      unionIds.size ? supabase.from("unions").select("id,name,bn_name").in("id", [...unionIds]) : Promise.resolve({ data: [] as { id: string; name: string; bn_name: string | null }[] }),
+    const [ar, rd, bd] = await Promise.all([
       areaIds.size ? supabase.from("areas").select("id,name,bn_name").in("id", [...areaIds]) : Promise.resolve({ data: [] as { id: string; name: string; bn_name: string | null }[] }),
+      roadIds.size ? supabase.from("roads").select("id,name,bn_name").in("id", [...roadIds]) : Promise.resolve({ data: [] as { id: string; name: string; bn_name: string | null }[] }),
+      buildingIds.size ? supabase.from("buildings").select("id,name,house_number,holding_number").in("id", [...buildingIds]) : Promise.resolve({ data: [] as { id: string; name: string; house_number: string | null; holding_number: string | null }[] }),
     ]);
     const nameOf = (rows: Array<{ id: number | string; name: string; bn_name: string | null }>) => {
       const m = new Map<string, string>();
@@ -83,11 +80,20 @@ export const getAddressRevenue = createServerFn({ method: "POST" })
       return m;
     };
     const names = {
-      division: nameOf(dv.data ?? []),
-      district: nameOf(ds.data ?? []),
-      upazila: nameOf(up.data ?? []),
-      union: nameOf(un.data ?? []),
       area: nameOf(ar.data ?? []),
+      road: nameOf(rd.data ?? []),
+      building: (() => {
+        const m = new Map<string, string>();
+        for (const r of (bd.data ?? [])) {
+          const label = r.house_number
+            ? `${r.name} (${r.house_number})`
+            : r.holding_number
+            ? `${r.name} (${r.holding_number})`
+            : r.name;
+          m.set(String(r.id), label);
+        }
+        return m;
+      })(),
     };
 
     // 4) aggregate
@@ -100,11 +106,9 @@ export const getAddressRevenue = createServerFn({ method: "POST" })
       const cust = custMap.get(b.customer_id);
       if (!cust) continue;
       const rawId =
-        gb === "division" ? cust.division_id :
-        gb === "district" ? cust.district_id :
-        gb === "upazila" ? cust.upazila_id :
-        gb === "union" ? cust.union_id :
-        cust.area_id;
+        gb === "area" ? cust.area_id :
+        gb === "road" ? cust.road_id :
+        cust.building_id;
       const key = rawId == null ? "__none__" : String(rawId);
       const label = rawId == null ? "— অজানা —" : (names[gb].get(String(rawId)) || `#${rawId}`);
       let bucket = buckets.get(key);
