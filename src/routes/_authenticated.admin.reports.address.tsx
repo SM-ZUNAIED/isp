@@ -18,69 +18,34 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { getAddressRevenue } from "@/lib/reports.functions";
-import { useTx, useFmt, useI18n } from "@/hooks/use-i18n";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/reports/address")({
   head: () => ({ meta: [{ title: "Address-based Revenue — Net Bill Pro" }] }),
   component: AddressReportsPage,
 });
 
-type GroupBy = "division" | "district" | "upazila" | "union" | "area";
+type GroupBy = "area" | "road" | "building";
 
 function AddressReportsPage() {
   const tx = useTx();
-  const { lang } = useI18n();
   const { n, bdt } = useFmt();
   const GROUPS: { value: GroupBy; label: string }[] = [
-    { value: "division", label: tx("বিভাগ অনুযায়ী", "By Division") },
-    { value: "district", label: tx("জেলা অনুযায়ী", "By District") },
-    { value: "upazila", label: tx("উপজেলা অনুযায়ী", "By Upazila") },
-    { value: "union", label: tx("ইউনিয়ন অনুযায়ী", "By Union") },
-    { value: "area", label: tx("এরিয়া/মহল্লা অনুযায়ী", "By Area/Mohalla") },
+    { value: "area", label: tx("এরিয়া অনুযায়ী", "By Area") },
+    { value: "road", label: tx("রোড অনুযায়ী", "By Road") },
+    { value: "building", label: tx("হাউস নং অনুযায়ী", "By House No") },
   ];
 
-  const [groupBy, setGroupBy] = useState<GroupBy>("district");
-  const [divisionId, setDivisionId] = useState<number | null>(null);
-  const [districtId, setDistrictId] = useState<number | null>(null);
-  const [upazilaId, setUpazilaId] = useState<number | null>(null);
+  const [groupBy, setGroupBy] = useState<GroupBy>("area");
   const today = new Date();
   const first = new Date(today.getFullYear(), today.getMonth() - 5, 1);
   const [from, setFrom] = useState(first.toISOString().slice(0, 10));
   const [to, setTo] = useState(new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10));
 
-  const divQ = useQuery({
-    queryKey: ["addr", "divisions"],
-    queryFn: async () => {
-      const { data } = await supabase.from("divisions").select("id,name,bn_name").order("name");
-      return data ?? [];
-    },
-    staleTime: 10 * 60_000,
-  });
-  const disQ = useQuery({
-    queryKey: ["addr", "districts", divisionId],
-    enabled: divisionId != null,
-    queryFn: async () => {
-      const { data } = await supabase.from("districts")
-        .select("id,name,bn_name").eq("division_id", divisionId!).order("name");
-      return data ?? [];
-    },
-    staleTime: 10 * 60_000,
-  });
-  const upzQ = useQuery({
-    queryKey: ["addr", "upazilas", districtId],
-    enabled: districtId != null,
-    queryFn: async () => {
-      const { data } = await supabase.from("upazilas")
-        .select("id,name,bn_name").eq("district_id", districtId!).order("name");
-      return data ?? [];
-    },
-    staleTime: 10 * 60_000,
-  });
-
   const fetchReport = useServerFn(getAddressRevenue);
   const reportQ = useQuery({
-    queryKey: ["addr-report", groupBy, divisionId, districtId, upazilaId, from, to],
-    queryFn: () => fetchReport({ data: { group_by: groupBy, division_id: divisionId, district_id: districtId, upazila_id: upazilaId, from, to } }),
+    queryKey: ["addr-report", groupBy, from, to],
+    queryFn: () => fetchReport({ data: { group_by: groupBy, from, to } }),
   });
 
   const rows = reportQ.data?.rows ?? [];
@@ -122,7 +87,7 @@ function AddressReportsPage() {
       </div>
 
       <Card>
-        <CardContent className="p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <CardContent className="p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1.5">
             <Label className="text-xs">{tx("গ্রুপিং", "Grouping")}</Label>
             <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
@@ -132,13 +97,6 @@ function AddressReportsPage() {
               </SelectContent>
             </Select>
           </div>
-          <FilterCombo label={tx("বিভাগ", "Division")} rows={divQ.data ?? []} value={divisionId} lang={lang}
-            onChange={(v) => { setDivisionId(v); setDistrictId(null); setUpazilaId(null); }} />
-          <FilterCombo label={tx("জেলা", "District")} rows={disQ.data ?? []} value={districtId} lang={lang}
-            disabled={divisionId == null}
-            onChange={(v) => { setDistrictId(v); setUpazilaId(null); }} />
-          <FilterCombo label={tx("উপজেলা", "Upazila")} rows={upzQ.data ?? []} value={upazilaId} lang={lang}
-            disabled={districtId == null} onChange={setUpazilaId} />
           <div className="space-y-1.5">
             <Label className="text-xs">{tx("শুরু (বিলিং মাস)", "From (billing month)")}</Label>
             <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -253,34 +211,4 @@ function StatCard({ icon, label, value, sub, tone }: {
   );
 }
 
-function FilterCombo({
-  label, rows, value, onChange, disabled, lang,
-}: {
-  label: string;
-  rows: Array<{ id: number | string; name: string; bn_name: string | null }>;
-  value: number | null;
-  onChange: (v: number | null) => void;
-  disabled?: boolean;
-  lang: "bn" | "en";
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs">{label}</Label>
-      <Select disabled={disabled}
-        value={value == null ? "__all__" : String(value)}
-        onValueChange={(v) => onChange(v === "__all__" ? null : Number(v))}>
-        <SelectTrigger>
-          <SelectValue placeholder={disabled ? (lang === "bn" ? "নিষ্ক্রিয়" : "Disabled") : (lang === "bn" ? "সব" : "All")} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__all__">{lang === "bn" ? "সব " : "All "}{label}</SelectItem>
-          {rows.map((r) => (
-            <SelectItem key={String(r.id)} value={String(r.id)}>
-              {lang === "bn" ? (r.bn_name || r.name) : (r.name || r.bn_name)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
+
