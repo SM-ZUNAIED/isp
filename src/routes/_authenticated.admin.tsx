@@ -111,6 +111,9 @@ function AdminLayout() {
   const { t } = useI18n();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const fetchSettingsFn = useServerFn(getSettings);
+  const settingsQ = useQuery({ queryKey: ["settings"], queryFn: () => fetchSettingsFn(), staleTime: 5 * 60 * 1000 });
+  const brandName = settingsQ.data?.isp_name?.trim() || "Net Bill Pro";
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({
     queryKey: ["my-roles", user?.id],
@@ -173,7 +176,7 @@ function AdminLayout() {
       <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-card px-4 py-3">
         <Link to="/" className="flex items-center gap-2 font-bold">
           <BrandLogo size={9} />
-          <span>Net Bill Pro</span>
+          <span>{brandName}</span>
         </Link>
         <div className="flex items-center gap-2">
           <TopBarActions />
@@ -217,6 +220,9 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
+  const fetchSettingsFn = useServerFn(getSettings);
+  const settingsQ = useQuery({ queryKey: ["settings"], queryFn: () => fetchSettingsFn(), staleTime: 5 * 60 * 1000 });
+  const brandName = settingsQ.data?.isp_name?.trim() || "Net Bill Pro";
   const erpActive = location.pathname.startsWith("/admin/erp")
     || location.pathname.startsWith("/admin/hr")
     || location.pathname.startsWith("/admin/inventory")
@@ -230,7 +236,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
         <div className="flex items-center gap-2">
           <BrandLogo size={10} />
           <div className="flex-1 min-w-0">
-            <div className="font-bold leading-tight truncate">Net Bill Pro</div>
+            <div className="font-bold leading-tight truncate">{brandName}</div>
             <div className="text-xs text-muted-foreground truncate">{t("admin.brand.sub")}</div>
           </div>
           <Link
