@@ -1016,7 +1016,11 @@ export type Database = {
           paid_at: string
           receipt_number: string
           received_by: string | null
+          submission_ref: string | null
           transaction_id: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           amount: number
@@ -1029,7 +1033,11 @@ export type Database = {
           paid_at?: string
           receipt_number: string
           received_by?: string | null
+          submission_ref?: string | null
           transaction_id?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           amount?: number
@@ -1042,7 +1050,11 @@ export type Database = {
           paid_at?: string
           receipt_number?: string
           received_by?: string | null
+          submission_ref?: string | null
           transaction_id?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -1775,6 +1787,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_verify_payment: {
+        Args: { _approve: boolean; _payment_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1782,6 +1798,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_get_landing_settings: { Args: never; Returns: Json }
       public_get_receipt: { Args: { _receipt: string }; Returns: Json }
       public_lookup_bill: { Args: { _code: string }; Returns: Json }
       public_submit_payment: {
