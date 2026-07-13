@@ -217,6 +217,9 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
+  const fetchSettingsFn = useServerFn(getSettings);
+  const settingsQ = useQuery({ queryKey: ["settings"], queryFn: () => fetchSettingsFn(), staleTime: 5 * 60 * 1000 });
+  const brandName = settingsQ.data?.isp_name?.trim() || "Net Bill Pro";
   const erpActive = location.pathname.startsWith("/admin/erp")
     || location.pathname.startsWith("/admin/hr")
     || location.pathname.startsWith("/admin/inventory")
@@ -230,7 +233,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
         <div className="flex items-center gap-2">
           <BrandLogo size={10} />
           <div className="flex-1 min-w-0">
-            <div className="font-bold leading-tight truncate">Net Bill Pro</div>
+            <div className="font-bold leading-tight truncate">{brandName}</div>
             <div className="text-xs text-muted-foreground truncate">{t("admin.brand.sub")}</div>
           </div>
           <Link
