@@ -196,6 +196,7 @@ export type Database = {
       buildings: {
         Row: {
           created_at: string
+          google_map_url: string | null
           holding_number: string | null
           house_number: string | null
           id: string
@@ -204,6 +205,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          google_map_url?: string | null
           holding_number?: string | null
           house_number?: string | null
           id?: string
@@ -212,6 +214,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          google_map_url?: string | null
           holding_number?: string | null
           house_number?: string | null
           id?: string
@@ -446,6 +449,7 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          party_name: string | null
         }
         Insert: {
           amount: number
@@ -455,6 +459,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
         }
         Update: {
           amount?: number
@@ -464,6 +469,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
         }
         Relationships: []
       }
@@ -476,6 +482,7 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          party_name: string | null
         }
         Insert: {
           amount: number
@@ -485,6 +492,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
         }
         Update: {
           amount?: number
@@ -494,41 +502,51 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
         }
         Relationships: []
       }
       inventory_items: {
         Row: {
+          category: string | null
+          cost_price: number
           created_at: string
           current_stock: number
           id: string
           name: string
           notes: string | null
           reorder_level: number
+          sale_price: number
           sku: string | null
           unit: string | null
           unit_cost: number
           updated_at: string
         }
         Insert: {
+          category?: string | null
+          cost_price?: number
           created_at?: string
           current_stock?: number
           id?: string
           name: string
           notes?: string | null
           reorder_level?: number
+          sale_price?: number
           sku?: string | null
           unit?: string | null
           unit_cost?: number
           updated_at?: string
         }
         Update: {
+          category?: string | null
+          cost_price?: number
           created_at?: string
           current_stock?: number
           id?: string
           name?: string
           notes?: string | null
           reorder_level?: number
+          sale_price?: number
           sku?: string | null
           unit?: string | null
           unit_cost?: number
@@ -1130,6 +1148,7 @@ export type Database = {
       post_offices: {
         Row: {
           bn_name: string | null
+          code: string | null
           created_at: string
           id: string
           name: string
@@ -1137,6 +1156,7 @@ export type Database = {
         }
         Insert: {
           bn_name?: string | null
+          code?: string | null
           created_at?: string
           id?: string
           name: string
@@ -1144,6 +1164,7 @@ export type Database = {
         }
         Update: {
           bn_name?: string | null
+          code?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -1189,30 +1210,51 @@ export type Database = {
       purchase_orders: {
         Row: {
           created_at: string
+          created_by: string | null
+          discount: number
+          expected_date: string | null
           id: string
           notes: string | null
+          order_date: string | null
           po_number: string
           status: string
+          subtotal: number
+          tax: number
+          total: number
           total_amount: number
           updated_at: string
           vendor_id: string | null
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
+          discount?: number
+          expected_date?: string | null
           id?: string
           notes?: string | null
+          order_date?: string | null
           po_number: string
           status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
           total_amount?: number
           updated_at?: string
           vendor_id?: string | null
         }
         Update: {
           created_at?: string
+          created_by?: string | null
+          discount?: number
+          expected_date?: string | null
           id?: string
           notes?: string | null
+          order_date?: string | null
           po_number?: string
           status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
           total_amount?: number
           updated_at?: string
           vendor_id?: string | null
@@ -1384,31 +1426,43 @@ export type Database = {
           created_at: string
           id: string
           item_id: string | null
+          move_type: string | null
           moved_at: string
+          moved_by: string | null
           movement_type: string
           notes: string | null
           quantity: number
           reference: string | null
+          unit_cost: number
+          warehouse_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           item_id?: string | null
+          move_type?: string | null
           moved_at?: string
+          moved_by?: string | null
           movement_type: string
           notes?: string | null
           quantity?: number
           reference?: string | null
+          unit_cost?: number
+          warehouse_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           item_id?: string | null
+          move_type?: string | null
           moved_at?: string
+          moved_by?: string | null
           movement_type?: string
           notes?: string | null
           quantity?: number
           reference?: string | null
+          unit_cost?: number
+          warehouse_id?: string | null
         }
         Relationships: [
           {
@@ -1416,6 +1470,13 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_warehouse_fk"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
             referencedColumns: ["id"]
           },
         ]
@@ -1590,6 +1651,7 @@ export type Database = {
       vendors: {
         Row: {
           address: string | null
+          contact_person: string | null
           created_at: string
           email: string | null
           id: string
@@ -1600,6 +1662,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -1610,6 +1673,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -1651,6 +1715,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      warehouses: {
+        Row: {
+          address: string | null
+          code: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       zones: {
         Row: {
