@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X, Eye, Upload } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Pencil, MapPin, X, Eye, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -241,7 +241,6 @@ function CustomersPage() {
                   </TableCell></TableRow>
                 )}
                 {rows.map((r) => {
-                  const isActive = r.status === "active";
                   return (
                     <TableRow key={r.id}>
                       <TableCell className="font-mono text-xs">{r.customer_code}</TableCell>
