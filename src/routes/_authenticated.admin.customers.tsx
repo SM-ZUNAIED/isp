@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X, Eye } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X, Eye, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   listCustomers, createCustomer, updateCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
+  bulkImportCustomers,
 } from "@/lib/customers.functions";
+import { Textarea } from "@/components/ui/textarea";
 import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
@@ -155,6 +157,7 @@ function CustomersPage() {
           zones={optsQ.data?.zones ?? []}
           onSaved={invalidate}
         />
+        <BulkImportDialog onSaved={invalidate} />
       </div>
 
       <Card>
