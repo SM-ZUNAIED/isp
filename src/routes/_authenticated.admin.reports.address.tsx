@@ -14,7 +14,9 @@ import { Progress } from "@/components/ui/progress";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { getAddressRevenue } from "@/lib/reports.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
@@ -28,13 +30,42 @@ type GroupBy = "area" | "road" | "building";
 function AddressReportsPage() {
   const tx = useTx();
   const { n, bdt } = useFmt();
-  const GROUPS: { value: GroupBy; label: string }[] = [
-    { value: "area", label: tx("এরিয়া অনুযায়ী", "By Area") },
-    { value: "road", label: tx("রোড অনুযায়ী", "By Road") },
-    { value: "building", label: tx("হাউস নং অনুযায়ী", "By House No") },
-  ];
+  const [areaId, setAreaId] = useState<string | null>(null);
+  const [roadId, setRoadId] = useState<string | null>(null);
+  const [buildingId, setBuildingId] = useState<string | null>(null);
+  const groupBy: GroupBy = buildingId ? "building" : roadId ? "road" : "area";
+  const currentGroupLabel =
+    groupBy === "area" ? tx("এরিয়া অনুযায়ী", "By Area")
+    : groupBy === "road" ? tx("রোড অনুযায়ী", "By Road")
+    : tx("হাউস নং অনুযায়ী", "By House No");
 
-  const [groupBy, setGroupBy] = useState<GroupBy>("area");
+  const areasQ = useQuery({
+    queryKey: ["addr-filter", "areas"],
+    queryFn: async () => {
+      const { data } = await supabase.from("areas").select("id,name,bn_name").order("name").limit(2000);
+      return data ?? [];
+    },
+    staleTime: 5 * 60_000,
+  });
+  const roadsQ = useQuery({
+    queryKey: ["addr-filter", "roads", areaId],
+    enabled: !!areaId,
+    queryFn: async () => {
+      const { data } = await supabase.from("roads").select("id,name,bn_name").eq("area_id", areaId!).order("name").limit(2000);
+      return data ?? [];
+    },
+    staleTime: 5 * 60_000,
+  });
+  const buildingsQ = useQuery({
+    queryKey: ["addr-filter", "buildings", roadId],
+    enabled: !!roadId,
+    queryFn: async () => {
+      const { data } = await supabase.from("buildings").select("id,name,house_number,holding_number").eq("road_id", roadId!).order("name").limit(2000);
+      return data ?? [];
+    },
+    staleTime: 5 * 60_000,
+  });
+
   const today = new Date();
   const first = new Date(today.getFullYear(), today.getMonth() - 5, 1);
   const [from, setFrom] = useState(first.toISOString().slice(0, 10));
@@ -42,8 +73,8 @@ function AddressReportsPage() {
 
   const fetchReport = useServerFn(getAddressRevenue);
   const reportQ = useQuery({
-    queryKey: ["addr-report", groupBy, from, to],
-    queryFn: () => fetchReport({ data: { group_by: groupBy, from, to } }),
+    queryKey: ["addr-report", groupBy, areaId, roadId, buildingId, from, to],
+    queryFn: () => fetchReport({ data: { group_by: groupBy, area_id: areaId, road_id: roadId, building_id: buildingId, from, to } }),
   });
 
   const rows = reportQ.data?.rows ?? [];
@@ -65,8 +96,6 @@ function AddressReportsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const currentGroupLabel = GROUPS.find((g) => g.value === groupBy)?.label ?? "";
-
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
@@ -86,14 +115,33 @@ function AddressReportsPage() {
 
       <Card>
         <CardContent className="p-4 space-y-3">
-          <Tabs value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
-            <TabsList className="grid w-full grid-cols-3">
-              {GROUPS.map((g) => (
-                <TabsTrigger key={g.value} value={g.value}>{g.label}</TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <FilterSelect
+              label={tx("এরিয়া", "Area")}
+              placeholder={tx("সব এরিয়া", "All areas")}
+              value={areaId}
+              options={(areasQ.data ?? []).map((r) => ({ id: String(r.id), label: r.bn_name || r.name }))}
+              onChange={(v) => { setAreaId(v); setRoadId(null); setBuildingId(null); }}
+            />
+            <FilterSelect
+              label={tx("রোড", "Road")}
+              placeholder={areaId ? tx("সব রোড", "All roads") : tx("এরিয়া নির্বাচন করুন", "Select area first")}
+              value={roadId}
+              disabled={!areaId}
+              options={(roadsQ.data ?? []).map((r) => ({ id: String(r.id), label: r.bn_name || r.name }))}
+              onChange={(v) => { setRoadId(v); setBuildingId(null); }}
+            />
+            <FilterSelect
+              label={tx("হাউস নং", "House No")}
+              placeholder={roadId ? tx("সব হাউস", "All houses") : tx("রোড নির্বাচন করুন", "Select road first")}
+              value={buildingId}
+              disabled={!roadId}
+              options={(buildingsQ.data ?? []).map((r) => ({
+                id: String(r.id),
+                label: r.house_number ? `${r.name} (${r.house_number})` : r.holding_number ? `${r.name} (${r.holding_number})` : r.name,
+              }))}
+              onChange={setBuildingId}
+            />
             <div className="space-y-1.5">
               <Label className="text-xs">{tx("শুরু (বিলিং মাস)", "From (billing month)")}</Label>
               <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
