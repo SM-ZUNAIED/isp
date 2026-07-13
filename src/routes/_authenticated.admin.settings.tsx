@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
@@ -71,6 +71,7 @@ function SettingsPage() {
   const get = useServerFn(getSettings);
   const update = useServerFn(updateSettings);
   const qc = useQueryClient();
+  const router = useRouter();
   const q = useQuery({ queryKey: ["settings"], queryFn: () => get() });
 
   const [f, setF] = useState<SettingsForm>({
@@ -113,10 +114,15 @@ function SettingsPage() {
 
   const mut = useMutation({
     mutationFn: () => update({ data: f }),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(tx("সেটিংস সংরক্ষিত", "Settings saved"));
-      qc.invalidateQueries({ queryKey: ["settings"] });
-      qc.invalidateQueries({ queryKey: ["landing"] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["settings"] }),
+        qc.invalidateQueries({ queryKey: ["landing"] }),
+        qc.invalidateQueries({ queryKey: ["site-meta"] }),
+        qc.invalidateQueries({ queryKey: ["logo"] }),
+      ]);
+      await router.invalidate();
     },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
