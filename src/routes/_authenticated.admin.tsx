@@ -350,7 +350,7 @@ function BrandLogo({ size = 10 }: { size?: number }) {
   });
   useEffect(() => {
     const ch = supabase
-      .channel("settings-sync")
+      .channel(`settings-sync-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "settings" },
