@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 export type LandingSettings = {
   id: number | null;
@@ -15,7 +15,7 @@ export type LandingSettings = {
   hero_subtitle: string | null;
   hero_image_url: string | null;
   about_text: string | null;
-  landing_content: Record<string, unknown> | null;
+  landing_content: Json | null;
 };
 
 export const getLandingData = createServerFn({ method: "GET" }).handler(async () => {
