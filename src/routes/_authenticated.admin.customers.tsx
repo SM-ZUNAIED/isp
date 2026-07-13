@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X, Eye } from "lucide-react";
+import { Plus, Search, Loader2, Trash2, Power, PowerOff, Pencil, MapPin, X, Eye, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   listCustomers, createCustomer, updateCustomer, updateCustomerStatus, deleteCustomer, listPackagesAndZones,
+  bulkImportCustomers,
 } from "@/lib/customers.functions";
+import { Textarea } from "@/components/ui/textarea";
 import { AddressSelector, emptyAddress, type AddressValue } from "@/components/address-selector";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
@@ -155,6 +157,7 @@ function CustomersPage() {
           zones={optsQ.data?.zones ?? []}
           onSaved={invalidate}
         />
+        <BulkImportDialog onSaved={invalidate} />
       </div>
 
       <Card>
@@ -597,5 +600,130 @@ function FilterSelect({
         </SelectContent>
       </Select>
     </div>
+  );
+}
+
+function BulkImportDialog({ onSaved }: { onSaved: () => void }) {
+  const tx = useTx();
+  const importFn = useServerFn(bulkImportCustomers);
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const [result, setResult] = useState<{ added: number; skipped: number; failed: Array<{ line: number; reason: string }> } | null>(null);
+
+  const parsed = useMemo(() => {
+    const rows: Array<{ customer_code: string; full_name: string; package_name: string }> = [];
+    const errors: Array<{ line: number; reason: string }> = [];
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    lines.forEach((line, idx) => {
+      const lineNo = idx + 1;
+      const parts = line.split(/\t|,/).map((s) => s.trim()).filter((_, i, arr) => arr.length > 0);
+      // Skip header row
+      if (idx === 0 && /user\s*id|customer/i.test(parts[0] ?? "") && /name/i.test(parts[1] ?? "")) return;
+      if (parts.length < 3) {
+        errors.push({ line: lineNo, reason: tx("কমপক্ষে ৩টি কলাম প্রয়োজন (User ID, Name, Package)", "At least 3 columns required (User ID, Name, Package)") });
+        return;
+      }
+      const [code, name, ...rest] = parts;
+      const pkg = rest.join(", ").trim();
+      if (!code || !name || !pkg) {
+        errors.push({ line: lineNo, reason: tx("খালি ফিল্ড", "Empty field") });
+        return;
+      }
+      rows.push({ customer_code: code, full_name: name, package_name: pkg });
+    });
+    return { rows, errors };
+  }, [text, tx]);
+
+  const mut = useMutation({
+    mutationFn: async () => importFn({ data: { rows: parsed.rows } }),
+    onSuccess: (r) => {
+      setResult(r);
+      onSaved();
+      toast.success(tx(`${r.added} জন যুক্ত হয়েছে`, `${r.added} added`));
+    },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
+  const reset = () => { setText(""); setResult(null); };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <Upload className="mr-2 h-4 w-4" />
+          {tx("বাল্ক ইমপোর্ট", "Bulk Import")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{tx("কাস্টমার বাল্ক ইমপোর্ট", "Bulk Import Customers")}</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="text-sm text-muted-foreground">
+            {tx(
+              "প্রতি লাইনে একজন কাস্টমার — User ID, Name, Package (কমা বা ট্যাব দিয়ে আলাদা)।",
+              "One customer per line — User ID, Name, Package (comma or tab separated).",
+            )}
+          </div>
+          <pre className="rounded-md bg-muted p-2 text-xs">{`User ID, Name, Package\nC001, Rahim Uddin, 10 Mbps\nC002, Karim Ali, 20 Mbps`}</pre>
+
+          <Textarea
+            rows={10}
+            placeholder="C001, Rahim Uddin, 10 Mbps"
+            value={text}
+            onChange={(e) => { setText(e.target.value); setResult(null); }}
+          />
+
+          {text.trim() && !result && (
+            <div className="text-sm">
+              {tx(`${parsed.rows.length} টি বৈধ সারি`, `${parsed.rows.length} valid rows`)}
+              {parsed.errors.length > 0 && (
+                <span className="text-destructive"> · {tx(`${parsed.errors.length} টি ত্রুটি`, `${parsed.errors.length} errors`)}</span>
+              )}
+            </div>
+          )}
+
+          {parsed.errors.length > 0 && !result && (
+            <div className="max-h-32 overflow-y-auto rounded border p-2 text-xs space-y-1">
+              {parsed.errors.map((e) => (
+                <div key={e.line} className="text-destructive">Line {e.line}: {e.reason}</div>
+              ))}
+            </div>
+          )}
+
+          {result && (
+            <div className="rounded-md border p-3 space-y-2 text-sm">
+              <div>✅ {tx("যুক্ত হয়েছে", "Added")}: <b>{result.added}</b></div>
+              <div>⏭️ {tx("ডুপ্লিকেট এড়ানো হয়েছে", "Skipped duplicates")}: <b>{result.skipped}</b></div>
+              {result.failed.length > 0 && (
+                <div>
+                  <div className="text-destructive">⚠️ {tx("ব্যর্থ", "Failed")}: <b>{result.failed.length}</b></div>
+                  <div className="mt-1 max-h-32 overflow-y-auto text-xs space-y-1">
+                    {result.failed.map((f) => (
+                      <div key={f.line}>Line {f.line}: {f.reason}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>{tx("বন্ধ", "Close")}</Button>
+          {!result && (
+            <Button
+              onClick={() => mut.mutate()}
+              disabled={parsed.rows.length === 0 || mut.isPending}
+              className="bg-gradient-primary text-white"
+            >
+              {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {tx(`ইমপোর্ট করুন (${parsed.rows.length})`, `Import (${parsed.rows.length})`)}
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
