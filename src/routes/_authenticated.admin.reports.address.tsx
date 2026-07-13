@@ -12,11 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAddressRevenue } from "@/lib/reports.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
@@ -87,23 +85,23 @@ function AddressReportsPage() {
       </div>
 
       <Card>
-        <CardContent className="p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs">{tx("গ্রুপিং", "Grouping")}</Label>
-            <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {GROUPS.map((g) => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">{tx("শুরু (বিলিং মাস)", "From (billing month)")}</Label>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">{tx("শেষ", "To")}</Label>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        <CardContent className="p-4 space-y-3">
+          <Tabs value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
+            <TabsList className="grid w-full grid-cols-3">
+              {GROUPS.map((g) => (
+                <TabsTrigger key={g.value} value={g.value}>{g.label}</TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">{tx("শুরু (বিলিং মাস)", "From (billing month)")}</Label>
+              <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">{tx("শেষ", "To")}</Label>
+              <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            </div>
           </div>
         </CardContent>
       </Card>
