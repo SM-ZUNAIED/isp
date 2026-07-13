@@ -14,6 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      areas: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          id: string
+          name: string
+          village_id: string | null
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          village_id?: string | null
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          village_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "areas_village_id_fkey"
+            columns: ["village_id"]
+            isOneToOne: false
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          date: string
+          id: string
+          remarks: string | null
+          staff_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          remarks?: string | null
+          staff_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          remarks?: string | null
+          staff_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bills: {
         Row: {
           amount: number
@@ -69,6 +189,41 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buildings: {
+        Row: {
+          created_at: string
+          holding_number: string | null
+          house_number: string | null
+          id: string
+          name: string
+          road_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          holding_number?: string | null
+          house_number?: string | null
+          id?: string
+          name: string
+          road_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          holding_number?: string | null
+          house_number?: string | null
+          id?: string
+          name?: string
+          road_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buildings_road_id_fkey"
+            columns: ["road_id"]
+            isOneToOne: false
+            referencedRelation: "roads"
             referencedColumns: ["id"]
           },
         ]
@@ -229,6 +384,59 @@ export type Database = {
           },
         ]
       }
+      districts: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          division_id: number
+          id: number
+          name: string
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          division_id: number
+          id?: number
+          name: string
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          division_id?: number
+          id?: number
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "districts_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      divisions: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
@@ -289,6 +497,126 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_items: {
+        Row: {
+          created_at: string
+          current_stock: number
+          id: string
+          name: string
+          notes: string | null
+          reorder_level: number
+          sku: string | null
+          unit: string | null
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_stock?: number
+          id?: string
+          name: string
+          notes?: string | null
+          reorder_level?: number
+          sku?: string | null
+          unit?: string | null
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_stock?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          reorder_level?: number
+          sku?: string | null
+          unit?: string | null
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      journal_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entry_date: string
+          entry_no: string
+          id: string
+          reference: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date: string
+          entry_no: string
+          id?: string
+          reference?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_no?: string
+          id?: string
+          reference?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      journal_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit: number
+          debit: number
+          entry_id: string
+          id: string
+          memo: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id: string
+          id?: string
+          memo?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id?: string
+          id?: string
+          memo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_lines_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           address: string | null
@@ -329,6 +657,56 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leaves: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          from_date: string
+          id: string
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          reason: string | null
+          staff_id: string
+          status: Database["public"]["Enums"]["leave_status"]
+          to_date: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          from_date: string
+          id?: string
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          reason?: string | null
+          staff_id: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          to_date: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          from_date?: string
+          id?: string
+          leave_type?: Database["public"]["Enums"]["leave_type"]
+          reason?: string | null
+          staff_id?: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          to_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaves_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -665,6 +1043,122 @@ export type Database = {
           },
         ]
       }
+      payroll_items: {
+        Row: {
+          allowances: number
+          basic: number
+          created_at: string
+          deductions: number
+          id: string
+          net_amount: number
+          paid: boolean
+          run_id: string
+          staff_id: string
+        }
+        Insert: {
+          allowances?: number
+          basic?: number
+          created_at?: string
+          deductions?: number
+          id?: string
+          net_amount?: number
+          paid?: boolean
+          run_id: string
+          staff_id: string
+        }
+        Update: {
+          allowances?: number
+          basic?: number
+          created_at?: string
+          deductions?: number
+          id?: string
+          net_amount?: number
+          paid?: boolean
+          run_id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_items_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_items_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_runs: {
+        Row: {
+          created_at: string
+          finalized_at: string | null
+          generated_by: string | null
+          id: string
+          period_month: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          finalized_at?: string | null
+          generated_by?: string | null
+          id?: string
+          period_month: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          finalized_at?: string | null
+          generated_by?: string | null
+          id?: string
+          period_month?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      post_offices: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          id: string
+          name: string
+          union_id: string
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          union_id: string
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          union_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_offices_union_id_fkey"
+            columns: ["union_id"]
+            isOneToOne: false
+            referencedRelation: "unions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -691,6 +1185,79 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          po_number: string
+          status: string
+          total_amount: number
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          po_number: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          po_number?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roads: {
+        Row: {
+          area_id: string | null
+          bn_name: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          area_id?: string | null
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          area_id?: string | null
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roads_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settings: {
         Row: {
@@ -751,6 +1318,107 @@ export type Database = {
           whatsapp_api_config?: Json | null
         }
         Relationships: []
+      }
+      staff: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          created_at: string
+          department: string | null
+          designation: string | null
+          email: string | null
+          full_name: string
+          id: string
+          joining_date: string | null
+          mobile: string | null
+          nid: string | null
+          notes: string | null
+          salary: number
+          staff_code: string
+          status: Database["public"]["Enums"]["staff_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          joining_date?: string | null
+          mobile?: string | null
+          nid?: string | null
+          notes?: string | null
+          salary?: number
+          staff_code: string
+          status?: Database["public"]["Enums"]["staff_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          joining_date?: string | null
+          mobile?: string | null
+          nid?: string | null
+          notes?: string | null
+          salary?: number
+          staff_code?: string
+          status?: Database["public"]["Enums"]["staff_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string | null
+          moved_at: string
+          movement_type: string
+          notes: string | null
+          quantity: number
+          reference: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          moved_at?: string
+          movement_type: string
+          notes?: string | null
+          quantity?: number
+          reference?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          moved_at?: string
+          movement_type?: string
+          notes?: string | null
+          quantity?: number
+          reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ticket_replies: {
         Row: {
@@ -834,6 +1502,70 @@ export type Database = {
           },
         ]
       }
+      unions: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          id: string
+          name: string
+          upazila_id: number
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          upazila_id: number
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          upazila_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unions_upazila_id_fkey"
+            columns: ["upazila_id"]
+            isOneToOne: false
+            referencedRelation: "upazilas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      upazilas: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          district_id: number
+          id: number
+          name: string
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          district_id: number
+          id?: number
+          name: string
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          district_id?: number
+          id?: number
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upazilas_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -854,6 +1586,71 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          mobile: string | null
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          mobile?: string | null
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          mobile?: string | null
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      villages: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          id: string
+          name: string
+          post_office_id: string
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          post_office_id: string
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          post_office_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "villages_post_office_id_fkey"
+            columns: ["post_office_id"]
+            isOneToOne: false
+            referencedRelation: "post_offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       zones: {
         Row: {
@@ -904,11 +1701,16 @@ export type Database = {
       }
     }
     Enums: {
+      account_type: "asset" | "liability" | "equity" | "income" | "expense"
       app_role: "admin" | "staff" | "customer"
+      attendance_status: "present" | "absent" | "leave" | "half_day" | "late"
       bill_status: "paid" | "unpaid" | "partial" | "overdue"
       customer_status: "active" | "pending" | "suspended" | "expired"
+      leave_status: "pending" | "approved" | "rejected" | "cancelled"
+      leave_type: "casual" | "sick" | "annual" | "unpaid" | "other"
       olt_brand: "vsol" | "cdata" | "huawei" | "bdcom" | "zte" | "other"
       payment_method: "cash" | "bkash" | "nagad" | "rocket" | "bank" | "other"
+      staff_status: "active" | "inactive"
       ticket_category:
         | "no_internet"
         | "slow_speed"
@@ -1044,11 +1846,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["asset", "liability", "equity", "income", "expense"],
       app_role: ["admin", "staff", "customer"],
+      attendance_status: ["present", "absent", "leave", "half_day", "late"],
       bill_status: ["paid", "unpaid", "partial", "overdue"],
       customer_status: ["active", "pending", "suspended", "expired"],
+      leave_status: ["pending", "approved", "rejected", "cancelled"],
+      leave_type: ["casual", "sick", "annual", "unpaid", "other"],
       olt_brand: ["vsol", "cdata", "huawei", "bdcom", "zte", "other"],
       payment_method: ["cash", "bkash", "nagad", "rocket", "bank", "other"],
+      staff_status: ["active", "inactive"],
       ticket_category: [
         "no_internet",
         "slow_speed",
