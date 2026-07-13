@@ -78,17 +78,19 @@ export function AddressSelector({
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <PickField
-          label={tx("জোন", "Zone")} icon
-          rows={zones.data} loading={zones.isLoading}
-          value={zoneId ?? null}
-          onSelect={(v) => onZoneChange?.(v as string | null)}
-          disabled={disabled || !onZoneChange}
-          placeholderLabel={tx("জোন বাছাই করুন", "Select zone")}
-          searchLabel={tx("জোন সার্চ করুন...", "Search zone...")}
-          emptyLabel={tx("কিছু পাওয়া যায়নি।", "No results.")}
-        />
+      <div className={cn("grid gap-3 sm:grid-cols-2", onZoneChange ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
+        {onZoneChange && (
+          <PickField
+            label={tx("জোন", "Zone")} icon
+            rows={zones.data} loading={zones.isLoading}
+            value={zoneId ?? null}
+            onSelect={(v) => onZoneChange(v as string | null)}
+            disabled={disabled}
+            placeholderLabel={tx("জোন বাছাই করুন", "Select zone")}
+            searchLabel={tx("জোন সার্চ করুন...", "Search zone...")}
+            emptyLabel={tx("কিছু পাওয়া যায়নি।", "No results.")}
+          />
+        )}
         <div className="space-y-1.5">
           <Label className="text-xs">{tx("মহল্লা / এরিয়া (ঐচ্ছিক)", "Mohalla / Area (optional)")}</Label>
           <Input value={value.mohalla ?? ""} disabled={disabled}
