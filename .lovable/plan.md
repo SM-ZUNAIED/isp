@@ -1,118 +1,62 @@
-## লক্ষ্য
+## Bulk Customer Import feature
 
-Admin panel-এ একটি complete ISP ERP module chain যোগ করব — বর্তমান design language (gradient-primary, rounded-2xl cards, shadow-soft, bilingual bn/en, sidebar nav) হুবহু মেনে। ইতিমধ্যে থাকা Customers, Bills, Payments, Packages, Mikrotik, OLT, Tickets, Accounts (income/expense) unchanged থাকবে; ERP layer এদের উপর বসবে।
+Admin > Customers পেজে একটি **"Bulk Import"** বাটন যোগ করব। বাটনে click করলে একটি dialog খুলবে যেখানে আপনি customer list plain text হিসেবে paste করতে পারবেন। System সেটি parse করে database-এ automatically add করবে।
 
-## নতুন Modules
+### Input format
 
-### 1. HR & Payroll
-- **Attendance** — daily check-in/out per staff, status (present/absent/leave/half), remarks
-- **Leaves** — leave request, type (casual/sick/annual), from/to, status (pending/approved/rejected)
-- **Salary** — monthly salary structure per staff (basic + allowances - deductions), auto-carry from `staff.salary`
-- **Payroll runs** — month-wise payroll generation → linked expense entry auto-create
-
-### 2. Inventory / Stock
-- **Items** — catalog (router, ONU, cable, connector, etc.) with unit, reorder level
-- **Warehouses** — multi-location optional (default: main)
-- **Stock movements** — IN (purchase/return), OUT (deploy to customer/damage), transfer
-- **Current stock view** — item × warehouse balance
-
-### 3. Purchase & Vendors
-- **Vendors** — supplier directory (name, contact, address)
-- **Purchase orders** — vendor, items, qty, rate, total, status (draft/received/paid)
-- **Vendor bills & payments** — link to expense ledger
-
-### 4. Accounting / Ledger (upgrade)
-- **Chart of accounts** — Assets, Liabilities, Equity, Income, Expense (seeded default tree)
-- **Journal entries** — double-entry (debit/credit balanced)
-- **Auto-journals** — payments, expenses, payroll, purchase bills → journal entries
-- **Reports** — Trial balance, Profit & Loss, Balance sheet (basic)
-
-## Database Schema
-
-New tables (all in migration, RLS enabled, admin+staff manage, service_role full):
+প্রতিটি customer এক লাইনে, comma বা tab দিয়ে separated:
 
 ```
-attendance          (staff_id, date, status, check_in, check_out, remarks)
-leaves              (staff_id, type, from_date, to_date, status, reason, approved_by)
-salary_structures   (staff_id, basic, allowances jsonb, deductions jsonb, effective_from)
-payroll_runs        (month, status, total, generated_by)
-payroll_items       (run_id, staff_id, basic, allowances, deductions, net, paid)
-
-inventory_items     (name, sku, unit, category, reorder_level, current_stock)
-warehouses          (name, location)
-stock_movements     (item_id, warehouse_id, type, qty, ref_type, ref_id, notes, moved_by)
-
-vendors             (name, contact, mobile, email, address)
-purchase_orders     (vendor_id, po_number, order_date, status, total, notes)
-purchase_order_items(po_id, item_id, qty, rate, amount)
-vendor_bills        (vendor_id, po_id, bill_number, bill_date, amount, paid, status)
-
-accounts            (code, name, type enum[asset,liability,equity,income,expense], parent_id)
-journal_entries     (entry_date, reference, description, total, source, source_id)
-journal_lines       (entry_id, account_id, debit, credit, memo)
+User ID, Name, Package Name
+C001, Rahim Uddin, 10 Mbps
+C002, Karim Ali, 20 Mbps
+C003, Jamal Hossain, 5 Mbps
 ```
 
-Standard `id`, `created_at`, `updated_at` on all. GRANT to authenticated+service_role. RLS policies use `has_role(auth.uid(),'admin')` OR `has_role(auth.uid(),'staff')` for read/write.
+- **User ID** (customer_code) — required
+- **Name** (full_name) — required
+- **Package Name** — required, existing package-এর নামের সাথে match করতে হবে (case-insensitive)
 
-Seed: default chart of accounts + default warehouse.
+Header row (`User ID, Name, Package`) থাকলে auto-detect করে skip হবে।
 
-## Frontend
+### Behavior
 
-### Sidebar
-বর্তমান `NAV` array-এ ERP section যোগ (grouped visually with separator label):
-- HR: Attendance, Leaves, Payroll
-- Inventory: Items, Stock Movements
-- Purchase: Vendors, Purchase Orders
-- Accounting: Chart of Accounts, Journal, Reports
+- প্রতিটি row-এর package name দেখে matching `package_id` এবং সেই package-এর `monthly_price` লোড করবে → `monthly_bill` হিসেবে auto-set হবে (আগের feature অনুযায়ী)।
+- **Mobile** field required না — bulk import-এ empty placeholder দিয়ে insert হবে, পরে edit করে দেওয়া যাবে।
+- Status default `pending`।
 
-### Routes (সব `_authenticated.admin.*`)
-```
-_authenticated.admin.hr.attendance.tsx
-_authenticated.admin.hr.leaves.tsx
-_authenticated.admin.hr.payroll.tsx
-_authenticated.admin.inventory.items.tsx
-_authenticated.admin.inventory.movements.tsx
-_authenticated.admin.purchase.vendors.tsx
-_authenticated.admin.purchase.orders.tsx
-_authenticated.admin.accounting.chart.tsx
-_authenticated.admin.accounting.journal.tsx
-_authenticated.admin.accounting.reports.tsx
-_authenticated.admin.erp.index.tsx        (ERP overview dashboard)
-```
+### Duplicate handling (skip)
 
-প্রতিটি page-এ CRUD table (search, add dialog, edit dialog, delete confirm) — বর্তমান `customers`/`packages` pattern হুবহু follow করবে (Card + Table + Dialog + toast + TanStack Query invalidate)।
+Import করার আগে existing `customer_code` list এর সাথে match করে duplicate rows skip হবে।
 
-### Server functions
-প্রতিটি module-এর জন্য `.functions.ts`:
-- `src/lib/hr.functions.ts` — attendance/leaves/salary/payroll CRUD + payroll generation
-- `src/lib/inventory.functions.ts` — items/movements CRUD + stock balance
-- `src/lib/purchase.functions.ts` — vendors/POs/bills CRUD
-- `src/lib/accounting.functions.ts` — accounts/journals CRUD + trial balance/P&L/BS aggregation
+### Result summary
 
-সব `requireSupabaseAuth` middleware + role check (admin/staff)।
+Import শেষে toast/summary দেখাবে:
+- ✅ Added: N
+- ⏭️ Skipped (duplicate): N
+- ⚠️ Failed (invalid package / missing field): N — সাথে line number ও error reason
 
-### i18n
-`use-i18n.tsx`-এ নতুন keys (bn+en): sidebar labels, page titles, form labels, status enums, buttons।
+### Technical details
 
-### Design
-- Existing `bg-gradient-primary`, `shadow-soft`, `rounded-2xl`, `Card`, `Table`, `Dialog`, `Badge` reuse
-- ERP overview page: gradient stat cards (like admin dashboard) — total staff on leave today, low-stock items, pending POs, month-to-date P&L
-- Consistent color tones: HR=indigo, Inventory=emerald, Purchase=amber, Accounting=rose
+1. **New server function** `bulkImportCustomers` in `src/lib/customers.functions.ts`:
+   - Input: `{ rows: Array<{ customer_code, full_name, package_name }> }`
+   - Fetches all packages + existing customer_codes once
+   - Maps package names → id + monthly_price
+   - Filters duplicates
+   - Bulk inserts via single `supabase.from("customers").insert([...])`
+   - Returns `{ added, skipped, failed: [{ line, reason }] }`
 
-## Delivery approach (single turn)
+2. **UI component** — new "Bulk Import" dialog in `src/routes/_authenticated.admin.customers.tsx`:
+   - Textarea for pasting list
+   - Preview parsed rows before submitting
+   - Submit → call server fn → show result summary
+   - On success invalidate customers query
 
-Massive scope — এক turn-এ সব ship করব:
-1. Migration (all tables + RLS + seed) — approve দরকার
-2. Server functions (4 files)
-3. Route files (~11 files)
-4. Sidebar update + i18n keys
-5. ERP overview dashboard
+3. Customer_code এ unique constraint না থাকলে duplicate check শুধু pre-import filter দিয়েই হবে (schema change লাগবে না)।
 
-Approve করলে migration দিয়ে শুরু করব। শেষে typecheck রান করে verify করব।
+### Files to change
 
-## Out of scope (আপাতত)
-- Barcode/QR scanning
-- Multi-currency
-- Advanced tax modules (VAT return)
-- Fixed asset depreciation
-- Bank reconciliation UI (data থাকবে, UI পরে)
+- `src/lib/customers.functions.ts` — add `bulkImportCustomers` server fn
+- `src/routes/_authenticated.admin.customers.tsx` — add Bulk Import button + dialog UI
+
+কোনো database schema change লাগবে না।
