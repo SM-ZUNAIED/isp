@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const CustomerStatus = z.enum(["active", "pending", "suspended", "expired"]);
+const CustomerStatus = z.enum(["active", "pending", "suspended", "expired", "no_payment"]);
 
 export const listCustomers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
