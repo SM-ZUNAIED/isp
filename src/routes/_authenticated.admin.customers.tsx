@@ -113,7 +113,7 @@ function CustomersPage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["customers"] });
 
   const statusMut = useMutation({
-    mutationFn: (v: { id: string; status: "active" | "pending" | "suspended" | "expired" }) =>
+    mutationFn: (v: { id: string; status: "active" | "pending" | "suspended" | "expired" | "no_payment" }) =>
       setStatus({ data: v }),
     onSuccess: () => { toast.success(tx("স্ট্যাটাস আপডেট হয়েছে", "Status updated")); invalidate(); },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
