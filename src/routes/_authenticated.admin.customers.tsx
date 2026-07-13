@@ -445,7 +445,7 @@ function CustomerFormDialog({
           onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label={tx("কাস্টমার কোড *", "Customer Code *")}>
+            <Field label={tx("ইউজার আইডি *", "User ID *")}>
               <Input required value={form.customer_code}
                 onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
             </Field>
