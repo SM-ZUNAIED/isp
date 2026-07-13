@@ -111,6 +111,9 @@ function AdminLayout() {
   const { t } = useI18n();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const fetchSettingsFn = useServerFn(getSettings);
+  const settingsQ = useQuery({ queryKey: ["settings"], queryFn: () => fetchSettingsFn(), staleTime: 5 * 60 * 1000 });
+  const brandName = settingsQ.data?.isp_name?.trim() || "Net Bill Pro";
   const fetchRoles = useServerFn(getMyRoles);
   const rolesQ = useQuery({
     queryKey: ["my-roles", user?.id],
@@ -173,7 +176,7 @@ function AdminLayout() {
       <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-card px-4 py-3">
         <Link to="/" className="flex items-center gap-2 font-bold">
           <BrandLogo size={9} />
-          <span>Net Bill Pro</span>
+          <span>{brandName}</span>
         </Link>
         <div className="flex items-center gap-2">
           <TopBarActions />
