@@ -257,4 +257,33 @@ function StatCard({ icon, label, value, sub, tone }: {
   );
 }
 
+function FilterSelect({
+  label, placeholder, value, options, onChange, disabled,
+}: {
+  label: string;
+  placeholder: string;
+  value: string | null;
+  options: Array<{ id: string; label: string }>;
+  onChange: (v: string | null) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      <Select
+        disabled={disabled}
+        value={value ?? "__all__"}
+        onValueChange={(v) => onChange(v === "__all__" ? null : v)}
+      >
+        <SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">{placeholder}</SelectItem>
+          {options.map((o) => (
+            <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
