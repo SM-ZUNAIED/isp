@@ -1298,7 +1298,12 @@ export type Database = {
       app_role: "admin" | "staff" | "customer"
       attendance_status: "present" | "absent" | "leave" | "half_day" | "late"
       bill_status: "paid" | "unpaid" | "partial" | "overdue"
-      customer_status: "active" | "pending" | "suspended" | "expired"
+      customer_status:
+        | "active"
+        | "pending"
+        | "suspended"
+        | "expired"
+        | "no_payment"
       leave_status: "pending" | "approved" | "rejected" | "cancelled"
       leave_type: "casual" | "sick" | "annual" | "unpaid" | "other"
       olt_brand: "vsol" | "cdata" | "huawei" | "bdcom" | "zte" | "other"
@@ -1443,7 +1448,13 @@ export const Constants = {
       app_role: ["admin", "staff", "customer"],
       attendance_status: ["present", "absent", "leave", "half_day", "late"],
       bill_status: ["paid", "unpaid", "partial", "overdue"],
-      customer_status: ["active", "pending", "suspended", "expired"],
+      customer_status: [
+        "active",
+        "pending",
+        "suspended",
+        "expired",
+        "no_payment",
+      ],
       leave_status: ["pending", "approved", "rejected", "cancelled"],
       leave_type: ["casual", "sick", "annual", "unpaid", "other"],
       olt_brand: ["vsol", "cdata", "huawei", "bdcom", "zte", "other"],
