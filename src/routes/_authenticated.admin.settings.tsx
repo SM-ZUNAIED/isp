@@ -52,6 +52,8 @@ type SettingsForm = {
   email: string;
   address: string;
   website: string;
+  site_title: string;
+  site_description: string;
   landing_content: LandingContent;
 };
 
@@ -74,6 +76,7 @@ function SettingsPage() {
   const [f, setF] = useState<SettingsForm>({
     isp_name: "", logo_url: "", hero_title: "", hero_subtitle: "", about_text: "",
     hotline: "", whatsapp: "", email: "", address: "", website: "",
+    site_title: "", site_description: "",
     landing_content: EMPTY_LANDING,
   });
 
@@ -91,6 +94,8 @@ function SettingsPage() {
         email: q.data.email ?? "",
         address: q.data.address ?? "",
         website: q.data.website ?? "",
+        site_title: (q.data as { site_title?: string | null }).site_title ?? "",
+        site_description: (q.data as { site_description?: string | null }).site_description ?? "",
         landing_content: {
           hero_badge_bn: lc.hero_badge_bn ?? "",
           hero_badge_en: lc.hero_badge_en ?? "",
