@@ -534,7 +534,12 @@ function CustomerFormDialog({
 
           <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
             <div className="text-sm font-semibold">{tx("ঠিকানা (ক্যাসকেডিং)", "Address (Cascading)")}</div>
-            <AddressSelector value={addr} onChange={setAddr} />
+            <AddressSelector
+              value={addr}
+              onChange={setAddr}
+              zoneId={form.zone_id || null}
+              onZoneChange={(id) => setForm({ ...form, zone_id: id ?? "" })}
+            />
           </div>
 
           <DialogFooter>
