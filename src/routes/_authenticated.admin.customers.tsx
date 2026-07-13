@@ -55,6 +55,7 @@ const STATUS_TONE: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700 border-amber-200",
   suspended: "bg-rose-100 text-rose-700 border-rose-200",
   expired: "bg-slate-200 text-slate-700 border-slate-300",
+  no_payment: "bg-orange-100 text-orange-700 border-orange-200",
 };
 
 function CustomersPage() {
@@ -66,6 +67,7 @@ function CustomersPage() {
     pending: tx("অপেক্ষমাণ", "Pending"),
     suspended: tx("স্থগিত", "Suspended"),
     expired: tx("মেয়াদ শেষ", "Expired"),
+    no_payment: tx("পেমেন্ট নেই", "No Payment"),
   };
   const list = useServerFn(listCustomers);
   const opts = useServerFn(listPackagesAndZones);
@@ -525,6 +527,7 @@ function CustomerFormDialog({
                   <SelectItem value="active">{tx("সক্রিয়", "Active")}</SelectItem>
                   <SelectItem value="suspended">{tx("স্থগিত", "Suspended")}</SelectItem>
                   <SelectItem value="expired">{tx("মেয়াদ শেষ", "Expired")}</SelectItem>
+                  <SelectItem value="no_payment">{tx("পেমেন্ট নেই", "No Payment")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
