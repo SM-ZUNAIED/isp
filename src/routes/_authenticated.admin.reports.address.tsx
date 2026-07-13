@@ -18,7 +18,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { getAddressRevenue } from "@/lib/reports.functions";
-import { useTx, useFmt, useI18n } from "@/hooks/use-i18n";
+import { useTx, useFmt } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/reports/address")({
   head: () => ({ meta: [{ title: "Address-based Revenue — Net Bill Pro" }] }),
@@ -29,7 +29,6 @@ type GroupBy = "area" | "road" | "building";
 
 function AddressReportsPage() {
   const tx = useTx();
-  const { lang } = useI18n();
   const { n, bdt } = useFmt();
   const GROUPS: { value: GroupBy; label: string }[] = [
     { value: "area", label: tx("এরিয়া অনুযায়ী", "By Area") },
