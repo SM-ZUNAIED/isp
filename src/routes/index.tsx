@@ -360,7 +360,11 @@ function LandingPage() {
             <p className="mt-4 text-muted-foreground">{t("packages.subtitle")}</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {packages.map((pkg) => (
+            {(() => {
+              const popular = packages.filter((p) => p.is_popular);
+              const list = popular.length > 0 ? popular : packages;
+              return list;
+            })().map((pkg) => (
               <div
                 key={pkg.id}
                 className={`relative rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-2 ${
@@ -392,6 +396,43 @@ function LandingPage() {
               </div>
             ))}
           </div>
+          {packages.some((p) => p.is_popular) && packages.some((p) => !p.is_popular) && (
+            <div className="mt-8 text-center">
+              <Button variant="outline" onClick={() => setShowAllPackages((v) => !v)}>
+                {showAllPackages
+                  ? (lang === "bn" ? "কম দেখান" : "Show Less")
+                  : (lang === "bn" ? "সকল প্যাকেজ দেখুন" : "View All Packages")}
+              </Button>
+            </div>
+          )}
+          {showAllPackages && (
+            <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {packages.filter((p) => !p.is_popular).map((pkg) => (
+                <div
+                  key={pkg.id}
+                  className="relative rounded-3xl border bg-card p-6 shadow-soft transition-all hover:shadow-elevated hover:-translate-y-2"
+                >
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: pkg.color ?? "var(--gradient-primary)" }}>
+                    <Wifi className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold">{pkg.name}</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-extrabold">৳{Math.round(Number(pkg.monthly_price))}</span>
+                    <span className="text-muted-foreground">{t("packages.perMonth")}</span>
+                  </div>
+                  <ul className="mt-6 space-y-3 text-sm">
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.download")}: {pkg.download_speed} Mbps</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.upload")}: {pkg.upload_speed} Mbps</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.unlimited")}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {t("packages.support247")}</li>
+                  </ul>
+                  <Button onClick={() => handleOrder({ id: pkg.id, name: pkg.name, price: Number(pkg.monthly_price) })} className="mt-6 w-full" variant="outline">
+                    {t("packages.order")}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
