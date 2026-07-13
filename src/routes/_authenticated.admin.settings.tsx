@@ -415,7 +415,7 @@ function LogoUploader({
     <div className="space-y-3">
       <Label className="text-xs font-medium">{tx("লোগো", "Logo")}</Label>
       <div className="flex items-center gap-4 rounded-xl border p-4">
-        <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-xl border bg-transparent bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%),linear-gradient(-45deg,#e5e7eb_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e5e7eb_75%),linear-gradient(-45deg,transparent_75%,#e5e7eb_75%)] bg-[length:12px_12px] bg-[position:0_0,0_6px,6px_-6px,-6px_0px]">
+        <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-xl">
           {url ? (
             <img src={url} alt="logo" className="h-full w-full object-contain" />
           ) : (
