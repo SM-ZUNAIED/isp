@@ -35,12 +35,7 @@ type Level =
   | "post_offices" | "villages" | "areas" | "roads" | "buildings";
 
 const LEVELS: Array<{ key: Level; bn: string; en: string; parent?: Level; parentCol?: string }> = [
-  { key: "divisions", bn: "বিভাগ", en: "Division" },
-  { key: "districts", bn: "জেলা", en: "District", parent: "divisions", parentCol: "division_id" },
-  { key: "upazilas", bn: "উপজেলা", en: "Upazila", parent: "districts", parentCol: "district_id" },
-  { key: "unions", bn: "ইউনিয়ন", en: "Union", parent: "upazilas", parentCol: "upazila_id" },
-  { key: "post_offices", bn: "পোস্ট অফিস", en: "Post Office", parent: "unions", parentCol: "union_id" },
-  { key: "villages", bn: "গ্রাম", en: "Village", parent: "post_offices", parentCol: "post_office_id" },
+  { key: "villages", bn: "গ্রাম", en: "Village" },
   { key: "areas", bn: "এরিয়া", en: "Area", parent: "villages", parentCol: "village_id" },
   { key: "roads", bn: "রোড", en: "Road", parent: "areas", parentCol: "area_id" },
   { key: "buildings", bn: "বিল্ডিং", en: "Building", parent: "roads", parentCol: "road_id" },
@@ -66,7 +61,7 @@ type Row = {
 function AddressAdminPage() {
   const tx = useTx();
   const { lang } = useI18n();
-  const [tab, setTab] = useState<Level>("divisions");
+  const [tab, setTab] = useState<Level>("villages");
 
   return (
     <div className="space-y-6">
