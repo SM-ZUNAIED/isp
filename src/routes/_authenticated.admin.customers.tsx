@@ -213,7 +213,7 @@ function CustomersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{tx("কোড", "Code")}</TableHead>
+                  <TableHead>{tx("ইউজার আইডি", "User ID")}</TableHead>
                   <TableHead>{tx("নাম", "Name")}</TableHead>
                   <TableHead>{tx("মোবাইল", "Mobile")}</TableHead>
                   <TableHead>{tx("ঠিকানা", "Address")}</TableHead>
