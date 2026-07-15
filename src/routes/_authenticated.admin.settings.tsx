@@ -170,6 +170,7 @@ function SettingsPage() {
             <TabsTrigger value="stats">{tx("About Stats", "About Stats")}</TabsTrigger>
             <TabsTrigger value="reviews">{tx("Reviews", "Reviews")}</TabsTrigger>
             <TabsTrigger value="faqs">{tx("FAQs", "FAQs")}</TabsTrigger>
+            <TabsTrigger value="coverage">{tx("কাভারেজ", "Coverage")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
