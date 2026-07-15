@@ -69,6 +69,9 @@ function LandingPage() {
     about_stats?: Array<{ value: string; label_bn?: string; label_en?: string }>;
     reviews?: Array<{ name: string; loc_bn?: string; loc_en?: string; text_bn?: string; text_en?: string }>;
     faqs?: Array<{ q_bn?: string; q_en?: string; a_bn?: string; a_en?: string }>;
+    coverage_title_bn?: string; coverage_title_en?: string;
+    coverage_subtitle_bn?: string; coverage_subtitle_en?: string;
+    cities?: Array<{ name_bn?: string; name_en?: string }>;
   };
   const ICON_MAP: Record<string, typeof Zap> = {
     zap: Zap, shield: Shield, signal: Signal, router: Router, headphones: Headphones,
