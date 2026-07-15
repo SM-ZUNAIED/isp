@@ -32,7 +32,11 @@ function AccessPage() {
   const [selected, setSelected] = useState<UserRow | null>(null);
 
   const users = useMemo(() => {
-    const all = (q.data ?? []).filter((u) => !u.roles.includes("admin"));
+    // Access Control only applies to staff (and future manager-like roles).
+    // Customers must not appear here.
+    const all = (q.data ?? []).filter(
+      (u) => !u.roles.includes("admin") && !u.roles.includes("customer"),
+    );
     if (!search.trim()) return all;
     const s = search.toLowerCase();
     return all.filter(
