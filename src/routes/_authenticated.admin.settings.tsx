@@ -28,6 +28,7 @@ type FeatureItem = { icon: string; title_bn: string; title_en: string; desc_bn: 
 type AboutStat = { value: string; label_bn: string; label_en: string };
 type ReviewItem = { name: string; loc_bn: string; loc_en: string; text_bn: string; text_en: string };
 type FaqItem = { q_bn: string; q_en: string; a_bn: string; a_en: string };
+type CityItem = { name_bn: string; name_en: string };
 
 type LandingContent = {
   hero_badge_bn: string;
@@ -39,6 +40,11 @@ type LandingContent = {
   about_stats: AboutStat[];
   reviews: ReviewItem[];
   faqs: FaqItem[];
+  coverage_title_bn: string;
+  coverage_title_en: string;
+  coverage_subtitle_bn: string;
+  coverage_subtitle_en: string;
+  cities: CityItem[];
 };
 
 type SettingsForm = {
@@ -64,7 +70,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 const ICON_OPTIONS = Object.keys(ICON_MAP);
 
 
-const EMPTY_LANDING: LandingContent = { hero_badge_bn: "", hero_badge_en: "", hero_title_en: "", hero_subtitle_en: "", about_text_en: "", features: [], about_stats: [], reviews: [], faqs: [] };
+const EMPTY_LANDING: LandingContent = {
+  hero_badge_bn: "", hero_badge_en: "", hero_title_en: "", hero_subtitle_en: "", about_text_en: "",
+  features: [], about_stats: [], reviews: [], faqs: [],
+  coverage_title_bn: "", coverage_title_en: "", coverage_subtitle_bn: "", coverage_subtitle_en: "",
+  cities: [],
+};
 
 function SettingsPage() {
   const tx = useTx();
@@ -107,6 +118,11 @@ function SettingsPage() {
           about_stats: lc.about_stats ?? [],
           reviews: lc.reviews ?? [],
           faqs: lc.faqs ?? [],
+          coverage_title_bn: lc.coverage_title_bn ?? "",
+          coverage_title_en: lc.coverage_title_en ?? "",
+          coverage_subtitle_bn: lc.coverage_subtitle_bn ?? "",
+          coverage_subtitle_en: lc.coverage_subtitle_en ?? "",
+          cities: lc.cities ?? [],
         },
       });
     }
@@ -154,6 +170,7 @@ function SettingsPage() {
             <TabsTrigger value="stats">{tx("About Stats", "About Stats")}</TabsTrigger>
             <TabsTrigger value="reviews">{tx("Reviews", "Reviews")}</TabsTrigger>
             <TabsTrigger value="faqs">{tx("FAQs", "FAQs")}</TabsTrigger>
+            <TabsTrigger value="coverage">{tx("কাভারেজ", "Coverage")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
@@ -336,6 +353,50 @@ function SettingsPage() {
                     <F label={tx("উত্তর (English)", "Answer (English)")}><Textarea rows={2} value={it.a_en} onChange={(e) => { const a = [...f.landing_content.faqs]; a[i] = { ...it, a_en: e.target.value }; setLC({ faqs: a }); }} /></F>
                     <div className="sm:col-span-2 flex justify-end">
                       <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => { setLC({ faqs: f.landing_content.faqs.filter((_, j) => j !== i) }); }}><Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Remove")}</Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="coverage">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{tx("কাভারেজ এরিয়া", "Coverage Areas")}</CardTitle>
+                <Button type="button" size="sm" variant="outline" onClick={() =>
+                  setLC({ cities: [...f.landing_content.cities, { name_bn: "", name_en: "" }] })
+                }><Plus className="h-4 w-4 mr-1" /> {tx("যোগ করুন", "Add")}</Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <F label={tx("সেকশন শিরোনাম (বাংলা)", "Section Title (Bangla)")}>
+                    <Input value={f.landing_content.coverage_title_bn ?? ""} onChange={(e) => setLC({ coverage_title_bn: e.target.value })} placeholder="আমাদের কাভারেজ এলাকা" />
+                  </F>
+                  <F label={tx("সেকশন শিরোনাম (English)", "Section Title (English)")}>
+                    <Input value={f.landing_content.coverage_title_en ?? ""} onChange={(e) => setLC({ coverage_title_en: e.target.value })} placeholder="Our Coverage Areas" />
+                  </F>
+                  <F label={tx("সাব-টাইটেল (বাংলা)", "Subtitle (Bangla)")}>
+                    <Input value={f.landing_content.coverage_subtitle_bn ?? ""} onChange={(e) => setLC({ coverage_subtitle_bn: e.target.value })} placeholder="সারা বাংলাদেশে ছড়িয়ে আছে আমাদের নেটওয়ার্ক" />
+                  </F>
+                  <F label={tx("সাব-টাইটেল (English)", "Subtitle (English)")}>
+                    <Input value={f.landing_content.coverage_subtitle_en ?? ""} onChange={(e) => setLC({ coverage_subtitle_en: e.target.value })} placeholder="Our network spans across Bangladesh" />
+                  </F>
+                </div>
+
+                {f.landing_content.cities.length === 0 && (
+                  <p className="text-sm text-muted-foreground">{tx("কোনো এলাকা নেই — 'যোগ করুন' চাপুন", "No areas — click Add")}</p>
+                )}
+                {f.landing_content.cities.map((it, i) => (
+                  <div key={i} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-2">
+                    <F label={tx("এলাকা (বাংলা)", "Area (Bangla)")}>
+                      <Input value={it.name_bn} onChange={(e) => { const a = [...f.landing_content.cities]; a[i] = { ...it, name_bn: e.target.value }; setLC({ cities: a }); }} placeholder="ঢাকা" />
+                    </F>
+                    <F label={tx("এলাকা (English)", "Area (English)")}>
+                      <Input value={it.name_en} onChange={(e) => { const a = [...f.landing_content.cities]; a[i] = { ...it, name_en: e.target.value }; setLC({ cities: a }); }} placeholder="Dhaka" />
+                    </F>
+                    <div className="sm:col-span-2 flex justify-end">
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => { setLC({ cities: f.landing_content.cities.filter((_, j) => j !== i) }); }}><Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Remove")}</Button>
                     </div>
                   </div>
                 ))}

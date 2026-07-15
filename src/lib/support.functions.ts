@@ -246,6 +246,14 @@ const LandingContent = z.object({
   about_stats: z.array(AboutStat).default([]),
   reviews: z.array(ReviewItem).default([]),
   faqs: z.array(FaqItem).default([]),
+  coverage_title_bn: z.string().optional().nullable(),
+  coverage_title_en: z.string().optional().nullable(),
+  coverage_subtitle_bn: z.string().optional().nullable(),
+  coverage_subtitle_en: z.string().optional().nullable(),
+  cities: z.array(z.object({
+    name_bn: z.string().default(""),
+    name_en: z.string().default(""),
+  })).default([]),
 }).partial();
 
 const SettingsInput = z.object({
