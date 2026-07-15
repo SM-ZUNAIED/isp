@@ -260,8 +260,7 @@ function PermissionsEditor({ user }: { user: UserRow }) {
             {PERMISSION_KEYS.map((k) => (
               <TableRow key={k}>
                 <TableCell className="font-medium">
-                  {PERMISSION_LABELS[k].bn}{" "}
-                  <span className="text-xs text-muted-foreground">/ {PERMISSION_LABELS[k].en}</span>
+                  {tx(PERMISSION_LABELS[k].bn, PERMISSION_LABELS[k].en)}
                 </TableCell>
                 <TableCell className="text-center">
                   <Checkbox
