@@ -277,6 +277,155 @@ function CreateUserDialog({ onSubmit, pending }: { onSubmit: (v: { email: string
   );
 }
 
+function PermissionsDialog({ userId, userLabel }: { userId: string; userLabel: string }) {
+  const tx = useTx();
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState<Record<PermissionKey, { can_view: boolean; can_edit: boolean }>>(
+    () => Object.fromEntries(PERMISSION_KEYS.map((k) => [k, { can_view: false, can_edit: false }])) as never,
+  );
+
+  const getFn = useServerFn(getUserPermissions);
+  const setFn = useServerFn(setUserPermissions);
+
+  const q = useQuery({
+    queryKey: ["user-permissions", userId],
+    queryFn: () => getFn({ data: { user_id: userId } }),
+    enabled: open,
+  });
+
+  useEffect(() => {
+    if (!q.data) return;
+    const next = Object.fromEntries(
+      PERMISSION_KEYS.map((k) => [k, { can_view: false, can_edit: false }]),
+    ) as Record<PermissionKey, { can_view: boolean; can_edit: boolean }>;
+    q.data.forEach((r) => {
+      if (PERMISSION_KEYS.includes(r.permission_key)) {
+        next[r.permission_key] = { can_view: r.can_view, can_edit: r.can_edit };
+      }
+    });
+    setState(next);
+  }, [q.data]);
+
+  const saveMut = useMutation({
+    mutationFn: () => setFn({
+      data: {
+        user_id: userId,
+        permissions: PERMISSION_KEYS.map((k) => ({
+          permission_key: k,
+          can_view: state[k].can_view,
+          can_edit: state[k].can_edit,
+        })),
+      },
+    }),
+    onSuccess: () => {
+      toast.success(tx("Permissions সেভ হয়েছে", "Permissions saved"));
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
+  });
+
+  const toggle = (k: PermissionKey, field: "can_view" | "can_edit", v: boolean) => {
+    setState((s) => {
+      const cur = { ...s[k], [field]: v };
+      // If edit is enabled, view must also be enabled
+      if (field === "can_edit" && v) cur.can_view = true;
+      // If view is disabled, edit must also be disabled
+      if (field === "can_view" && !v) cur.can_edit = false;
+      return { ...s, [k]: cur };
+    });
+  };
+
+  const setAll = (field: "can_view" | "can_edit", v: boolean) => {
+    setState((s) => {
+      const next = { ...s };
+      PERMISSION_KEYS.forEach((k) => {
+        const cur = { ...next[k], [field]: v };
+        if (field === "can_edit" && v) cur.can_view = true;
+        if (field === "can_view" && !v) cur.can_edit = false;
+        next[k] = cur;
+      });
+      return next;
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8" title={tx("Permissions", "Permissions")}>
+          <Lock className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>
+            {tx("Permissions — ", "Permissions — ")}<span className="text-primary">{userLabel}</span>
+          </DialogTitle>
+        </DialogHeader>
+        {q.isLoading ? (
+          <div className="grid place-items-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+        ) : (
+          <div className="max-h-[60vh] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{tx("পেজ / সেকশন", "Page / Section")}</TableHead>
+                  <TableHead className="text-center w-24">
+                    {tx("দেখা", "View")}
+                    <button
+                      type="button"
+                      onClick={() => setAll("can_view", !PERMISSION_KEYS.every((k) => state[k].can_view))}
+                      className="block mx-auto text-[10px] text-primary hover:underline"
+                    >{tx("সব", "All")}</button>
+                  </TableHead>
+                  <TableHead className="text-center w-24">
+                    {tx("এডিট", "Edit")}
+                    <button
+                      type="button"
+                      onClick={() => setAll("can_edit", !PERMISSION_KEYS.every((k) => state[k].can_edit))}
+                      className="block mx-auto text-[10px] text-primary hover:underline"
+                    >{tx("সব", "All")}</button>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {PERMISSION_KEYS.map((k) => (
+                  <TableRow key={k}>
+                    <TableCell className="font-medium">{PERMISSION_LABELS[k].bn} <span className="text-xs text-muted-foreground">/ {PERMISSION_LABELS[k].en}</span></TableCell>
+                    <TableCell className="text-center">
+                      <Checkbox
+                        checked={state[k].can_view}
+                        onCheckedChange={(v) => toggle(k, "can_view", !!v)}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Checkbox
+                        checked={state[k].can_edit}
+                        onCheckedChange={(v) => toggle(k, "can_edit", !!v)}
+                        disabled={!state[k].can_view}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>{tx("বাতিল", "Cancel")}</Button>
+          <Button
+            onClick={() => saveMut.mutate()}
+            disabled={saveMut.isPending}
+            className="bg-gradient-primary text-white"
+          >
+            {saveMut.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+            {tx("সেভ", "Save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ResetPasswordDialog({ onSubmit }: { onSubmit: (pw: string) => void }) {
   const tx = useTx();
   const [open, setOpen] = useState(false);
