@@ -32,6 +32,7 @@ import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBillsRouteImport } from './routes/_authenticated.admin.bills'
 import { Route as AuthenticatedAdminAddressRouteImport } from './routes/_authenticated.admin.address'
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
+import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated.admin.access'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
@@ -159,6 +160,12 @@ const AuthenticatedAdminAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAccessRoute =
+  AuthenticatedAdminAccessRouteImport.update({
+    id: '/access',
+    path: '/access',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicCronRunRoute = ApiPublicCronRunRouteImport.update({
   id: '/api/public/cron/run',
   path: '/api/public/cron/run',
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/customer': typeof AuthenticatedCustomerRoute
+  '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
   '/admin/bills': typeof AuthenticatedAdminBillsRoute
@@ -210,6 +218,7 @@ export interface FileRoutesByTo {
   '/pay-bill': typeof PayBillRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/customer': typeof AuthenticatedCustomerRoute
+  '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
   '/admin/bills': typeof AuthenticatedAdminBillsRoute
@@ -239,6 +248,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/customer': typeof AuthenticatedCustomerRoute
+  '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
   '/_authenticated/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/_authenticated/admin/address': typeof AuthenticatedAdminAddressRoute
   '/_authenticated/admin/bills': typeof AuthenticatedAdminBillsRoute
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/customer'
+    | '/admin/access'
     | '/admin/accounts'
     | '/admin/address'
     | '/admin/bills'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/pay-bill'
     | '/reset-password'
     | '/customer'
+    | '/admin/access'
     | '/admin/accounts'
     | '/admin/address'
     | '/admin/bills'
@@ -322,6 +334,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/customer'
+    | '/_authenticated/admin/access'
     | '/_authenticated/admin/accounts'
     | '/_authenticated/admin/address'
     | '/_authenticated/admin/bills'
@@ -515,6 +528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAccountsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/access': {
+      id: '/_authenticated/admin/access'
+      path: '/access'
+      fullPath: '/admin/access'
+      preLoaderRoute: typeof AuthenticatedAdminAccessRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/cron/run': {
       id: '/api/public/cron/run'
       path: '/api/public/cron/run'
@@ -540,6 +560,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAccessRoute: typeof AuthenticatedAdminAccessRoute
   AuthenticatedAdminAccountsRoute: typeof AuthenticatedAdminAccountsRoute
   AuthenticatedAdminAddressRoute: typeof AuthenticatedAdminAddressRoute
   AuthenticatedAdminBillsRoute: typeof AuthenticatedAdminBillsRoute
@@ -560,6 +581,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAccessRoute: AuthenticatedAdminAccessRoute,
   AuthenticatedAdminAccountsRoute: AuthenticatedAdminAccountsRoute,
   AuthenticatedAdminAddressRoute: AuthenticatedAdminAddressRoute,
   AuthenticatedAdminBillsRoute: AuthenticatedAdminBillsRoute,
@@ -618,13 +640,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
