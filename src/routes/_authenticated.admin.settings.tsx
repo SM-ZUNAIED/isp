@@ -359,6 +359,50 @@ function SettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="coverage">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{tx("কাভারেজ এরিয়া", "Coverage Areas")}</CardTitle>
+                <Button type="button" size="sm" variant="outline" onClick={() =>
+                  setLC({ cities: [...f.landing_content.cities, { name_bn: "", name_en: "" }] })
+                }><Plus className="h-4 w-4 mr-1" /> {tx("যোগ করুন", "Add")}</Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <F label={tx("সেকশন শিরোনাম (বাংলা)", "Section Title (Bangla)")}>
+                    <Input value={f.landing_content.coverage_title_bn ?? ""} onChange={(e) => setLC({ coverage_title_bn: e.target.value })} placeholder="আমাদের কাভারেজ এলাকা" />
+                  </F>
+                  <F label={tx("সেকশন শিরোনাম (English)", "Section Title (English)")}>
+                    <Input value={f.landing_content.coverage_title_en ?? ""} onChange={(e) => setLC({ coverage_title_en: e.target.value })} placeholder="Our Coverage Areas" />
+                  </F>
+                  <F label={tx("সাব-টাইটেল (বাংলা)", "Subtitle (Bangla)")}>
+                    <Input value={f.landing_content.coverage_subtitle_bn ?? ""} onChange={(e) => setLC({ coverage_subtitle_bn: e.target.value })} placeholder="সারা বাংলাদেশে ছড়িয়ে আছে আমাদের নেটওয়ার্ক" />
+                  </F>
+                  <F label={tx("সাব-টাইটেল (English)", "Subtitle (English)")}>
+                    <Input value={f.landing_content.coverage_subtitle_en ?? ""} onChange={(e) => setLC({ coverage_subtitle_en: e.target.value })} placeholder="Our network spans across Bangladesh" />
+                  </F>
+                </div>
+
+                {f.landing_content.cities.length === 0 && (
+                  <p className="text-sm text-muted-foreground">{tx("কোনো এলাকা নেই — 'যোগ করুন' চাপুন", "No areas — click Add")}</p>
+                )}
+                {f.landing_content.cities.map((it, i) => (
+                  <div key={i} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-2">
+                    <F label={tx("এলাকা (বাংলা)", "Area (Bangla)")}>
+                      <Input value={it.name_bn} onChange={(e) => { const a = [...f.landing_content.cities]; a[i] = { ...it, name_bn: e.target.value }; setLC({ cities: a }); }} placeholder="ঢাকা" />
+                    </F>
+                    <F label={tx("এলাকা (English)", "Area (English)")}>
+                      <Input value={it.name_en} onChange={(e) => { const a = [...f.landing_content.cities]; a[i] = { ...it, name_en: e.target.value }; setLC({ cities: a }); }} placeholder="Dhaka" />
+                    </F>
+                    <div className="sm:col-span-2 flex justify-end">
+                      <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => { setLC({ cities: f.landing_content.cities.filter((_, j) => j !== i) }); }}><Trash2 className="h-4 w-4 mr-1" /> {tx("মুছুন", "Remove")}</Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         <div className="flex justify-end">
