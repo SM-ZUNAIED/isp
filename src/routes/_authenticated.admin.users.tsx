@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { Loader2, Plus, Trash2, Shield, KeyRound, UserCog, Pencil } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Plus, Trash2, Shield, KeyRound, UserCog, Pencil, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -26,6 +27,10 @@ import {
   listUsers, createUser, assignRole, removeRole, resetPassword, deleteUser, updateUser,
   type UserRow,
 } from "@/lib/users.functions";
+import {
+  getUserPermissions, setUserPermissions,
+  PERMISSION_KEYS, PERMISSION_LABELS, type PermissionKey,
+} from "@/lib/permissions.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
@@ -204,6 +209,9 @@ function UserRowView({
                 {available.map((r) => <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>)}
               </SelectContent>
             </Select>
+          )}
+          {!u.roles.includes("admin") && (u.roles.includes("staff") || u.roles.includes("customer")) && (
+            <PermissionsDialog userId={u.id} userLabel={u.full_name || u.email || u.id} />
           )}
           <EditUserDialog u={u} onSubmit={onUpdate} />
           <ResetPasswordDialog onSubmit={onReset} />
