@@ -28,6 +28,7 @@ type FeatureItem = { icon: string; title_bn: string; title_en: string; desc_bn: 
 type AboutStat = { value: string; label_bn: string; label_en: string };
 type ReviewItem = { name: string; loc_bn: string; loc_en: string; text_bn: string; text_en: string };
 type FaqItem = { q_bn: string; q_en: string; a_bn: string; a_en: string };
+type CityItem = { name_bn: string; name_en: string };
 
 type LandingContent = {
   hero_badge_bn: string;
@@ -39,6 +40,11 @@ type LandingContent = {
   about_stats: AboutStat[];
   reviews: ReviewItem[];
   faqs: FaqItem[];
+  coverage_title_bn: string;
+  coverage_title_en: string;
+  coverage_subtitle_bn: string;
+  coverage_subtitle_en: string;
+  cities: CityItem[];
 };
 
 type SettingsForm = {
@@ -64,7 +70,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 const ICON_OPTIONS = Object.keys(ICON_MAP);
 
 
-const EMPTY_LANDING: LandingContent = { hero_badge_bn: "", hero_badge_en: "", hero_title_en: "", hero_subtitle_en: "", about_text_en: "", features: [], about_stats: [], reviews: [], faqs: [] };
+const EMPTY_LANDING: LandingContent = {
+  hero_badge_bn: "", hero_badge_en: "", hero_title_en: "", hero_subtitle_en: "", about_text_en: "",
+  features: [], about_stats: [], reviews: [], faqs: [],
+  coverage_title_bn: "", coverage_title_en: "", coverage_subtitle_bn: "", coverage_subtitle_en: "",
+  cities: [],
+};
 
 function SettingsPage() {
   const tx = useTx();
@@ -107,6 +118,11 @@ function SettingsPage() {
           about_stats: lc.about_stats ?? [],
           reviews: lc.reviews ?? [],
           faqs: lc.faqs ?? [],
+          coverage_title_bn: lc.coverage_title_bn ?? "",
+          coverage_title_en: lc.coverage_title_en ?? "",
+          coverage_subtitle_bn: lc.coverage_subtitle_bn ?? "",
+          coverage_subtitle_en: lc.coverage_subtitle_en ?? "",
+          cities: lc.cities ?? [],
         },
       });
     }
