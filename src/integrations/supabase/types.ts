@@ -1187,6 +1187,36 @@ export type Database = {
           },
         ]
       }
+      user_permissions: {
+        Row: {
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          permission_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          permission_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          permission_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1272,6 +1302,10 @@ export type Database = {
       admin_verify_payment: {
         Args: { _approve: boolean; _payment_id: string }
         Returns: Json
+      }
+      has_permission: {
+        Args: { _key: string; _need_edit?: boolean; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
