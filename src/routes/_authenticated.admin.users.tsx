@@ -39,11 +39,12 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
   component: UsersPage,
 });
 
-type Role = "admin" | "staff" | "customer";
-const ALL_ROLES: Role[] = ["admin", "staff", "customer"];
-const ROLE_LABEL: Record<Role, string> = { admin: "Admin", staff: "Staff", customer: "Customer" };
+type Role = "admin" | "manager" | "staff" | "customer";
+const ALL_ROLES: Role[] = ["admin", "manager", "staff", "customer"];
+const ROLE_LABEL: Record<Role, string> = { admin: "Admin", manager: "Manager", staff: "Staff", customer: "Customer" };
 const ROLE_COLOR: Record<Role, string> = {
   admin: "bg-red-500/10 text-red-600 border-red-500/20",
+  manager: "bg-purple-500/10 text-purple-600 border-purple-500/20",
   staff: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   customer: "bg-green-500/10 text-green-600 border-green-500/20",
 };
