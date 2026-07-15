@@ -508,14 +508,21 @@ function LandingPage() {
       <section id="coverage" className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">{t("coverage.title")}</h2>
-            <p className="mt-4 text-muted-foreground">{t("coverage.subtitle")}</p>
+            <h2 className="text-3xl font-bold md:text-4xl">
+              {pickLang(lc.coverage_title_bn, lc.coverage_title_en) || t("coverage.title")}
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              {pickLang(lc.coverage_subtitle_bn, lc.coverage_subtitle_en) || t("coverage.subtitle")}
+            </p>
           </div>
           <div className="mt-12 grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {(["city.dhaka","city.chittagong","city.rajshahi","city.khulna","city.sylhet","city.barisal","city.rangpur","city.mymensingh"] as const).map((key) => (
-              <div key={key} className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft transition-all hover:shadow-elevated">
+            {(lc.cities && lc.cities.length > 0
+              ? lc.cities.map((c, i) => ({ key: `city-${i}`, name: pickLang(c.name_bn, c.name_en) }))
+              : (["city.dhaka","city.chittagong","city.rajshahi","city.khulna","city.sylhet","city.barisal","city.rangpur","city.mymensingh"] as const).map((key) => ({ key, name: t(key) }))
+            ).map((c) => (
+              <div key={c.key} className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft transition-all hover:shadow-elevated">
                 <MapPin className="h-5 w-5 text-primary" />
-                <span className="font-semibold">{t(key)}</span>
+                <span className="font-semibold">{c.name}</span>
               </div>
             ))}
           </div>
