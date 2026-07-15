@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type AppRole = "admin" | "staff" | "customer";
+type AppRole = "admin" | "manager" | "staff" | "customer";
 
 async function assertAdmin(supabase: ReturnType<typeof import("@supabase/supabase-js").createClient>, userId: string) {
   const { data } = await (supabase as unknown as {
@@ -67,7 +67,7 @@ export const createUser = createServerFn({ method: "POST" })
       password: z.string().min(6),
       full_name: z.string().optional(),
       mobile: z.string().optional(),
-      role: z.enum(["admin", "staff", "customer"]),
+      role: z.enum(["admin", "manager", "staff", "customer"]),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -93,7 +93,7 @@ export const assignRole = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       user_id: z.string().uuid(),
-      role: z.enum(["admin", "staff", "customer"]),
+      role: z.enum(["admin", "manager", "staff", "customer"]),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -111,7 +111,7 @@ export const removeRole = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       user_id: z.string().uuid(),
-      role: z.enum(["admin", "staff", "customer"]),
+      role: z.enum(["admin", "manager", "staff", "customer"]),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
