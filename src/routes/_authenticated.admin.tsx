@@ -38,6 +38,8 @@ import { useI18n } from "@/hooks/use-i18n";
 import { getSettings } from "@/lib/support.functions";
 import { useLogoUrl } from "@/hooks/use-logo";
 import { supabase } from "@/integrations/supabase/client";
+import { usePermissions } from "@/hooks/use-permissions";
+import type { PermissionKey } from "@/lib/permissions.functions";
 
 const getMyRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -58,8 +60,8 @@ type NavKey =
   | "admin.nav.notices" | "admin.nav.users" | "admin.nav.settings";
 
 type NavLink =
-  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; labelKey: NavKey }
-  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; label: { bn: string; en: string } };
+  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; permKey?: PermissionKey; labelKey: NavKey }
+  | { kind: "link"; to: string; icon: typeof LayoutDashboard; exact?: boolean; disabled?: boolean; adminOnly?: boolean; permKey?: PermissionKey; label: { bn: string; en: string } };
 
 type NavItem =
   | NavLink
@@ -68,24 +70,24 @@ type NavItem =
 
 const NAV: Array<NavItem> = [
   { kind: "section", label: { bn: "কোর", en: "Core" } },
-  { kind: "link", to: "/admin", labelKey: "admin.nav.dashboard", icon: LayoutDashboard, exact: true },
-  { kind: "link", to: "/admin/customers", labelKey: "admin.nav.customers", icon: Users },
-  { kind: "link", to: "/admin/packages", labelKey: "admin.nav.packages", icon: Package },
-  { kind: "link", to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio },
-  { kind: "link", to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true },
-  { kind: "link", to: "/admin/reports/address", labelKey: "admin.nav.addressReport", icon: BarChart3 },
-  { kind: "link", to: "/admin/bills", labelKey: "admin.nav.bills", icon: Receipt },
-  { kind: "link", to: "/admin/payments", labelKey: "admin.nav.payments", icon: Wallet },
-  { kind: "link", to: "/admin/mikrotik", labelKey: "admin.nav.mikrotik", icon: RouterIcon },
-  { kind: "link", to: "/admin/olt", labelKey: "admin.nav.olt", icon: Radio },
-  { kind: "link", to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket },
-  { kind: "link", to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell },
+  { kind: "link", to: "/admin", labelKey: "admin.nav.dashboard", icon: LayoutDashboard, exact: true, permKey: "dashboard" },
+  { kind: "link", to: "/admin/customers", labelKey: "admin.nav.customers", icon: Users, permKey: "customers" },
+  { kind: "link", to: "/admin/packages", labelKey: "admin.nav.packages", icon: Package, permKey: "packages" },
+  { kind: "link", to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio, permKey: "zones" },
+  { kind: "link", to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true, permKey: "address" },
+  { kind: "link", to: "/admin/reports/address", labelKey: "admin.nav.addressReport", icon: BarChart3, permKey: "address_report" },
+  { kind: "link", to: "/admin/bills", labelKey: "admin.nav.bills", icon: Receipt, permKey: "bills" },
+  { kind: "link", to: "/admin/payments", labelKey: "admin.nav.payments", icon: Wallet, permKey: "payments" },
+  { kind: "link", to: "/admin/mikrotik", labelKey: "admin.nav.mikrotik", icon: RouterIcon, permKey: "mikrotik" },
+  { kind: "link", to: "/admin/olt", labelKey: "admin.nav.olt", icon: Radio, permKey: "olt" },
+  { kind: "link", to: "/admin/tickets", labelKey: "admin.nav.tickets", icon: Ticket, permKey: "tickets" },
+  { kind: "link", to: "/admin/notices", labelKey: "admin.nav.notices", icon: Bell, permKey: "notices" },
 
   { kind: "section", label: { bn: "অ্যাডমিন", en: "Admin" } },
-  { kind: "link", to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true },
-  { kind: "link", to: "/admin/accounts", labelKey: "admin.nav.accounts", icon: Wallet },
-  { kind: "link", to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true },
-  { kind: "link", to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true },
+  { kind: "link", to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true, permKey: "staff" },
+  { kind: "link", to: "/admin/accounts", labelKey: "admin.nav.accounts", icon: Wallet, permKey: "accounts" },
+  { kind: "link", to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true, permKey: "users" },
+  { kind: "link", to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true, permKey: "settings" },
 ];
 
 
@@ -207,6 +209,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
   const settingsQ = useQuery({ queryKey: ["settings"], queryFn: () => fetchSettingsFn(), staleTime: 5 * 60 * 1000 });
   const brandName = settingsQ.data?.isp_name?.trim() || "Net Bill Pro";
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const { canView } = usePermissions();
 
   return (
     <div className="flex h-full flex-col">
@@ -230,7 +233,14 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
 
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.filter((n) => n.kind === "section" || n.kind === "group" || !n.adminOnly || isAdmin).map((item, i) => {
+        {NAV.filter((n) => {
+          if (n.kind === "section" || n.kind === "group") return true;
+          if (n.adminOnly && !isAdmin) return false;
+          if (isAdmin) return true;
+          // Staff: must have can_view for this permKey
+          if (!n.permKey) return true;
+          return canView(n.permKey);
+        }).map((item, i) => {
           if (item.kind === "section") {
             return (
               <div key={`s-${i}`} className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
