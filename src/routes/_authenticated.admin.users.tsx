@@ -210,9 +210,6 @@ function UserRowView({
               </SelectContent>
             </Select>
           )}
-          {!u.roles.includes("admin") && (u.roles.includes("staff") || u.roles.includes("customer")) && (
-            <PermissionsDialog userId={u.id} userLabel={u.full_name || u.email || u.id} />
-          )}
           <EditUserDialog u={u} onSubmit={onUpdate} />
           <ResetPasswordDialog onSubmit={onReset} />
           {!isMe && (
