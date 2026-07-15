@@ -14,6 +14,7 @@ import {
   Menu,
   UserCog,
   ShieldAlert,
+  ShieldCheck,
   MapPin,
   BarChart3,
   UserCircle2,
@@ -87,6 +88,7 @@ const NAV: Array<NavItem> = [
   { kind: "link", to: "/admin/staff", labelKey: "admin.nav.staff", icon: Users2, adminOnly: true, permKey: "staff" },
   { kind: "link", to: "/admin/accounts", labelKey: "admin.nav.accounts", icon: Wallet, permKey: "accounts" },
   { kind: "link", to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true, permKey: "users" },
+  { kind: "link", to: "/admin/access", icon: ShieldCheck, adminOnly: true, label: { bn: "অ্যাক্সেস কন্ট্রোল", en: "Access Control" } },
   { kind: "link", to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true, permKey: "settings" },
 ];
 
