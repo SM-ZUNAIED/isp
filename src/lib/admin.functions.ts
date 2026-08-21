@@ -8,7 +8,7 @@ export type DashboardStats = {
   pendingBills: number;
   openTickets: number;
   onlineDevices: number;
-  role: "admin" | "staff" | "customer" | null;
+  role: "admin" | "manager" | "staff" | "customer" | null;
 };
 
 export const getDashboardStats = createServerFn({ method: "GET" })
@@ -20,7 +20,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
-      .in("role", ["admin", "staff"])
+      .in("role", ["admin", "manager", "staff"])
       .maybeSingle();
 
     const role = (roleRow?.role ?? "customer") as DashboardStats["role"];
