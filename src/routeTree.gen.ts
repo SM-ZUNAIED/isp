@@ -36,7 +36,18 @@ import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated.admin.access'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
+import { Route as AuthenticatedAdminHrSalaryPoliciesRouteImport } from './routes/_authenticated.admin.hr.salary-policies'
+import { Route as AuthenticatedAdminHrLeaveRouteImport } from './routes/_authenticated.admin.hr.leave'
+import { Route as AuthenticatedAdminHrEmployeesRouteImport } from './routes/_authenticated.admin.hr.employees'
+import { Route as AuthenticatedAdminHrAttendanceRouteImport } from './routes/_authenticated.admin.hr.attendance'
+import { Route as AuthenticatedAdminHrAdvanceSalaryRouteImport } from './routes/_authenticated.admin.hr.advance-salary'
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
+import { Route as AuthenticatedAdminCallCenterVoiceTemplatesRouteImport } from './routes/_authenticated.admin.call-center.voice-templates'
+import { Route as AuthenticatedAdminCallCenterSipNumbersRouteImport } from './routes/_authenticated.admin.call-center.sip-numbers'
+import { Route as AuthenticatedAdminCallCenterIpPhonesRouteImport } from './routes/_authenticated.admin.call-center.ip-phones'
+import { Route as AuthenticatedAdminCallCenterFollowUpsRouteImport } from './routes/_authenticated.admin.call-center.follow-ups'
+import { Route as AuthenticatedAdminCallCenterCallLogsRouteImport } from './routes/_authenticated.admin.call-center.call-logs'
+import { Route as AuthenticatedAdminCallCenterAutoVoiceSmsRouteImport } from './routes/_authenticated.admin.call-center.auto-voice-sms'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -183,10 +194,76 @@ const AuthenticatedAdminReportsAddressRoute =
     path: '/reports/address',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminHrSalaryPoliciesRoute =
+  AuthenticatedAdminHrSalaryPoliciesRouteImport.update({
+    id: '/hr/salary-policies',
+    path: '/hr/salary-policies',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHrLeaveRoute =
+  AuthenticatedAdminHrLeaveRouteImport.update({
+    id: '/hr/leave',
+    path: '/hr/leave',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHrEmployeesRoute =
+  AuthenticatedAdminHrEmployeesRouteImport.update({
+    id: '/hr/employees',
+    path: '/hr/employees',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHrAttendanceRoute =
+  AuthenticatedAdminHrAttendanceRouteImport.update({
+    id: '/hr/attendance',
+    path: '/hr/attendance',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminHrAdvanceSalaryRoute =
+  AuthenticatedAdminHrAdvanceSalaryRouteImport.update({
+    id: '/hr/advance-salary',
+    path: '/hr/advance-salary',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCustomersIdRoute =
   AuthenticatedAdminCustomersIdRouteImport.update({
     id: '/customers_/$id',
     path: '/customers/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCallCenterVoiceTemplatesRoute =
+  AuthenticatedAdminCallCenterVoiceTemplatesRouteImport.update({
+    id: '/call-center/voice-templates',
+    path: '/call-center/voice-templates',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCallCenterSipNumbersRoute =
+  AuthenticatedAdminCallCenterSipNumbersRouteImport.update({
+    id: '/call-center/sip-numbers',
+    path: '/call-center/sip-numbers',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCallCenterIpPhonesRoute =
+  AuthenticatedAdminCallCenterIpPhonesRouteImport.update({
+    id: '/call-center/ip-phones',
+    path: '/call-center/ip-phones',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCallCenterFollowUpsRoute =
+  AuthenticatedAdminCallCenterFollowUpsRouteImport.update({
+    id: '/call-center/follow-ups',
+    path: '/call-center/follow-ups',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCallCenterCallLogsRoute =
+  AuthenticatedAdminCallCenterCallLogsRouteImport.update({
+    id: '/call-center/call-logs',
+    path: '/call-center/call-logs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCallCenterAutoVoiceSmsRoute =
+  AuthenticatedAdminCallCenterAutoVoiceSmsRouteImport.update({
+    id: '/call-center/auto-voice-sms',
+    path: '/call-center/auto-voice-sms',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 
@@ -215,7 +292,18 @@ export interface FileRoutesByFullPath {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/call-center/auto-voice-sms': typeof AuthenticatedAdminCallCenterAutoVoiceSmsRoute
+  '/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
+  '/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
+  '/admin/call-center/ip-phones': typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  '/admin/call-center/sip-numbers': typeof AuthenticatedAdminCallCenterSipNumbersRoute
+  '/admin/call-center/voice-templates': typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/admin/hr/advance-salary': typeof AuthenticatedAdminHrAdvanceSalaryRoute
+  '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/admin/hr/employees': typeof AuthenticatedAdminHrEmployeesRoute
+  '/admin/hr/leave': typeof AuthenticatedAdminHrLeaveRoute
+  '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
 }
@@ -243,7 +331,18 @@ export interface FileRoutesByTo {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/call-center/auto-voice-sms': typeof AuthenticatedAdminCallCenterAutoVoiceSmsRoute
+  '/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
+  '/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
+  '/admin/call-center/ip-phones': typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  '/admin/call-center/sip-numbers': typeof AuthenticatedAdminCallCenterSipNumbersRoute
+  '/admin/call-center/voice-templates': typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/admin/hr/advance-salary': typeof AuthenticatedAdminHrAdvanceSalaryRoute
+  '/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/admin/hr/employees': typeof AuthenticatedAdminHrEmployeesRoute
+  '/admin/hr/leave': typeof AuthenticatedAdminHrLeaveRoute
+  '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
 }
@@ -274,7 +373,18 @@ export interface FileRoutesById {
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/call-center/auto-voice-sms': typeof AuthenticatedAdminCallCenterAutoVoiceSmsRoute
+  '/_authenticated/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
+  '/_authenticated/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
+  '/_authenticated/admin/call-center/ip-phones': typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  '/_authenticated/admin/call-center/sip-numbers': typeof AuthenticatedAdminCallCenterSipNumbersRoute
+  '/_authenticated/admin/call-center/voice-templates': typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
+  '/_authenticated/admin/hr/advance-salary': typeof AuthenticatedAdminHrAdvanceSalaryRoute
+  '/_authenticated/admin/hr/attendance': typeof AuthenticatedAdminHrAttendanceRoute
+  '/_authenticated/admin/hr/employees': typeof AuthenticatedAdminHrEmployeesRoute
+  '/_authenticated/admin/hr/leave': typeof AuthenticatedAdminHrLeaveRoute
+  '/_authenticated/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
 }
@@ -305,7 +415,18 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
+    | '/admin/call-center/auto-voice-sms'
+    | '/admin/call-center/call-logs'
+    | '/admin/call-center/follow-ups'
+    | '/admin/call-center/ip-phones'
+    | '/admin/call-center/sip-numbers'
+    | '/admin/call-center/voice-templates'
     | '/admin/customers/$id'
+    | '/admin/hr/advance-salary'
+    | '/admin/hr/attendance'
+    | '/admin/hr/employees'
+    | '/admin/hr/leave'
+    | '/admin/hr/salary-policies'
     | '/admin/reports/address'
     | '/api/public/cron/run'
   fileRoutesByTo: FileRoutesByTo
@@ -333,7 +454,18 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
+    | '/admin/call-center/auto-voice-sms'
+    | '/admin/call-center/call-logs'
+    | '/admin/call-center/follow-ups'
+    | '/admin/call-center/ip-phones'
+    | '/admin/call-center/sip-numbers'
+    | '/admin/call-center/voice-templates'
     | '/admin/customers/$id'
+    | '/admin/hr/advance-salary'
+    | '/admin/hr/attendance'
+    | '/admin/hr/employees'
+    | '/admin/hr/leave'
+    | '/admin/hr/salary-policies'
     | '/admin/reports/address'
     | '/api/public/cron/run'
   id:
@@ -363,7 +495,18 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/call-center/auto-voice-sms'
+    | '/_authenticated/admin/call-center/call-logs'
+    | '/_authenticated/admin/call-center/follow-ups'
+    | '/_authenticated/admin/call-center/ip-phones'
+    | '/_authenticated/admin/call-center/sip-numbers'
+    | '/_authenticated/admin/call-center/voice-templates'
     | '/_authenticated/admin/customers_/$id'
+    | '/_authenticated/admin/hr/advance-salary'
+    | '/_authenticated/admin/hr/attendance'
+    | '/_authenticated/admin/hr/employees'
+    | '/_authenticated/admin/hr/leave'
+    | '/_authenticated/admin/hr/salary-policies'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
   fileRoutesById: FileRoutesById
@@ -568,11 +711,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminReportsAddressRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/hr/salary-policies': {
+      id: '/_authenticated/admin/hr/salary-policies'
+      path: '/hr/salary-policies'
+      fullPath: '/admin/hr/salary-policies'
+      preLoaderRoute: typeof AuthenticatedAdminHrSalaryPoliciesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/hr/leave': {
+      id: '/_authenticated/admin/hr/leave'
+      path: '/hr/leave'
+      fullPath: '/admin/hr/leave'
+      preLoaderRoute: typeof AuthenticatedAdminHrLeaveRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/hr/employees': {
+      id: '/_authenticated/admin/hr/employees'
+      path: '/hr/employees'
+      fullPath: '/admin/hr/employees'
+      preLoaderRoute: typeof AuthenticatedAdminHrEmployeesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/hr/attendance': {
+      id: '/_authenticated/admin/hr/attendance'
+      path: '/hr/attendance'
+      fullPath: '/admin/hr/attendance'
+      preLoaderRoute: typeof AuthenticatedAdminHrAttendanceRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/hr/advance-salary': {
+      id: '/_authenticated/admin/hr/advance-salary'
+      path: '/hr/advance-salary'
+      fullPath: '/admin/hr/advance-salary'
+      preLoaderRoute: typeof AuthenticatedAdminHrAdvanceSalaryRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/customers_/$id': {
       id: '/_authenticated/admin/customers_/$id'
       path: '/customers/$id'
       fullPath: '/admin/customers/$id'
       preLoaderRoute: typeof AuthenticatedAdminCustomersIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/call-center/voice-templates': {
+      id: '/_authenticated/admin/call-center/voice-templates'
+      path: '/call-center/voice-templates'
+      fullPath: '/admin/call-center/voice-templates'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterVoiceTemplatesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/call-center/sip-numbers': {
+      id: '/_authenticated/admin/call-center/sip-numbers'
+      path: '/call-center/sip-numbers'
+      fullPath: '/admin/call-center/sip-numbers'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterSipNumbersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/call-center/ip-phones': {
+      id: '/_authenticated/admin/call-center/ip-phones'
+      path: '/call-center/ip-phones'
+      fullPath: '/admin/call-center/ip-phones'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterIpPhonesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/call-center/follow-ups': {
+      id: '/_authenticated/admin/call-center/follow-ups'
+      path: '/call-center/follow-ups'
+      fullPath: '/admin/call-center/follow-ups'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterFollowUpsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/call-center/call-logs': {
+      id: '/_authenticated/admin/call-center/call-logs'
+      path: '/call-center/call-logs'
+      fullPath: '/admin/call-center/call-logs'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterCallLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/call-center/auto-voice-sms': {
+      id: '/_authenticated/admin/call-center/auto-voice-sms'
+      path: '/call-center/auto-voice-sms'
+      fullPath: '/admin/call-center/auto-voice-sms'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterAutoVoiceSmsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
   }
@@ -596,7 +816,18 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminZonesRoute: typeof AuthenticatedAdminZonesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminCallCenterAutoVoiceSmsRoute: typeof AuthenticatedAdminCallCenterAutoVoiceSmsRoute
+  AuthenticatedAdminCallCenterCallLogsRoute: typeof AuthenticatedAdminCallCenterCallLogsRoute
+  AuthenticatedAdminCallCenterFollowUpsRoute: typeof AuthenticatedAdminCallCenterFollowUpsRoute
+  AuthenticatedAdminCallCenterIpPhonesRoute: typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  AuthenticatedAdminCallCenterSipNumbersRoute: typeof AuthenticatedAdminCallCenterSipNumbersRoute
+  AuthenticatedAdminCallCenterVoiceTemplatesRoute: typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
+  AuthenticatedAdminHrAdvanceSalaryRoute: typeof AuthenticatedAdminHrAdvanceSalaryRoute
+  AuthenticatedAdminHrAttendanceRoute: typeof AuthenticatedAdminHrAttendanceRoute
+  AuthenticatedAdminHrEmployeesRoute: typeof AuthenticatedAdminHrEmployeesRoute
+  AuthenticatedAdminHrLeaveRoute: typeof AuthenticatedAdminHrLeaveRoute
+  AuthenticatedAdminHrSalaryPoliciesRoute: typeof AuthenticatedAdminHrSalaryPoliciesRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
 }
 
@@ -618,7 +849,26 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminZonesRoute: AuthenticatedAdminZonesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminCallCenterAutoVoiceSmsRoute:
+    AuthenticatedAdminCallCenterAutoVoiceSmsRoute,
+  AuthenticatedAdminCallCenterCallLogsRoute:
+    AuthenticatedAdminCallCenterCallLogsRoute,
+  AuthenticatedAdminCallCenterFollowUpsRoute:
+    AuthenticatedAdminCallCenterFollowUpsRoute,
+  AuthenticatedAdminCallCenterIpPhonesRoute:
+    AuthenticatedAdminCallCenterIpPhonesRoute,
+  AuthenticatedAdminCallCenterSipNumbersRoute:
+    AuthenticatedAdminCallCenterSipNumbersRoute,
+  AuthenticatedAdminCallCenterVoiceTemplatesRoute:
+    AuthenticatedAdminCallCenterVoiceTemplatesRoute,
   AuthenticatedAdminCustomersIdRoute: AuthenticatedAdminCustomersIdRoute,
+  AuthenticatedAdminHrAdvanceSalaryRoute:
+    AuthenticatedAdminHrAdvanceSalaryRoute,
+  AuthenticatedAdminHrAttendanceRoute: AuthenticatedAdminHrAttendanceRoute,
+  AuthenticatedAdminHrEmployeesRoute: AuthenticatedAdminHrEmployeesRoute,
+  AuthenticatedAdminHrLeaveRoute: AuthenticatedAdminHrLeaveRoute,
+  AuthenticatedAdminHrSalaryPoliciesRoute:
+    AuthenticatedAdminHrSalaryPoliciesRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
 }
 
