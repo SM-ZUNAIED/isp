@@ -85,6 +85,7 @@ function StaffPage() {
 
   const q = useQuery({ queryKey: ["admin-staff"], queryFn: () => list() });
   const usersQ = useQuery({ queryKey: ["assignable-users"], queryFn: () => listUsers() });
+  const rolesQ = useQuery({ queryKey: ["job-roles"], queryFn: () => listRoles(), staleTime: 30_000 });
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["admin-staff"] });
     qc.invalidateQueries({ queryKey: ["assignable-users"] });
