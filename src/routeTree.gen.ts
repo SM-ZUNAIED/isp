@@ -38,6 +38,7 @@ import { Route as AuthenticatedAdminHrIndexRouteImport } from './routes/_authent
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
 import { Route as AuthenticatedAdminHrSalaryPoliciesRouteImport } from './routes/_authenticated.admin.hr.salary-policies'
+import { Route as AuthenticatedAdminHrReportsRouteImport } from './routes/_authenticated.admin.hr.reports'
 import { Route as AuthenticatedAdminHrPayrollRouteImport } from './routes/_authenticated.admin.hr.payroll'
 import { Route as AuthenticatedAdminHrLeaveRouteImport } from './routes/_authenticated.admin.hr.leave'
 import { Route as AuthenticatedAdminHrEmployeesRouteImport } from './routes/_authenticated.admin.hr.employees'
@@ -208,6 +209,12 @@ const AuthenticatedAdminHrSalaryPoliciesRoute =
     path: '/hr/salary-policies',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminHrReportsRoute =
+  AuthenticatedAdminHrReportsRouteImport.update({
+    id: '/hr/reports',
+    path: '/hr/reports',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminHrPayrollRoute =
   AuthenticatedAdminHrPayrollRouteImport.update({
     id: '/hr/payroll',
@@ -318,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/admin/hr/employees': typeof AuthenticatedAdminHrEmployeesRoute
   '/admin/hr/leave': typeof AuthenticatedAdminHrLeaveRoute
   '/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
+  '/admin/hr/reports': typeof AuthenticatedAdminHrReportsRoute
   '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
@@ -359,6 +367,7 @@ export interface FileRoutesByTo {
   '/admin/hr/employees': typeof AuthenticatedAdminHrEmployeesRoute
   '/admin/hr/leave': typeof AuthenticatedAdminHrLeaveRoute
   '/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
+  '/admin/hr/reports': typeof AuthenticatedAdminHrReportsRoute
   '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
@@ -403,6 +412,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/hr/employees': typeof AuthenticatedAdminHrEmployeesRoute
   '/_authenticated/admin/hr/leave': typeof AuthenticatedAdminHrLeaveRoute
   '/_authenticated/admin/hr/payroll': typeof AuthenticatedAdminHrPayrollRoute
+  '/_authenticated/admin/hr/reports': typeof AuthenticatedAdminHrReportsRoute
   '/_authenticated/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
@@ -447,6 +457,7 @@ export interface FileRouteTypes {
     | '/admin/hr/employees'
     | '/admin/hr/leave'
     | '/admin/hr/payroll'
+    | '/admin/hr/reports'
     | '/admin/hr/salary-policies'
     | '/admin/reports/address'
     | '/api/public/cron/run'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/admin/hr/employees'
     | '/admin/hr/leave'
     | '/admin/hr/payroll'
+    | '/admin/hr/reports'
     | '/admin/hr/salary-policies'
     | '/admin/reports/address'
     | '/api/public/cron/run'
@@ -531,6 +543,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/hr/employees'
     | '/_authenticated/admin/hr/leave'
     | '/_authenticated/admin/hr/payroll'
+    | '/_authenticated/admin/hr/reports'
     | '/_authenticated/admin/hr/salary-policies'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
@@ -751,6 +764,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHrSalaryPoliciesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/hr/reports': {
+      id: '/_authenticated/admin/hr/reports'
+      path: '/hr/reports'
+      fullPath: '/admin/hr/reports'
+      preLoaderRoute: typeof AuthenticatedAdminHrReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/hr/payroll': {
       id: '/_authenticated/admin/hr/payroll'
       path: '/hr/payroll'
@@ -868,6 +888,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminHrEmployeesRoute: typeof AuthenticatedAdminHrEmployeesRoute
   AuthenticatedAdminHrLeaveRoute: typeof AuthenticatedAdminHrLeaveRoute
   AuthenticatedAdminHrPayrollRoute: typeof AuthenticatedAdminHrPayrollRoute
+  AuthenticatedAdminHrReportsRoute: typeof AuthenticatedAdminHrReportsRoute
   AuthenticatedAdminHrSalaryPoliciesRoute: typeof AuthenticatedAdminHrSalaryPoliciesRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
   AuthenticatedAdminHrIndexRoute: typeof AuthenticatedAdminHrIndexRoute
@@ -910,6 +931,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminHrEmployeesRoute: AuthenticatedAdminHrEmployeesRoute,
   AuthenticatedAdminHrLeaveRoute: AuthenticatedAdminHrLeaveRoute,
   AuthenticatedAdminHrPayrollRoute: AuthenticatedAdminHrPayrollRoute,
+  AuthenticatedAdminHrReportsRoute: AuthenticatedAdminHrReportsRoute,
   AuthenticatedAdminHrSalaryPoliciesRoute:
     AuthenticatedAdminHrSalaryPoliciesRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
