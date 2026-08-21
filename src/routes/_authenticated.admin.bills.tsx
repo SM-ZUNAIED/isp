@@ -230,6 +230,156 @@ function BillsPage() {
   );
 }
 
+function GenerateDialog({
+  open, onOpenChange, month, pending, onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  month: string;
+  pending: boolean;
+  onConfirm: (ids: string[]) => void;
+}) {
+  const tx = useTx();
+  const { n, bdt } = useFmt();
+  const fetchCustomers = useServerFn(listBillableCustomers);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+
+  const customers = useQuery({
+    queryKey: ["billable-customers", month],
+    queryFn: () => fetchCustomers({ data: { billing_month: month } }),
+    enabled: open,
+  });
+
+  const all = customers.data ?? [];
+  const eligible = all.filter((c) => !c.already_billed && c.monthly_bill > 0);
+
+  useEffect(() => {
+    if (!open) return;
+    const next: Record<string, boolean> = {};
+    for (const c of eligible) next[c.id] = true;
+    setSelected(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, customers.data]);
+
+  const visible = all.filter((c) => {
+    if (!search.trim()) return true;
+    const s = search.toLowerCase();
+    return (
+      c.full_name?.toLowerCase().includes(s) ||
+      c.customer_code?.toLowerCase().includes(s) ||
+      c.mobile?.toLowerCase().includes(s)
+    );
+  });
+
+  const chosen = eligible.filter((c) => selected[c.id]);
+  const totalAmount = chosen.reduce((a, c) => a + c.monthly_bill, 0);
+  const allChecked = eligible.length > 0 && chosen.length === eligible.length;
+
+  const toggleAll = (v: boolean) => {
+    const next: Record<string, boolean> = {};
+    for (const c of eligible) next[c.id] = v;
+    setSelected(next);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            {tx("কাস্টমার নির্বাচন করুন", "Select Customers")} — {month}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder={tx("নাম, ইউজার আইডি বা মোবাইল...", "Name, user ID or mobile...")} className="pl-9" />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+              <Checkbox checked={allChecked} onCheckedChange={(v) => toggleAll(Boolean(v))} />
+              {tx("সব নির্বাচন", "Select all")}
+            </label>
+            <div className="text-sm text-muted-foreground">
+              {tx(
+                `${n(chosen.length)} জন নির্বাচিত • মোট ${bdt(totalAmount)}`,
+                `${n(chosen.length)} selected • Total ${bdt(totalAmount)}`,
+              )}
+            </div>
+          </div>
+
+          <div className="max-h-[45vh] overflow-y-auto rounded-xl border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10" />
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
+                  <TableHead>{tx("মোবাইল", "Mobile")}</TableHead>
+                  <TableHead className="text-right">{tx("মাসিক বিল", "Monthly Bill")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.isLoading && (
+                  <TableRow><TableCell colSpan={4} className="py-10 text-center">
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
+                  </TableCell></TableRow>
+                )}
+                {!customers.isLoading && visible.length === 0 && (
+                  <TableRow><TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                    {tx("কোনো সক্রিয় কাস্টমার নেই", "No active customers")}
+                  </TableCell></TableRow>
+                )}
+                {visible.map((c) => {
+                  const disabled = c.already_billed || c.monthly_bill <= 0;
+                  return (
+                    <TableRow key={c.id} className={disabled ? "opacity-60" : ""}>
+                      <TableCell>
+                        <Checkbox
+                          disabled={disabled}
+                          checked={!disabled && Boolean(selected[c.id])}
+                          onCheckedChange={(v) =>
+                            setSelected((prev) => ({ ...prev, [c.id]: Boolean(v) }))
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{c.full_name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {c.customer_code}
+                          {c.already_billed && ` • ${tx("এ মাসে বিল হয়েছে", "already billed")}`}
+                          {!c.already_billed && c.monthly_bill <= 0 && ` • ${tx("বিল ০", "no amount")}`}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">{c.mobile}</TableCell>
+                      <TableCell className="text-right">{bdt(c.monthly_bill)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{tx("বাতিল", "Cancel")}</Button>
+          <Button
+            disabled={pending || chosen.length === 0}
+            onClick={() => onConfirm(chosen.map((c) => c.id))}
+            className="bg-gradient-primary text-white"
+          >
+            {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+            {tx(`${n(chosen.length)} জনের বিল তৈরি করুন`, `Generate ${n(chosen.length)} bills`)}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function StatMini({ label, value, tone }: { label: string; value: string; tone: "indigo" | "emerald" | "rose" }) {
   const map = {
     indigo: "from-indigo-500 to-indigo-600",
