@@ -82,6 +82,7 @@ function StaffPage() {
   const update = useServerFn(updateStaff);
   const del = useServerFn(deleteStaff);
   const listUsers = useServerFn(listAssignableUsers);
+  const listRoles = useServerFn(listJobRoles);
 
   const q = useQuery({ queryKey: ["admin-staff"], queryFn: () => list() });
   const usersQ = useQuery({ queryKey: ["assignable-users"], queryFn: () => listUsers() });
