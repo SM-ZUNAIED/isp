@@ -219,7 +219,7 @@ function CustomerPortal() {
                   <Link
                     key={p.id}
                     to="/pay-bill/receipt/$receiptNo"
-                    params={{ receiptNo: p.receipt_number }}
+                    params={{ receiptNo: p.receipt_number ?? "" }}
                     className="flex items-center justify-between rounded-xl border p-3 hover:border-primary/60 hover:bg-primary/5 transition-colors"
                   >
                     <div>
