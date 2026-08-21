@@ -108,6 +108,7 @@ export type Database = {
       buildings: {
         Row: {
           created_at: string
+          google_map_url: string | null
           holding_number: string | null
           house_number: string | null
           id: string
@@ -116,6 +117,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          google_map_url?: string | null
           holding_number?: string | null
           house_number?: string | null
           id?: string
@@ -124,6 +126,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          google_map_url?: string | null
           holding_number?: string | null
           house_number?: string | null
           id?: string
@@ -358,6 +361,7 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          party_name: string | null
         }
         Insert: {
           amount: number
@@ -367,6 +371,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
         }
         Update: {
           amount?: number
@@ -376,6 +381,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
         }
         Relationships: []
       }
@@ -388,6 +394,7 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          party_name: string | null
         }
         Insert: {
           amount: number
@@ -397,6 +404,7 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
         }
         Update: {
           amount?: number
@@ -406,6 +414,37 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          party_name?: string | null
+        }
+        Relationships: []
+      }
+      job_roles: {
+        Row: {
+          bn_name: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          bn_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          bn_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -800,6 +839,7 @@ export type Database = {
       post_offices: {
         Row: {
           bn_name: string | null
+          code: string | null
           created_at: string
           id: string
           name: string
@@ -808,6 +848,7 @@ export type Database = {
         }
         Insert: {
           bn_name?: string | null
+          code?: string | null
           created_at?: string
           id?: string
           name: string
@@ -816,6 +857,7 @@ export type Database = {
         }
         Update: {
           bn_name?: string | null
+          code?: string | null
           created_at?: string
           id?: string
           name?: string
