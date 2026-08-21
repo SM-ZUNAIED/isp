@@ -89,8 +89,9 @@ function CustomerPortal() {
             <p className="text-sm text-muted-foreground">
               এই ইমেইল ({user?.email}) কোনো কাস্টমারের সাথে যুক্ত নয়। অনুগ্রহ করে ISP অফিসে যোগাযোগ করুন।
             </p>
-            <div className="flex gap-2 justify-center">
+            <div className="flex flex-wrap gap-2 justify-center">
               <Button variant="outline" asChild><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />হোম</Link></Button>
+              <Button variant="secondary" asChild><Link to="/admin">অ্যাডমিন প্যানেল</Link></Button>
               <Button onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" />লগআউট</Button>
             </div>
           </CardContent>
