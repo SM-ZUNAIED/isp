@@ -329,7 +329,26 @@ function StaffPage() {
             </div>
             <div>
               <Label>{tx("পদবি", "Designation")}</Label>
-              <Input value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} />
+              <Select
+                value={form.designation || "__none"}
+                onValueChange={(v) => setForm({ ...form, designation: v === "__none" ? "" : v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={tx("রোল নির্বাচন করুন", "Select role")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none">{tx("নির্বাচন করা হয়নি", "Not selected")}</SelectItem>
+                  {rolesQ.data?.filter((r) => r.is_active).map((r) => (
+                    <SelectItem key={r.id} value={r.name}>
+                      {tx(r.bn_name || r.name, r.name)}
+                    </SelectItem>
+                  ))}
+                  {form.designation &&
+                    !(rolesQ.data ?? []).some((r) => r.name === form.designation) && (
+                      <SelectItem value={form.designation}>{form.designation}</SelectItem>
+                    )}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>{tx("বিভাগ", "Department")}</Label>
