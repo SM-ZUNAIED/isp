@@ -1,1 +1,0 @@
-ALTER TYPE public.customer_status ADD VALUE IF NOT EXISTS 'no_payment';
