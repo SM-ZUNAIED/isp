@@ -84,10 +84,10 @@ function LandingPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("user_roles").select("role").eq("user_id", session!.user.id);
-      return (data ?? []).map((r) => r.role as "admin" | "staff" | "customer");
+      return (data ?? []).map((r) => r.role as "admin" | "manager" | "staff" | "customer");
     },
   });
-  const isPrivileged = (rolesQ.data ?? []).some((r) => r === "admin" || r === "staff");
+  const isPrivileged = (rolesQ.data ?? []).some((r) => r === "admin" || r === "manager" || r === "staff");
 
   const ispName = settings?.isp_name ?? "Net Bill Pro";
   const hotline = settings?.hotline ?? "01339562416";
