@@ -1,62 +1,33 @@
-## Bulk Customer Import feature
+# Fix: "Unauthorized: Invalid token" on the deployed site
 
-Admin > Customers পেজে একটি **"Bulk Import"** বাটন যোগ করব। বাটনে click করলে একটি dialog খুলবে যেখানে আপনি customer list plain text হিসেবে paste করতে পারবেন। System সেটি parse করে database-এ automatically add করবে।
+## What is happening
 
-### Input format
+The screenshot is your own Cloudflare deploy (`earthonlinebd.earthonlinebd2026.workers.dev`), not the Lovable-published site. Login works (the sidebar shows `manager@gmail.com`), so the browser side has the correct backend keys. The failure comes from the server side: every admin data call is validated on the server, and the server rejects the login token as invalid.
 
-প্রতিটি customer এক লাইনে, comma বা tab দিয়ে separated:
+That happens when the server-side backend settings in the Cloudflare Worker do not match the backend the frontend logged into — typically leftover values from the previous backend project (the project was switched to the new one recently), or values that were never added to the Worker at all.
 
-```
-User ID, Name, Package Name
-C001, Rahim Uddin, 10 Mbps
-C002, Karim Ali, 20 Mbps
-C003, Jamal Hossain, 5 Mbps
-```
+Note: the code itself is fine — the same flow works in preview, where the platform injects the server-side values automatically.
 
-- **User ID** (customer_code) — required
-- **Name** (full_name) — required
-- **Package Name** — required, existing package-এর নামের সাথে match করতে হবে (case-insensitive)
+## Recommended fix (simplest, no maintenance)
 
-Header row (`User ID, Name, Package`) থাকলে auto-detect করে skip হবে।
+Publish through Lovable instead of the hand-rolled Worker. Lovable's hosting injects all server-side backend values on every deploy, so this class of error cannot happen. The `.lovable.app` URL (and any custom domain you attach) then serves the same app.
 
-### Behavior
+## If you want to keep your own Cloudflare Worker
 
-- প্রতিটি row-এর package name দেখে matching `package_id` এবং সেই package-এর `monthly_price` লোড করবে → `monthly_bill` হিসেবে auto-set হবে (আগের feature অনুযায়ী)।
-- **Mobile** field required না — bulk import-এ empty placeholder দিয়ে insert হবে, পরে edit করে দেওয়া যাবে।
-- Status default `pending`।
+Then the Worker needs these three server-side variables set to exactly the same backend project the frontend is built against:
 
-### Duplicate handling (skip)
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_PROJECT_ID`
 
-Import করার আগে existing `customer_code` list এর সাথে match করে duplicate rows skip হবে।
+Steps:
+1. Read the current values from the project's `.env` in this workspace (they are the correct, current backend values).
+2. In the Cloudflare dashboard, open the Worker → Settings → Variables, and set/overwrite the three names above with those values (delete any old ones from the previous backend project).
+3. Also confirm the frontend build variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) used at build time are from the same project — a mismatch between the browser and server sides produces exactly this "Invalid token" message.
+4. Redeploy the Worker and hard-refresh, then log out and log in once so a fresh token is issued.
 
-### Result summary
+If cron endpoints are also used from that deployment, `CRON_SECRET` and the service-role value must be present in the Worker too; those are separate from this login problem.
 
-Import শেষে toast/summary দেখাবে:
-- ✅ Added: N
-- ⏭️ Skipped (duplicate): N
-- ⚠️ Failed (invalid package / missing field): N — সাথে line number ও error reason
+## What I will change in code
 
-### Technical details
-
-1. **New server function** `bulkImportCustomers` in `src/lib/customers.functions.ts`:
-   - Input: `{ rows: Array<{ customer_code, full_name, package_name }> }`
-   - Fetches all packages + existing customer_codes once
-   - Maps package names → id + monthly_price
-   - Filters duplicates
-   - Bulk inserts via single `supabase.from("customers").insert([...])`
-   - Returns `{ added, skipped, failed: [{ line, reason }] }`
-
-2. **UI component** — new "Bulk Import" dialog in `src/routes/_authenticated.admin.customers.tsx`:
-   - Textarea for pasting list
-   - Preview parsed rows before submitting
-   - Submit → call server fn → show result summary
-   - On success invalidate customers query
-
-3. Customer_code এ unique constraint না থাকলে duplicate check শুধু pre-import filter দিয়েই হবে (schema change লাগবে না)।
-
-### Files to change
-
-- `src/lib/customers.functions.ts` — add `bulkImportCustomers` server fn
-- `src/routes/_authenticated.admin.customers.tsx` — add Bulk Import button + dialog UI
-
-কোনো database schema change লাগবে না।
+Nothing is required in the app code for this fix — it is a deployment configuration issue. If you prefer, I can additionally make the admin screen show a clearer message ("server backend configuration mismatch") instead of the raw `Unauthorized: Invalid token`, so future misconfiguration is obvious at a glance.
