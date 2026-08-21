@@ -97,11 +97,6 @@ export const generateMonthlyBills = createServerFn({ method: "POST" })
   });
 
 
-    if (toInsert.length === 0) return { created: 0, skipped: existingSet.size };
-    const { error } = await context.supabase.from("bills").insert(toInsert);
-    if (error) throw new Error(error.message);
-    return { created: toInsert.length, skipped: existingSet.size };
-  });
 
 /** Collect a payment against a bill (or standalone). */
 export const collectPayment = createServerFn({ method: "POST" })
