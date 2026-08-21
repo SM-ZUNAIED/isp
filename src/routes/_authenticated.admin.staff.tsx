@@ -27,6 +27,7 @@ import {
   listStaff, createStaff, updateStaff, deleteStaff, listAssignableUsers,
   type StaffRow,
 } from "@/lib/staff.functions";
+import { listJobRoles } from "@/lib/job-roles.functions";
 import { useTx } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/staff")({
