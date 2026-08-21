@@ -47,15 +47,32 @@ export const updateMyAddress = createServerFn({ method: "POST" })
   });
 
 /* ============ Quick-add child levels (union → building) ============ */
-/* Reads use the browser client with anon SELECT policies.
-   These are for signed-in users to append a missing branch on the fly. */
+/* Shared reference catalogue: only admin/manager/staff may append rows.
+   Name fields are strictly length-capped to prevent abuse. */
+
+const nameField = z.string().trim().min(1).max(100);
+const optName = z.string().trim().max(100).optional().nullable();
+
+type Ctx = { supabase: unknown; userId: string };
+
+async function assertStaff(context: Ctx) {
+  const sb = context.supabase as {
+    rpc: (name: string, args: unknown) => Promise<{ data: boolean | null }>;
+  };
+  for (const role of ["admin", "manager", "staff"] as const) {
+    const { data } = await sb.rpc("has_role", { _user_id: context.userId, _role: role });
+    if (data) return;
+  }
+  throw new Error("শুধুমাত্র Admin / Manager / Staff অনুমোদিত");
+}
 
 export const createUnionFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ upazila_id: z.number().int(), name: z.string().min(1), bn_name: z.string().optional().nullable() }).parse(d),
+    z.object({ upazila_id: z.number().int(), name: nameField, bn_name: optName }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertStaff(context as unknown as Ctx);
     const { data: row, error } = await context.supabase
       .from("unions").insert(data).select("id, name, bn_name").single();
     if (error) throw new Error(error.message);
@@ -65,9 +82,10 @@ export const createUnionFn = createServerFn({ method: "POST" })
 export const createPostOfficeFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ union_id: z.string().uuid(), name: z.string().min(1), bn_name: z.string().optional().nullable() }).parse(d),
+    z.object({ union_id: z.string().uuid(), name: nameField, bn_name: optName }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertStaff(context as unknown as Ctx);
     const { data: row, error } = await context.supabase
       .from("post_offices").insert(data).select("id, name, bn_name").single();
     if (error) throw new Error(error.message);
@@ -77,9 +95,10 @@ export const createPostOfficeFn = createServerFn({ method: "POST" })
 export const createVillageFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ post_office_id: z.string().uuid(), name: z.string().min(1), bn_name: z.string().optional().nullable() }).parse(d),
+    z.object({ post_office_id: z.string().uuid(), name: nameField, bn_name: optName }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertStaff(context as unknown as Ctx);
     const { data: row, error } = await context.supabase
       .from("villages").insert(data).select("id, name, bn_name").single();
     if (error) throw new Error(error.message);
@@ -89,9 +108,10 @@ export const createVillageFn = createServerFn({ method: "POST" })
 export const createAreaFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ village_id: z.string().uuid(), name: z.string().min(1), bn_name: z.string().optional().nullable() }).parse(d),
+    z.object({ village_id: z.string().uuid(), name: nameField, bn_name: optName }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertStaff(context as unknown as Ctx);
     const { data: row, error } = await context.supabase
       .from("areas").insert(data).select("id, name, bn_name").single();
     if (error) throw new Error(error.message);
@@ -101,9 +121,10 @@ export const createAreaFn = createServerFn({ method: "POST" })
 export const createRoadFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ area_id: z.string().uuid(), name: z.string().min(1), bn_name: z.string().optional().nullable() }).parse(d),
+    z.object({ area_id: z.string().uuid(), name: nameField, bn_name: optName }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertStaff(context as unknown as Ctx);
     const { data: row, error } = await context.supabase
       .from("roads").insert(data).select("id, name, bn_name").single();
     if (error) throw new Error(error.message);
@@ -115,12 +136,13 @@ export const createBuildingFn = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       road_id: z.string().uuid(),
-      name: z.string().min(1),
-      holding_number: z.string().optional().nullable(),
-      house_number: z.string().optional().nullable(),
+      name: nameField,
+      holding_number: z.string().trim().max(50).optional().nullable(),
+      house_number: z.string().trim().max(50).optional().nullable(),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertStaff(context as unknown as Ctx);
     const { data: row, error } = await context.supabase
       .from("buildings").insert(data).select("id, name, holding_number, house_number").single();
     if (error) throw new Error(error.message);
