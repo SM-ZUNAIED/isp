@@ -279,8 +279,8 @@ function LandingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-hero py-20 md:py-32">
-        <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:32px_32px]" />
-        <div className="container relative mx-auto px-4 text-center text-primary-foreground">
+        <div aria-hidden className="pointer-events-none absolute inset-0 hero-dots" />
+        <div className="container relative mx-auto px-4 text-center text-hero-foreground [text-shadow:0_1px_2px_oklch(0_0_0_/_0.25)]">
           <div className="mx-auto max-w-4xl animate-fade-in-up">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm">
               <Star className="h-4 w-4 fill-current text-warning" />
