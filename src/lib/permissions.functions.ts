@@ -15,6 +15,8 @@ export type PermissionKey =
   | "olt"
   | "tickets"
   | "notices"
+  | "hr"
+  | "call_center"
   | "staff"
   | "accounts"
   | "users"
@@ -33,6 +35,8 @@ export const PERMISSION_KEYS: PermissionKey[] = [
   "olt",
   "tickets",
   "notices",
+  "hr",
+  "call_center",
   "staff",
   "accounts",
   "users",
@@ -52,6 +56,8 @@ export const PERMISSION_LABELS: Record<PermissionKey, { bn: string; en: string }
   olt: { bn: "OLT / ONU", en: "OLT / ONU" },
   tickets: { bn: "সাপোর্ট টিকেট", en: "Support Tickets" },
   notices: { bn: "নোটিশ", en: "Notices" },
+  hr: { bn: "এইচআর ম্যানেজমেন্ট", en: "HR Management" },
+  call_center: { bn: "স্মার্ট কল সেন্টার", en: "Smart Call Center" },
   staff: { bn: "স্টাফ", en: "Staff" },
   accounts: { bn: "অ্যাকাউন্টস", en: "Accounts" },
   users: { bn: "ইউজার ও রোল", en: "Users & Roles" },

@@ -21,6 +21,8 @@ import {
   UserCircle2,
   Users2,
   ChevronDown, Home,
+  Briefcase, CalendarCheck, Plane, HandCoins, Scale, PieChart,
+  Headphones, Phone, PhoneCall, CalendarClock, History, Mic, Megaphone,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -68,7 +70,7 @@ type NavLink =
 type NavItem =
   | NavLink
   | { kind: "section"; label: { bn: string; en: string } }
-  | { kind: "group"; id: string; icon: typeof LayoutDashboard; label: { bn: string; en: string }; children: NavLink[] };
+  | { kind: "group"; id: string; icon: typeof LayoutDashboard; adminOnly?: boolean; permKey?: PermissionKey; label: { bn: string; en: string }; children: NavLink[] };
 
 const NAV: Array<NavItem> = [
   { kind: "section", label: { bn: "কোর", en: "Core" } },
@@ -78,6 +80,26 @@ const NAV: Array<NavItem> = [
   { kind: "link", to: "/admin/zones", labelKey: "admin.nav.zones", icon: Radio, permKey: "zones" },
   { kind: "link", to: "/admin/address", labelKey: "admin.nav.address", icon: MapPin, adminOnly: true, permKey: "address" },
   { kind: "link", to: "/admin/reports/address", labelKey: "admin.nav.addressReport", icon: BarChart3, permKey: "address_report" },
+  { kind: "group", id: "hr", icon: Briefcase, permKey: "hr", label: { bn: "এইচআর ম্যানেজমেন্ট", en: "HR Management" }, children: [
+    { kind: "link", to: "/admin/hr", icon: BarChart3, exact: true, label: { bn: "এইচআর ড্যাশবোর্ড", en: "HR Dashboard" } },
+    { kind: "link", to: "/admin/hr/employees", icon: Users2, label: { bn: "কর্মচারী", en: "Employees" } },
+    { kind: "link", to: "/admin/hr/attendance", icon: CalendarCheck, label: { bn: "উপস্থিতি", en: "Attendance" } },
+    { kind: "link", to: "/admin/hr/leave", icon: Plane, label: { bn: "ছুটি ব্যবস্থাপনা", en: "Leave Management" } },
+    { kind: "link", to: "/admin/hr/advance-salary", icon: HandCoins, label: { bn: "অগ্রিম বেতন", en: "Advance Salary" } },
+    { kind: "link", to: "/admin/hr/payroll", icon: Wallet, label: { bn: "পে-রোল জেনারেশন", en: "Payroll Generation" } },
+    { kind: "link", to: "/admin/hr/salary-policies", icon: Scale, label: { bn: "বেতন নীতিমালা", en: "Salary Policies" } },
+    { kind: "link", to: "/admin/hr/reports", icon: PieChart, label: { bn: "এইচআর রিপোর্ট", en: "HR Reports" } },
+  ] },
+  { kind: "group", id: "call-center", icon: Headphones, permKey: "call_center", label: { bn: "স্মার্ট কল সেন্টার", en: "Smart Call Center" }, children: [
+    { kind: "link", to: "/admin/call-center", icon: BarChart3, exact: true, label: { bn: "ড্যাশবোর্ড", en: "Dashboard" } },
+    { kind: "link", to: "/admin/call-center/ip-phones", icon: Phone, label: { bn: "আইপি ফোন কনফিগ", en: "IP Phone Config" } },
+    { kind: "link", to: "/admin/call-center/sip-numbers", icon: PhoneCall, label: { bn: "ডাইরেক্ট SIP আইপি নাম্বার", en: "Direct SIP IP Numbers" } },
+    { kind: "link", to: "/admin/call-center/follow-ups", icon: CalendarClock, label: { bn: "ফলো-আপ", en: "Follow-ups" } },
+    { kind: "link", to: "/admin/call-center/call-logs", icon: History, label: { bn: "কল লগ", en: "Call Logs" } },
+    { kind: "link", to: "/admin/call-center/voice-templates", icon: Mic, label: { bn: "ভয়েস টেমপ্লেট", en: "Voice Templates" } },
+    { kind: "link", to: "/admin/call-center/auto-voice-sms", icon: Megaphone, label: { bn: "অটো ভয়েস এসএমএস", en: "Auto Voice SMS" } },
+    { kind: "link", to: "/admin/call-center/reports", icon: PieChart, label: { bn: "রিপোর্ট", en: "Reports" } },
+  ] },
   { kind: "link", to: "/admin/bills", labelKey: "admin.nav.bills", icon: Receipt, permKey: "bills" },
   { kind: "link", to: "/admin/payments", labelKey: "admin.nav.payments", icon: Wallet, permKey: "payments" },
   { kind: "link", to: "/admin/mikrotik", labelKey: "admin.nav.mikrotik", icon: RouterIcon, permKey: "mikrotik" },
@@ -238,7 +260,7 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {NAV.filter((n) => {
-          if (n.kind === "section" || n.kind === "group") return true;
+          if (n.kind === "section") return true;
           if (n.adminOnly && !isAdmin) return false;
           if (isAdmin) return true;
           // Staff: must have can_view for this permKey
@@ -254,11 +276,11 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           }
           if (item.kind === "group") {
             const GIcon = item.icon;
-            const isOpen = !!openGroups[item.id];
             const groupLabel = lang === "en" ? item.label.en : item.label.bn;
             const anyChildActive = item.children.some((c) =>
               c.exact ? location.pathname === c.to : location.pathname.startsWith(c.to),
             );
+            const isOpen = openGroups[item.id] ?? anyChildActive;
             return (
               <div key={`g-${item.id}`} className="space-y-1">
                 <button
