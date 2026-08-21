@@ -48,7 +48,7 @@ const getMyRoles = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data } = await context.supabase
       .from("user_roles").select("role").eq("user_id", context.userId);
-    return (data ?? []).map((r) => r.role as "admin" | "staff" | "customer");
+    return (data ?? []).map((r) => r.role as "admin" | "manager" | "staff" | "customer");
   });
 
 export const Route = createFileRoute("/_authenticated/admin")({
