@@ -53,7 +53,7 @@ function AdminDashboard() {
   }
 
   const s = data!;
-  const isPrivileged = s.role === "admin" || s.role === "staff";
+  const isPrivileged = s.role === "admin" || s.role === "manager" || s.role === "staff";
 
   return (
     <div className="space-y-6">
