@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
-import { Loader2, Wallet, Receipt, PlayCircle, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, Wallet, Receipt, PlayCircle, Search, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,9 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  listBills, generateMonthlyBills, collectPayment,
+  listBills, generateMonthlyBills, collectPayment, listBillableCustomers,
 } from "@/lib/billing.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
@@ -56,6 +57,7 @@ function BillsPage() {
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [month, setMonth] = useState(currentMonth());
+  const [genOpen, setGenOpen] = useState(false);
 
   const bills = useQuery({ queryKey: ["bills"], queryFn: () => list() });
 
@@ -65,17 +67,20 @@ function BillsPage() {
   };
 
   const genMut = useMutation({
-    mutationFn: () => generate({ data: { billing_month: month } }),
+    mutationFn: (customerIds: string[]) =>
+      generate({ data: { billing_month: month, customer_ids: customerIds } }),
     onSuccess: (r) => {
       toast.success(tx(`${n(r.created)}টি বিল তৈরি হয়েছে`, `${n(r.created)} bills created`), {
         description: r.skipped
-          ? tx(`${n(r.skipped)}টি ইতিমধ্যে ছিল`, `${n(r.skipped)} already existed`)
+          ? tx(`${n(r.skipped)}টি বাদ দেওয়া হয়েছে`, `${n(r.skipped)} skipped`)
           : undefined,
       });
+      setGenOpen(false);
       invalidate();
     },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
+
 
   const rows = useMemo(() => {
     const all = bills.data ?? [];
@@ -119,15 +124,24 @@ function BillsPage() {
               <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-40" />
             </div>
             <div className="flex items-end">
-              <Button onClick={() => genMut.mutate()} disabled={genMut.isPending}
+              <Button onClick={() => setGenOpen(true)}
                 className="bg-gradient-primary text-white shadow-soft">
-                {genMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+                <PlayCircle className="mr-2 h-4 w-4" />
                 {tx("বিল জেনারেট করুন", "Generate Bills")}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <GenerateDialog
+        open={genOpen}
+        onOpenChange={setGenOpen}
+        month={month}
+        pending={genMut.isPending}
+        onConfirm={(ids) => genMut.mutate(ids)}
+      />
+
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatMini label={tx("মোট বিল", "Total Billed")} value={bdt(totals.billed)} tone="indigo" />
@@ -213,6 +227,156 @@ function BillsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function GenerateDialog({
+  open, onOpenChange, month, pending, onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  month: string;
+  pending: boolean;
+  onConfirm: (ids: string[]) => void;
+}) {
+  const tx = useTx();
+  const { n, bdt } = useFmt();
+  const fetchCustomers = useServerFn(listBillableCustomers);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+
+  const customers = useQuery({
+    queryKey: ["billable-customers", month],
+    queryFn: () => fetchCustomers({ data: { billing_month: month } }),
+    enabled: open,
+  });
+
+  const all = customers.data ?? [];
+  const eligible = all.filter((c) => !c.already_billed && c.monthly_bill > 0);
+
+  useEffect(() => {
+    if (!open) return;
+    const next: Record<string, boolean> = {};
+    for (const c of eligible) next[c.id] = true;
+    setSelected(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, customers.data]);
+
+  const visible = all.filter((c) => {
+    if (!search.trim()) return true;
+    const s = search.toLowerCase();
+    return (
+      c.full_name?.toLowerCase().includes(s) ||
+      c.customer_code?.toLowerCase().includes(s) ||
+      c.mobile?.toLowerCase().includes(s)
+    );
+  });
+
+  const chosen = eligible.filter((c) => selected[c.id]);
+  const totalAmount = chosen.reduce((a, c) => a + c.monthly_bill, 0);
+  const allChecked = eligible.length > 0 && chosen.length === eligible.length;
+
+  const toggleAll = (v: boolean) => {
+    const next: Record<string, boolean> = {};
+    for (const c of eligible) next[c.id] = v;
+    setSelected(next);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            {tx("কাস্টমার নির্বাচন করুন", "Select Customers")} — {month}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder={tx("নাম, ইউজার আইডি বা মোবাইল...", "Name, user ID or mobile...")} className="pl-9" />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+              <Checkbox checked={allChecked} onCheckedChange={(v) => toggleAll(Boolean(v))} />
+              {tx("সব নির্বাচন", "Select all")}
+            </label>
+            <div className="text-sm text-muted-foreground">
+              {tx(
+                `${n(chosen.length)} জন নির্বাচিত • মোট ${bdt(totalAmount)}`,
+                `${n(chosen.length)} selected • Total ${bdt(totalAmount)}`,
+              )}
+            </div>
+          </div>
+
+          <div className="max-h-[45vh] overflow-y-auto rounded-xl border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10" />
+                  <TableHead>{tx("কাস্টমার", "Customer")}</TableHead>
+                  <TableHead>{tx("মোবাইল", "Mobile")}</TableHead>
+                  <TableHead className="text-right">{tx("মাসিক বিল", "Monthly Bill")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.isLoading && (
+                  <TableRow><TableCell colSpan={4} className="py-10 text-center">
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
+                  </TableCell></TableRow>
+                )}
+                {!customers.isLoading && visible.length === 0 && (
+                  <TableRow><TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                    {tx("কোনো সক্রিয় কাস্টমার নেই", "No active customers")}
+                  </TableCell></TableRow>
+                )}
+                {visible.map((c) => {
+                  const disabled = c.already_billed || c.monthly_bill <= 0;
+                  return (
+                    <TableRow key={c.id} className={disabled ? "opacity-60" : ""}>
+                      <TableCell>
+                        <Checkbox
+                          disabled={disabled}
+                          checked={!disabled && Boolean(selected[c.id])}
+                          onCheckedChange={(v) =>
+                            setSelected((prev) => ({ ...prev, [c.id]: Boolean(v) }))
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{c.full_name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {c.customer_code}
+                          {c.already_billed && ` • ${tx("এ মাসে বিল হয়েছে", "already billed")}`}
+                          {!c.already_billed && c.monthly_bill <= 0 && ` • ${tx("বিল ০", "no amount")}`}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">{c.mobile}</TableCell>
+                      <TableCell className="text-right">{bdt(c.monthly_bill)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{tx("বাতিল", "Cancel")}</Button>
+          <Button
+            disabled={pending || chosen.length === 0}
+            onClick={() => onConfirm(chosen.map((c) => c.id))}
+            className="bg-gradient-primary text-white"
+          >
+            {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+            {tx(`${n(chosen.length)} জনের বিল তৈরি করুন`, `Generate ${n(chosen.length)} bills`)}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
