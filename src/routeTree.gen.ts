@@ -48,6 +48,7 @@ import { Route as AuthenticatedAdminHrAdvanceSalaryRouteImport } from './routes/
 import { Route as AuthenticatedAdminCustomersIdRouteImport } from './routes/_authenticated.admin.customers_.$id'
 import { Route as AuthenticatedAdminCallCenterVoiceTemplatesRouteImport } from './routes/_authenticated.admin.call-center.voice-templates'
 import { Route as AuthenticatedAdminCallCenterSipNumbersRouteImport } from './routes/_authenticated.admin.call-center.sip-numbers'
+import { Route as AuthenticatedAdminCallCenterReportsRouteImport } from './routes/_authenticated.admin.call-center.reports'
 import { Route as AuthenticatedAdminCallCenterIpPhonesRouteImport } from './routes/_authenticated.admin.call-center.ip-phones'
 import { Route as AuthenticatedAdminCallCenterFollowUpsRouteImport } from './routes/_authenticated.admin.call-center.follow-ups'
 import { Route as AuthenticatedAdminCallCenterCallLogsRouteImport } from './routes/_authenticated.admin.call-center.call-logs'
@@ -270,6 +271,12 @@ const AuthenticatedAdminCallCenterSipNumbersRoute =
     path: '/call-center/sip-numbers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCallCenterReportsRoute =
+  AuthenticatedAdminCallCenterReportsRouteImport.update({
+    id: '/call-center/reports',
+    path: '/call-center/reports',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCallCenterIpPhonesRoute =
   AuthenticatedAdminCallCenterIpPhonesRouteImport.update({
     id: '/call-center/ip-phones',
@@ -324,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
   '/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
   '/admin/call-center/ip-phones': typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  '/admin/call-center/reports': typeof AuthenticatedAdminCallCenterReportsRoute
   '/admin/call-center/sip-numbers': typeof AuthenticatedAdminCallCenterSipNumbersRoute
   '/admin/call-center/voice-templates': typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
@@ -367,6 +375,7 @@ export interface FileRoutesByTo {
   '/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
   '/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
   '/admin/call-center/ip-phones': typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  '/admin/call-center/reports': typeof AuthenticatedAdminCallCenterReportsRoute
   '/admin/call-center/sip-numbers': typeof AuthenticatedAdminCallCenterSipNumbersRoute
   '/admin/call-center/voice-templates': typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   '/admin/customers/$id': typeof AuthenticatedAdminCustomersIdRoute
@@ -413,6 +422,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
   '/_authenticated/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
   '/_authenticated/admin/call-center/ip-phones': typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  '/_authenticated/admin/call-center/reports': typeof AuthenticatedAdminCallCenterReportsRoute
   '/_authenticated/admin/call-center/sip-numbers': typeof AuthenticatedAdminCallCenterSipNumbersRoute
   '/_authenticated/admin/call-center/voice-templates': typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   '/_authenticated/admin/customers_/$id': typeof AuthenticatedAdminCustomersIdRoute
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/call-center/call-logs'
     | '/admin/call-center/follow-ups'
     | '/admin/call-center/ip-phones'
+    | '/admin/call-center/reports'
     | '/admin/call-center/sip-numbers'
     | '/admin/call-center/voice-templates'
     | '/admin/customers/$id'
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/admin/call-center/call-logs'
     | '/admin/call-center/follow-ups'
     | '/admin/call-center/ip-phones'
+    | '/admin/call-center/reports'
     | '/admin/call-center/sip-numbers'
     | '/admin/call-center/voice-templates'
     | '/admin/customers/$id'
@@ -547,6 +559,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/call-center/call-logs'
     | '/_authenticated/admin/call-center/follow-ups'
     | '/_authenticated/admin/call-center/ip-phones'
+    | '/_authenticated/admin/call-center/reports'
     | '/_authenticated/admin/call-center/sip-numbers'
     | '/_authenticated/admin/call-center/voice-templates'
     | '/_authenticated/admin/customers_/$id'
@@ -847,6 +860,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCallCenterSipNumbersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/call-center/reports': {
+      id: '/_authenticated/admin/call-center/reports'
+      path: '/call-center/reports'
+      fullPath: '/admin/call-center/reports'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/call-center/ip-phones': {
       id: '/_authenticated/admin/call-center/ip-phones'
       path: '/call-center/ip-phones'
@@ -900,6 +920,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCallCenterCallLogsRoute: typeof AuthenticatedAdminCallCenterCallLogsRoute
   AuthenticatedAdminCallCenterFollowUpsRoute: typeof AuthenticatedAdminCallCenterFollowUpsRoute
   AuthenticatedAdminCallCenterIpPhonesRoute: typeof AuthenticatedAdminCallCenterIpPhonesRoute
+  AuthenticatedAdminCallCenterReportsRoute: typeof AuthenticatedAdminCallCenterReportsRoute
   AuthenticatedAdminCallCenterSipNumbersRoute: typeof AuthenticatedAdminCallCenterSipNumbersRoute
   AuthenticatedAdminCallCenterVoiceTemplatesRoute: typeof AuthenticatedAdminCallCenterVoiceTemplatesRoute
   AuthenticatedAdminCustomersIdRoute: typeof AuthenticatedAdminCustomersIdRoute
@@ -941,6 +962,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminCallCenterFollowUpsRoute,
   AuthenticatedAdminCallCenterIpPhonesRoute:
     AuthenticatedAdminCallCenterIpPhonesRoute,
+  AuthenticatedAdminCallCenterReportsRoute:
+    AuthenticatedAdminCallCenterReportsRoute,
   AuthenticatedAdminCallCenterSipNumbersRoute:
     AuthenticatedAdminCallCenterSipNumbersRoute,
   AuthenticatedAdminCallCenterVoiceTemplatesRoute:
