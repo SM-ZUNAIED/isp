@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      advance_salary: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string | null
+          request_date: string
+          staff_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string | null
+          request_date?: string
+          staff_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string | null
+          request_date?: string
+          staff_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advance_salary_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       areas: {
         Row: {
           bn_name: string | null
@@ -42,6 +83,97 @@ export type Database = {
             columns: ["village_id"]
             isOneToOne: false
             referencedRelation: "villages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          staff_id: string
+          status: string
+          updated_at: string
+          work_date: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          staff_id: string
+          status?: string
+          updated_at?: string
+          work_date?: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          staff_id?: string
+          status?: string
+          updated_at?: string
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auto_voice_sms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          scheduled_at: string | null
+          sent_count: number
+          status: string
+          target: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          scheduled_at?: string | null
+          sent_count?: number
+          status?: string
+          target?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          scheduled_at?: string | null
+          sent_count?: number
+          status?: string
+          target?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_voice_sms_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "voice_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -139,6 +271,60 @@ export type Database = {
             columns: ["road_id"]
             isOneToOne: false
             referencedRelation: "roads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_logs: {
+        Row: {
+          called_at: string
+          created_at: string
+          customer_id: string | null
+          direction: string
+          duration_sec: number
+          handled_by: string | null
+          id: string
+          notes: string | null
+          outcome: string
+          phone: string
+        }
+        Insert: {
+          called_at?: string
+          created_at?: string
+          customer_id?: string | null
+          direction?: string
+          duration_sec?: number
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          outcome?: string
+          phone: string
+        }
+        Update: {
+          called_at?: string
+          created_at?: string
+          customer_id?: string | null
+          direction?: string
+          duration_sec?: number
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          outcome?: string
+          phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_logs_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -385,6 +571,56 @@ export type Database = {
         }
         Relationships: []
       }
+      follow_ups: {
+        Row: {
+          contact_name: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          notes: string | null
+          phone: string
+          priority: string
+          scheduled_at: string
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_name?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          notes?: string | null
+          phone: string
+          priority?: string
+          scheduled_at?: string
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_name?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string
+          priority?: string
+          scheduled_at?: string
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_ups_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       incomes: {
         Row: {
           amount: number
@@ -417,6 +653,59 @@ export type Database = {
           party_name?: string | null
         }
         Relationships: []
+      }
+      ip_phone_configs: {
+        Row: {
+          assigned_staff_id: string | null
+          created_at: string
+          extension: string | null
+          id: string
+          is_active: boolean
+          label: string
+          notes: string | null
+          password: string | null
+          sip_port: number
+          sip_server: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          assigned_staff_id?: string | null
+          created_at?: string
+          extension?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          notes?: string | null
+          password?: string | null
+          sip_port?: number
+          sip_server?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          assigned_staff_id?: string | null
+          created_at?: string
+          extension?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          notes?: string | null
+          password?: string | null
+          sip_port?: number
+          sip_server?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ip_phone_configs_assigned_staff_id_fkey"
+            columns: ["assigned_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       job_roles: {
         Row: {
@@ -488,6 +777,50 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          leave_type: string
+          reason: string | null
+          staff_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          staff_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          staff_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -836,6 +1169,59 @@ export type Database = {
           },
         ]
       }
+      payroll: {
+        Row: {
+          advance_deduction: number
+          allowance: number
+          basic_salary: number
+          created_at: string
+          deduction: number
+          id: string
+          net_salary: number
+          notes: string | null
+          pay_month: string
+          staff_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          advance_deduction?: number
+          allowance?: number
+          basic_salary?: number
+          created_at?: string
+          deduction?: number
+          id?: string
+          net_salary?: number
+          notes?: string | null
+          pay_month: string
+          staff_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          advance_deduction?: number
+          allowance?: number
+          basic_salary?: number
+          created_at?: string
+          deduction?: number
+          id?: string
+          net_salary?: number
+          notes?: string | null
+          pay_month?: string
+          staff_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_offices: {
         Row: {
           bn_name: string | null
@@ -933,6 +1319,42 @@ export type Database = {
           },
         ]
       }
+      salary_policies: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_percentage: boolean
+          name: string
+          policy_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_percentage?: boolean
+          name: string
+          policy_type?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_percentage?: boolean
+          name?: string
+          policy_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           about_text: string | null
@@ -1013,6 +1435,50 @@ export type Database = {
           whatsapp_api_config?: Json | null
         }
         Relationships: []
+      }
+      sip_numbers: {
+        Row: {
+          assigned_staff_id: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          is_active: boolean
+          notes: string | null
+          number: string
+          provider: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_staff_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          notes?: string | null
+          number: string
+          provider?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_staff_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          notes?: string | null
+          number?: string
+          provider?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sip_numbers_assigned_staff_id_fkey"
+            columns: ["assigned_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff: {
         Row: {
@@ -1302,6 +1768,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      voice_templates: {
+        Row: {
+          audio_url: string | null
+          body: string
+          created_at: string
+          id: string
+          is_active: boolean
+          language: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          audio_url?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          language?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          language?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       zones: {
         Row: {
