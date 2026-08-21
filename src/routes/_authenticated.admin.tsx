@@ -276,11 +276,11 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
           }
           if (item.kind === "group") {
             const GIcon = item.icon;
-            const isOpen = !!openGroups[item.id];
             const groupLabel = lang === "en" ? item.label.en : item.label.bn;
             const anyChildActive = item.children.some((c) =>
               c.exact ? location.pathname === c.to : location.pathname.startsWith(c.to),
             );
+            const isOpen = openGroups[item.id] ?? anyChildActive;
             return (
               <div key={`g-${item.id}`} className="space-y-1">
                 <button
