@@ -113,7 +113,7 @@ function AdminLayout() {
   });
   const roles = rolesQ.data ?? [];
   const isAdmin = roles.includes("admin");
-  const isStaff = roles.includes("staff");
+  const isStaff = roles.includes("staff") || roles.includes("manager");
   const hasAccess = isAdmin || isStaff;
 
   if (rolesQ.isLoading || rolesQ.isFetching && !rolesQ.data) {
