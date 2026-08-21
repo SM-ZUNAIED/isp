@@ -26,12 +26,21 @@ export const Route = createFileRoute("/auth")({
 });
 
 async function routeAfterLogin(userId: string): Promise<"/admin" | "/customer"> {
-  const { data } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-  const roles = (data ?? []).map((r) => r.role as string);
-  if (roles.includes("admin") || roles.includes("manager") || roles.includes("staff")) return "/admin";
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+
+    if (error) throw new Error(`Role lookup failed: ${error.message}`);
+
+    const roles = (data ?? []).map((r) => r.role as string);
+    if (roles.includes("admin") || roles.includes("manager") || roles.includes("staff")) return "/admin";
+    if (roles.includes("customer")) return "/customer";
+
+    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+
   return "/customer";
 }
 
@@ -43,9 +52,11 @@ function AuthPage() {
 
   useEffect(() => {
     if (!loading && session) {
-      routeAfterLogin(session.user.id).then((to) => navigate({ to }));
+      routeAfterLogin(session.user.id)
+        .then((to) => navigate({ to }))
+        .catch((error: Error) => toast.error(lang === "bn" ? "অ্যাকাউন্টের রোল লোড করা যায়নি" : "Could not load account role", { description: error.message }));
     }
-  }, [loading, session, navigate]);
+  }, [loading, session, navigate, lang]);
 
   const bn = lang === "bn";
 

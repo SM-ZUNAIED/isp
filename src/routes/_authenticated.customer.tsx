@@ -60,6 +60,27 @@ function CustomerPortal() {
 
   const get = useServerFn(getCustomerPortal);
   const q = useQuery({ queryKey: ["customer-portal"], queryFn: () => get() });
+  const rolesQ = useQuery({
+    queryKey: ["my-roles", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user?.id ?? "");
+      if (error) throw new Error(error.message);
+      return (data ?? []).map((row) => row.role as string);
+    },
+  });
+  const hasAdminPortalRole = (rolesQ.data ?? []).some(
+    (role) => role === "admin" || role === "manager" || role === "staff",
+  );
+
+  useEffect(() => {
+    if (!q.isLoading && !q.data?.customer && hasAdminPortalRole) {
+      navigate({ to: "/admin", replace: true });
+    }
+  }, [q.isLoading, q.data?.customer, hasAdminPortalRole, navigate]);
 
   // Realtime: auto-sync when admin updates customer/profile/bills
   useEffect(() => {
@@ -75,7 +96,7 @@ function CustomerPortal() {
     return () => { supabase.removeChannel(ch); };
   }, [user?.id, qc]);
 
-  if (q.isLoading) {
+  if (q.isLoading || (!q.data?.customer && (rolesQ.isLoading || hasAdminPortalRole))) {
     return <div className="min-h-screen grid place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
