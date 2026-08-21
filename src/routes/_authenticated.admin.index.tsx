@@ -49,7 +49,25 @@ function AdminDashboard() {
     );
   }
   if (error) {
-    return <div className="text-destructive">{t("admin.dash.loadError")}: {(error as Error).message}</div>;
+    const msg = (error as Error).message ?? "";
+    const isAuthConfig = /unauthorized|invalid token|missing supabase/i.test(msg);
+    return (
+      <Card className="max-w-xl border-destructive/40">
+        <CardHeader>
+          <CardTitle className="text-destructive">{t("admin.dash.loadError")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {isAuthConfig ? (
+            <p className="text-muted-foreground">
+              {lang === "bn"
+                ? "সার্ভারের ব্যাকএন্ড কনফিগারেশন মিলছে না (server backend configuration mismatch)। ডিপ্লয়মেন্টে SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY সঠিক প্রজেক্টের কি না দেখুন, তারপর লগআউট করে আবার লগইন করুন।"
+                : "Server backend configuration mismatch. Check that the deployment's SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY point to the current backend project, then sign out and sign in again."}
+            </p>
+          ) : null}
+          <p className="font-mono text-xs text-muted-foreground break-all">{msg}</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   const s = data!;
