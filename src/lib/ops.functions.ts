@@ -44,7 +44,7 @@ export const opsList = createServerFn({ method: "GET" })
     if (data.orderBy) q = q.order(data.orderBy, { ascending: data.ascending });
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as unknown as Array<Record<string, unknown>>;
+    return (rows ?? []) as unknown as Array<Record<string, string | number | boolean | null>>;
   });
 
 export const opsInsert = createServerFn({ method: "POST" })
