@@ -46,7 +46,7 @@ export const generateMonthlyBills = createServerFn({ method: "POST" })
         bill_number: `INV-${data.billing_month.replace("-", "")}-${c.customer_code}-${String(i + 1).padStart(3, "0")}`,
         billing_month: monthStart,
         amount: Number(c.monthly_bill),
-        due_amount: Number(c.monthly_bill),
+        
         due_date: dueDate.toISOString().slice(0, 10),
         status: "unpaid" as const,
       }));
