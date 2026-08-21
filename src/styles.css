@@ -23,6 +23,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-hero-foreground: var(--hero-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -95,6 +96,7 @@
   --chart-5: oklch(0.7 0.18 210);
 
   /* Premium gradients */
+  --hero-foreground: oklch(0.99 0.005 220);
   --gradient-primary: linear-gradient(135deg, oklch(0.55 0.17 155), oklch(0.65 0.18 175));
   --gradient-hero: linear-gradient(135deg, oklch(0.55 0.17 155) 0%, oklch(0.55 0.22 275) 100%);
   --gradient-accent: linear-gradient(135deg, oklch(0.72 0.19 45), oklch(0.65 0.2 340));
@@ -150,6 +152,7 @@
   --chart-4: oklch(0.74 0.19 340);
   --chart-5: oklch(0.77 0.17 210);
 
+  --hero-foreground: oklch(0.99 0.005 220);
   --gradient-primary: linear-gradient(135deg, oklch(0.7 0.19 158), oklch(0.72 0.18 190));
   --gradient-hero: linear-gradient(135deg, oklch(0.42 0.18 265) 0%, oklch(0.38 0.16 200) 45%, oklch(0.44 0.19 158) 100%);
   --gradient-accent: linear-gradient(135deg, oklch(0.78 0.18 55), oklch(0.7 0.2 340));
@@ -197,6 +200,10 @@
   }
 }
 
+@utility hero-dots {
+  background-image: radial-gradient(circle at 1px 1px, oklch(1 0 0 / 0.25) 1px, transparent 0);
+  background-size: 32px 32px;
+}
 @utility bg-gradient-hero {
   background: var(--gradient-hero);
 }
