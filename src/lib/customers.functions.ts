@@ -81,7 +81,14 @@ export const updateCustomerStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-const UpdateInput = CreateInput.extend({ id: z.string().uuid() });
+const UpdateInput = CreateInput.extend({
+  id: z.string().uuid(),
+  // Imported customers may have no phone number yet — allow blank on edit.
+  mobile: z
+    .string()
+    .nullish()
+    .transform((v) => v ?? ""),
+});
 
 export const updateCustomer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
