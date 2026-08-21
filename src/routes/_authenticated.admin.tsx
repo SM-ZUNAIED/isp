@@ -48,7 +48,7 @@ const getMyRoles = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data } = await context.supabase
       .from("user_roles").select("role").eq("user_id", context.userId);
-    return (data ?? []).map((r) => r.role as "admin" | "staff" | "customer");
+    return (data ?? []).map((r) => r.role as "admin" | "manager" | "staff" | "customer");
   });
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -113,7 +113,7 @@ function AdminLayout() {
   });
   const roles = rolesQ.data ?? [];
   const isAdmin = roles.includes("admin");
-  const isStaff = roles.includes("staff");
+  const isStaff = roles.includes("staff") || roles.includes("manager");
   const hasAccess = isAdmin || isStaff;
 
   if (rolesQ.isLoading || rolesQ.isFetching && !rolesQ.data) {
