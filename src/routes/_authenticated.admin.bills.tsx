@@ -18,8 +18,9 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  listBills, generateMonthlyBills, collectPayment,
+  listBills, generateMonthlyBills, collectPayment, listBillableCustomers,
 } from "@/lib/billing.functions";
 import { useTx, useFmt } from "@/hooks/use-i18n";
 
