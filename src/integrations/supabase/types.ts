@@ -143,18 +143,25 @@ export type Database = {
       customers: {
         Row: {
           address: string | null
+          address_line: string | null
           alt_mobile: string | null
+          area_id: string | null
           avatar_path: string | null
+          building_id: string | null
           connection_date: string | null
           created_at: string
           customer_code: string
+          district_id: number | null
+          division_id: number | null
           email: string | null
           expiry_date: string | null
           full_name: string
+          holding_no: string | null
           id: string
           ip_address: string | null
           mikrotik_id: string | null
           mobile: string
+          mohalla: string | null
           monthly_bill: number
           nid_number: string | null
           nid_url: string | null
@@ -165,29 +172,42 @@ export type Database = {
           onu_serial: string | null
           package_id: string | null
           photo_url: string | null
+          post_office_id: string | null
           pppoe_password: string | null
           pppoe_username: string | null
+          road_id: string | null
+          road_name: string | null
           router_info: string | null
           splitter_info: string | null
           status: Database["public"]["Enums"]["customer_status"]
+          union_id: string | null
+          upazila_id: number | null
           updated_at: string
           user_id: string | null
+          village_id: string | null
           zone_id: string | null
         }
         Insert: {
           address?: string | null
+          address_line?: string | null
           alt_mobile?: string | null
+          area_id?: string | null
           avatar_path?: string | null
+          building_id?: string | null
           connection_date?: string | null
           created_at?: string
           customer_code: string
+          district_id?: number | null
+          division_id?: number | null
           email?: string | null
           expiry_date?: string | null
           full_name: string
+          holding_no?: string | null
           id?: string
           ip_address?: string | null
           mikrotik_id?: string | null
           mobile: string
+          mohalla?: string | null
           monthly_bill?: number
           nid_number?: string | null
           nid_url?: string | null
@@ -198,29 +218,42 @@ export type Database = {
           onu_serial?: string | null
           package_id?: string | null
           photo_url?: string | null
+          post_office_id?: string | null
           pppoe_password?: string | null
           pppoe_username?: string | null
+          road_id?: string | null
+          road_name?: string | null
           router_info?: string | null
           splitter_info?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
+          union_id?: string | null
+          upazila_id?: number | null
           updated_at?: string
           user_id?: string | null
+          village_id?: string | null
           zone_id?: string | null
         }
         Update: {
           address?: string | null
+          address_line?: string | null
           alt_mobile?: string | null
+          area_id?: string | null
           avatar_path?: string | null
+          building_id?: string | null
           connection_date?: string | null
           created_at?: string
           customer_code?: string
+          district_id?: number | null
+          division_id?: number | null
           email?: string | null
           expiry_date?: string | null
           full_name?: string
+          holding_no?: string | null
           id?: string
           ip_address?: string | null
           mikrotik_id?: string | null
           mobile?: string
+          mohalla?: string | null
           monthly_bill?: number
           nid_number?: string | null
           nid_url?: string | null
@@ -231,13 +264,19 @@ export type Database = {
           onu_serial?: string | null
           package_id?: string | null
           photo_url?: string | null
+          post_office_id?: string | null
           pppoe_password?: string | null
           pppoe_username?: string | null
+          road_id?: string | null
+          road_name?: string | null
           router_info?: string | null
           splitter_info?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
+          union_id?: string | null
+          upazila_id?: number | null
           updated_at?: string
           user_id?: string | null
+          village_id?: string | null
           zone_id?: string | null
         }
         Relationships: [
@@ -699,9 +738,13 @@ export type Database = {
           method: Database["public"]["Enums"]["payment_method"]
           notes: string | null
           paid_at: string
-          receipt_number: string
+          receipt_number: string | null
           received_by: string | null
+          submission_ref: string | null
           transaction_id: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           amount: number
@@ -712,9 +755,13 @@ export type Database = {
           method?: Database["public"]["Enums"]["payment_method"]
           notes?: string | null
           paid_at?: string
-          receipt_number: string
+          receipt_number?: string | null
           received_by?: string | null
+          submission_ref?: string | null
           transaction_id?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           amount?: number
@@ -725,9 +772,13 @@ export type Database = {
           method?: Database["public"]["Enums"]["payment_method"]
           notes?: string | null
           paid_at?: string
-          receipt_number?: string
+          receipt_number?: string | null
           received_by?: string | null
+          submission_ref?: string | null
           transaction_id?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -844,6 +895,10 @@ export type Database = {
         Row: {
           about_text: string | null
           address: string | null
+          auto_billing_enabled: boolean
+          auto_suspend_after_days: number
+          bill_due_days: number
+          bill_generation_day: number
           email: string | null
           hero_image_url: string | null
           hero_subtitle: string | null
@@ -854,6 +909,9 @@ export type Database = {
           landing_content: Json | null
           logo_url: string | null
           notification_toggles: Json | null
+          overdue_notice_days: number[]
+          site_description: string | null
+          site_title: string | null
           sms_api_config: Json | null
           updated_at: string
           website: string | null
@@ -863,6 +921,10 @@ export type Database = {
         Insert: {
           about_text?: string | null
           address?: string | null
+          auto_billing_enabled?: boolean
+          auto_suspend_after_days?: number
+          bill_due_days?: number
+          bill_generation_day?: number
           email?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
@@ -873,6 +935,9 @@ export type Database = {
           landing_content?: Json | null
           logo_url?: string | null
           notification_toggles?: Json | null
+          overdue_notice_days?: number[]
+          site_description?: string | null
+          site_title?: string | null
           sms_api_config?: Json | null
           updated_at?: string
           website?: string | null
@@ -882,6 +947,10 @@ export type Database = {
         Update: {
           about_text?: string | null
           address?: string | null
+          auto_billing_enabled?: boolean
+          auto_suspend_after_days?: number
+          bill_due_days?: number
+          bill_generation_day?: number
           email?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
@@ -892,6 +961,9 @@ export type Database = {
           landing_content?: Json | null
           logo_url?: string | null
           notification_toggles?: Json | null
+          overdue_notice_days?: number[]
+          site_description?: string | null
+          site_title?: string | null
           sms_api_config?: Json | null
           updated_at?: string
           website?: string | null
@@ -1106,6 +1178,36 @@ export type Database = {
           },
         ]
       }
+      user_permissions: {
+        Row: {
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          permission_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          permission_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          permission_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1188,6 +1290,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_verify_payment: {
+        Args: { _approve: boolean; _payment_id: string }
+        Returns: Json
+      }
+      has_permission: {
+        Args: { _key: string; _need_edit?: boolean; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1195,8 +1305,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_get_landing_settings: { Args: never; Returns: Json }
       public_get_receipt: { Args: { _receipt: string }; Returns: Json }
       public_lookup_bill: { Args: { _code: string }; Returns: Json }
+      public_submit_payment: {
+        Args: {
+          _bill_id: string
+          _method: string
+          _msisdn: string
+          _transaction_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "staff" | "customer"
