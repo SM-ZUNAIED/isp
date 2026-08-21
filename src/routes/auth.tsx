@@ -30,8 +30,8 @@ async function routeAfterLogin(userId: string): Promise<"/admin" | "/customer"> 
     .from("user_roles")
     .select("role")
     .eq("user_id", userId);
-  const roles = (data ?? []).map((r) => r.role);
-  if (roles.includes("admin") || roles.includes("staff")) return "/admin";
+  const roles = (data ?? []).map((r) => r.role as string);
+  if (roles.includes("admin") || roles.includes("manager") || roles.includes("staff")) return "/admin";
   return "/customer";
 }
 
