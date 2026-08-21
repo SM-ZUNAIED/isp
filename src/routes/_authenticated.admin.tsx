@@ -15,6 +15,7 @@ import {
   UserCog,
   ShieldAlert,
   ShieldCheck,
+  BadgeCheck,
   MapPin,
   BarChart3,
   UserCircle2,
