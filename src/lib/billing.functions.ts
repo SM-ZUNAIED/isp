@@ -15,11 +15,45 @@ export const listBills = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
-/** Generate monthly bills for all active customers. */
-export const generateMonthlyBills = createServerFn({ method: "POST" })
+/** List active customers with billable amount + whether a bill already exists for the month. */
+export const listBillableCustomers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z.object({ billing_month: z.string().regex(/^\d{4}-\d{2}$/) }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const monthStart = `${data.billing_month}-01`;
+    const { data: customers, error: cErr } = await context.supabase
+      .from("customers")
+      .select("id, customer_code, full_name, mobile, monthly_bill")
+      .eq("status", "active")
+      .order("customer_code", { ascending: true });
+    if (cErr) throw new Error(cErr.message);
+
+    const { data: existing } = await context.supabase
+      .from("bills")
+      .select("customer_id")
+      .eq("billing_month", monthStart);
+    const existingSet = new Set((existing ?? []).map((b) => b.customer_id));
+
+    return (customers ?? []).map((c) => ({
+      id: c.id,
+      customer_code: c.customer_code,
+      full_name: c.full_name,
+      mobile: c.mobile,
+      monthly_bill: Number(c.monthly_bill ?? 0),
+      already_billed: existingSet.has(c.id),
+    }));
+  });
+
+/** Generate monthly bills for selected (or all active) customers. */
+export const generateMonthlyBills = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      billing_month: z.string().regex(/^\d{4}-\d{2}$/),
+      customer_ids: z.array(z.string().uuid()).optional(),
+    }).parse(d),
   )
   .handler(async ({ context, data }) => {
     const monthStart = `${data.billing_month}-01`;
@@ -27,10 +61,14 @@ export const generateMonthlyBills = createServerFn({ method: "POST" })
     dueDate.setMonth(dueDate.getMonth() + 1);
     dueDate.setDate(10);
 
-    const { data: customers, error: cErr } = await context.supabase
+    let cq = context.supabase
       .from("customers")
       .select("id, customer_code, monthly_bill")
       .eq("status", "active");
+    if (data.customer_ids && data.customer_ids.length > 0) {
+      cq = cq.in("id", data.customer_ids);
+    }
+    const { data: customers, error: cErr } = await cq;
     if (cErr) throw new Error(cErr.message);
 
     const { data: existing } = await context.supabase
@@ -46,10 +84,18 @@ export const generateMonthlyBills = createServerFn({ method: "POST" })
         bill_number: `INV-${data.billing_month.replace("-", "")}-${c.customer_code}-${String(i + 1).padStart(3, "0")}`,
         billing_month: monthStart,
         amount: Number(c.monthly_bill),
-        
+
         due_date: dueDate.toISOString().slice(0, 10),
         status: "unpaid" as const,
       }));
+
+    const skipped = (customers ?? []).length - toInsert.length;
+    if (toInsert.length === 0) return { created: 0, skipped };
+    const { error } = await context.supabase.from("bills").insert(toInsert);
+    if (error) throw new Error(error.message);
+    return { created: toInsert.length, skipped };
+  });
+
 
     if (toInsert.length === 0) return { created: 0, skipped: existingSet.size };
     const { error } = await context.supabase.from("bills").insert(toInsert);
