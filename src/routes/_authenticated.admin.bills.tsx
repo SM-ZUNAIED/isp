@@ -56,6 +56,7 @@ function BillsPage() {
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [month, setMonth] = useState(currentMonth());
+  const [genOpen, setGenOpen] = useState(false);
 
   const bills = useQuery({ queryKey: ["bills"], queryFn: () => list() });
 
@@ -65,17 +66,20 @@ function BillsPage() {
   };
 
   const genMut = useMutation({
-    mutationFn: () => generate({ data: { billing_month: month } }),
+    mutationFn: (customerIds: string[]) =>
+      generate({ data: { billing_month: month, customer_ids: customerIds } }),
     onSuccess: (r) => {
       toast.success(tx(`${n(r.created)}টি বিল তৈরি হয়েছে`, `${n(r.created)} bills created`), {
         description: r.skipped
-          ? tx(`${n(r.skipped)}টি ইতিমধ্যে ছিল`, `${n(r.skipped)} already existed`)
+          ? tx(`${n(r.skipped)}টি বাদ দেওয়া হয়েছে`, `${n(r.skipped)} skipped`)
           : undefined,
       });
+      setGenOpen(false);
       invalidate();
     },
     onError: (e: Error) => toast.error(tx("ব্যর্থ", "Failed"), { description: e.message }),
   });
+
 
   const rows = useMemo(() => {
     const all = bills.data ?? [];
