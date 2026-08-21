@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminAddressRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
 import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated.admin.access'
 import { Route as AuthenticatedAdminHrIndexRouteImport } from './routes/_authenticated.admin.hr.index'
+import { Route as AuthenticatedAdminCallCenterIndexRouteImport } from './routes/_authenticated.admin.call-center.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
 import { Route as AuthenticatedAdminHrSalaryPoliciesRouteImport } from './routes/_authenticated.admin.hr.salary-policies'
@@ -192,6 +193,12 @@ const AuthenticatedAdminHrIndexRoute =
     path: '/hr/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCallCenterIndexRoute =
+  AuthenticatedAdminCallCenterIndexRouteImport.update({
+    id: '/call-center/',
+    path: '/call-center/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicCronRunRoute = ApiPublicCronRunRouteImport.update({
   id: '/api/public/cron/run',
   path: '/api/public/cron/run',
@@ -329,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
   '/admin/hr/': typeof AuthenticatedAdminHrIndexRoute
 }
 export interface FileRoutesByTo {
@@ -371,6 +379,7 @@ export interface FileRoutesByTo {
   '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/admin/call-center': typeof AuthenticatedAdminCallCenterIndexRoute
   '/admin/hr': typeof AuthenticatedAdminHrIndexRoute
 }
 export interface FileRoutesById {
@@ -416,6 +425,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
+  '/_authenticated/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
   '/_authenticated/admin/hr/': typeof AuthenticatedAdminHrIndexRoute
 }
 export interface FileRouteTypes {
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/admin/hr/salary-policies'
     | '/admin/reports/address'
     | '/api/public/cron/run'
+    | '/admin/call-center/'
     | '/admin/hr/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/admin/hr/salary-policies'
     | '/admin/reports/address'
     | '/api/public/cron/run'
+    | '/admin/call-center'
     | '/admin/hr'
   id:
     | '__root__'
@@ -547,6 +559,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/hr/salary-policies'
     | '/_authenticated/admin/reports/address'
     | '/api/public/cron/run'
+    | '/_authenticated/admin/call-center/'
     | '/_authenticated/admin/hr/'
   fileRoutesById: FileRoutesById
 }
@@ -743,6 +756,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHrIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/call-center/': {
+      id: '/_authenticated/admin/call-center/'
+      path: '/call-center'
+      fullPath: '/admin/call-center/'
+      preLoaderRoute: typeof AuthenticatedAdminCallCenterIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/cron/run': {
       id: '/api/public/cron/run'
       path: '/api/public/cron/run'
@@ -891,6 +911,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminHrReportsRoute: typeof AuthenticatedAdminHrReportsRoute
   AuthenticatedAdminHrSalaryPoliciesRoute: typeof AuthenticatedAdminHrSalaryPoliciesRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
+  AuthenticatedAdminCallCenterIndexRoute: typeof AuthenticatedAdminCallCenterIndexRoute
   AuthenticatedAdminHrIndexRoute: typeof AuthenticatedAdminHrIndexRoute
 }
 
@@ -935,6 +956,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminHrSalaryPoliciesRoute:
     AuthenticatedAdminHrSalaryPoliciesRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
+  AuthenticatedAdminCallCenterIndexRoute:
+    AuthenticatedAdminCallCenterIndexRoute,
   AuthenticatedAdminHrIndexRoute: AuthenticatedAdminHrIndexRoute,
 }
 
