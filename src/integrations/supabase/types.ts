@@ -1319,9 +1319,14 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "staff" | "customer"
+      app_role: "admin" | "staff" | "customer" | "manager"
       bill_status: "paid" | "unpaid" | "partial" | "overdue"
-      customer_status: "active" | "pending" | "suspended" | "expired"
+      customer_status:
+        | "active"
+        | "pending"
+        | "suspended"
+        | "expired"
+        | "no_payment"
       olt_brand: "vsol" | "cdata" | "huawei" | "bdcom" | "zte" | "other"
       payment_method: "cash" | "bkash" | "nagad" | "rocket" | "bank" | "other"
       staff_status: "active" | "inactive"
@@ -1460,9 +1465,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "staff", "customer"],
+      app_role: ["admin", "staff", "customer", "manager"],
       bill_status: ["paid", "unpaid", "partial", "overdue"],
-      customer_status: ["active", "pending", "suspended", "expired"],
+      customer_status: [
+        "active",
+        "pending",
+        "suspended",
+        "expired",
+        "no_payment",
+      ],
       olt_brand: ["vsol", "cdata", "huawei", "bdcom", "zte", "other"],
       payment_method: ["cash", "bkash", "nagad", "rocket", "bank", "other"],
       staff_status: ["active", "inactive"],
