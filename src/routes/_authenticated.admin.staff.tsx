@@ -27,6 +27,7 @@ import {
   listStaff, createStaff, updateStaff, deleteStaff, listAssignableUsers,
   type StaffRow,
 } from "@/lib/staff.functions";
+import { listJobRoles } from "@/lib/job-roles.functions";
 import { useTx } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/staff")({
@@ -82,9 +83,11 @@ function StaffPage() {
   const update = useServerFn(updateStaff);
   const del = useServerFn(deleteStaff);
   const listUsers = useServerFn(listAssignableUsers);
+  const listRoles = useServerFn(listJobRoles);
 
   const q = useQuery({ queryKey: ["admin-staff"], queryFn: () => list() });
   const usersQ = useQuery({ queryKey: ["assignable-users"], queryFn: () => listUsers() });
+  const rolesQ = useQuery({ queryKey: ["job-roles"], queryFn: () => listRoles(), staleTime: 30_000 });
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["admin-staff"] });
     qc.invalidateQueries({ queryKey: ["assignable-users"] });
@@ -329,7 +332,26 @@ function StaffPage() {
             </div>
             <div>
               <Label>{tx("পদবি", "Designation")}</Label>
-              <Input value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} />
+              <Select
+                value={form.designation || "__none"}
+                onValueChange={(v) => setForm({ ...form, designation: v === "__none" ? "" : v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={tx("রোল নির্বাচন করুন", "Select role")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none">{tx("নির্বাচন করা হয়নি", "Not selected")}</SelectItem>
+                  {rolesQ.data?.filter((r) => r.is_active).map((r) => (
+                    <SelectItem key={r.id} value={r.name}>
+                      {tx(r.bn_name || r.name, r.name)}
+                    </SelectItem>
+                  ))}
+                  {form.designation &&
+                    !(rolesQ.data ?? []).some((r) => r.name === form.designation) && (
+                      <SelectItem value={form.designation}>{form.designation}</SelectItem>
+                    )}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>{tx("বিভাগ", "Department")}</Label>
