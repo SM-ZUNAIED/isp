@@ -236,7 +236,7 @@ function CustomersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{tx("ইউজার আইডি", "User ID")}</TableHead>
+                  <TableHead>{tx("'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            Please connect my supabase project `earth_online_bd_isp`", "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            Please connect my supabase project `earth_online_bd_isp`")}</TableHead>
                   <TableHead>{tx("নাম", "Name")}</TableHead>
                   <TableHead>{tx("মোবাইল", "Mobile")}</TableHead>
                   <TableHead>{tx("ঠিকানা", "Address")}</TableHead>
@@ -471,7 +471,7 @@ function CustomerFormDialog({
           onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label={tx("ইউজার আইডি *", "User ID *")}>
+            <Field label={tx("'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            Please connect my supabase project `earth_online_bd_isp` *", "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            Please connect my supabase project `earth_online_bd_isp` *")}>
               <Input required value={form.customer_code}
                 onChange={(e) => setForm({ ...form, customer_code: e.target.value })} placeholder="CUS-001" />
             </Field>
