@@ -119,15 +119,24 @@ function BillsPage() {
               <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-40" />
             </div>
             <div className="flex items-end">
-              <Button onClick={() => genMut.mutate()} disabled={genMut.isPending}
+              <Button onClick={() => setGenOpen(true)}
                 className="bg-gradient-primary text-white shadow-soft">
-                {genMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+                <PlayCircle className="mr-2 h-4 w-4" />
                 {tx("বিল জেনারেট করুন", "Generate Bills")}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <GenerateDialog
+        open={genOpen}
+        onOpenChange={setGenOpen}
+        month={month}
+        pending={genMut.isPending}
+        onConfirm={(ids) => genMut.mutate(ids)}
+      />
+
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatMini label={tx("মোট বিল", "Total Billed")} value={bdt(totals.billed)} tone="indigo" />
