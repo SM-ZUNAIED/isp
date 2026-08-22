@@ -9,7 +9,7 @@ import { useResellerCtx } from "./_authenticated.reseller";
 import { getMyResellerContext } from "@/lib/reseller.functions";
 import { RESELLER_MODULE_LABELS, RESELLER_MODULES, type ResellerPerm } from "@/lib/reseller-keys";
 
-export const Route = createFileRoute("/_authenticated/reseller/admin")({
+export const Route = createFileRoute("/_authenticated/reseller/admin/")({
   component: ResellerAdmin,
 });
 

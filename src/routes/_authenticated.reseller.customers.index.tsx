@@ -18,7 +18,7 @@ import {
   resellerCustomers, resellerCreateCustomer, resellerUpdateCustomer, resellerDeleteCustomer, resellerRefs,
 } from "@/lib/reseller.functions";
 
-export const Route = createFileRoute("/_authenticated/reseller/customers")({
+export const Route = createFileRoute("/_authenticated/reseller/customers/")({
   component: ResellerCustomers,
 });
 

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ResellerNetworkTable } from "@/components/reseller-network-table";
 
-export const Route = createFileRoute("/_authenticated/reseller/manager")({
+export const Route = createFileRoute("/_authenticated/reseller/manager/")({
   component: () => (
     <ResellerNetworkTable
       module="manager"

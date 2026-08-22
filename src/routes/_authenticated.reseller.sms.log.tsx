@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useI18n } from "@/hooks/use-i18n";
 import { resellerSmsLog } from "@/lib/reseller.functions";
 
-export const Route = createFileRoute("/_authenticated/reseller/sms")({
+export const Route = createFileRoute("/_authenticated/reseller/sms/log")({
   component: ResellerSmsPage,
 });
 
