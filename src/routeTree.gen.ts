@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedResellerRouteImport } from './routes/_authenticated.reseller'
 import { Route as AuthenticatedCustomerRouteImport } from './routes/_authenticated.customer'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedResellerIndexRouteImport } from './routes/_authenticated.reseller.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.receipt.$receiptNo'
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
@@ -98,6 +99,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedResellerIndexRoute =
+  AuthenticatedResellerIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -343,7 +350,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/customer': typeof AuthenticatedCustomerRoute
-  '/reseller': typeof AuthenticatedResellerRoute
+  '/reseller': typeof AuthenticatedResellerRouteWithChildren
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
@@ -363,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/reseller/': typeof AuthenticatedResellerIndexRoute
   '/admin/call-center/auto-voice-sms': typeof AuthenticatedAdminCallCenterAutoVoiceSmsRoute
   '/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
   '/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
@@ -392,7 +400,6 @@ export interface FileRoutesByTo {
   '/pay-bill': typeof PayBillRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/customer': typeof AuthenticatedCustomerRoute
-  '/reseller': typeof AuthenticatedResellerRoute
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
@@ -412,6 +419,7 @@ export interface FileRoutesByTo {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/reseller': typeof AuthenticatedResellerIndexRoute
   '/admin/call-center/auto-voice-sms': typeof AuthenticatedAdminCallCenterAutoVoiceSmsRoute
   '/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
   '/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
@@ -444,7 +452,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/customer': typeof AuthenticatedCustomerRoute
-  '/_authenticated/reseller': typeof AuthenticatedResellerRoute
+  '/_authenticated/reseller': typeof AuthenticatedResellerRouteWithChildren
   '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
   '/_authenticated/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/_authenticated/admin/address': typeof AuthenticatedAdminAddressRoute
@@ -464,6 +472,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/reseller/': typeof AuthenticatedResellerIndexRoute
   '/_authenticated/admin/call-center/auto-voice-sms': typeof AuthenticatedAdminCallCenterAutoVoiceSmsRoute
   '/_authenticated/admin/call-center/call-logs': typeof AuthenticatedAdminCallCenterCallLogsRoute
   '/_authenticated/admin/call-center/follow-ups': typeof AuthenticatedAdminCallCenterFollowUpsRoute
@@ -516,6 +525,7 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
+    | '/reseller/'
     | '/admin/call-center/auto-voice-sms'
     | '/admin/call-center/call-logs'
     | '/admin/call-center/follow-ups'
@@ -545,7 +555,6 @@ export interface FileRouteTypes {
     | '/pay-bill'
     | '/reset-password'
     | '/customer'
-    | '/reseller'
     | '/admin/access'
     | '/admin/accounts'
     | '/admin/address'
@@ -565,6 +574,7 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
+    | '/reseller'
     | '/admin/call-center/auto-voice-sms'
     | '/admin/call-center/call-logs'
     | '/admin/call-center/follow-ups'
@@ -616,6 +626,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/zones'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
+    | '/_authenticated/reseller/'
     | '/_authenticated/admin/call-center/auto-voice-sms'
     | '/_authenticated/admin/call-center/call-logs'
     | '/_authenticated/admin/call-center/follow-ups'
@@ -706,6 +717,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reseller/': {
+      id: '/_authenticated/reseller/'
+      path: '/'
+      fullPath: '/reseller/'
+      preLoaderRoute: typeof AuthenticatedResellerIndexRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -1095,16 +1113,29 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedResellerRouteChildren {
+  AuthenticatedResellerIndexRoute: typeof AuthenticatedResellerIndexRoute
+}
+
+const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
+  AuthenticatedResellerIndexRoute: AuthenticatedResellerIndexRoute,
+}
+
+const AuthenticatedResellerRouteWithChildren =
+  AuthenticatedResellerRoute._addFileChildren(
+    AuthenticatedResellerRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedCustomerRoute: typeof AuthenticatedCustomerRoute
-  AuthenticatedResellerRoute: typeof AuthenticatedResellerRoute
+  AuthenticatedResellerRoute: typeof AuthenticatedResellerRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedCustomerRoute: AuthenticatedCustomerRoute,
-  AuthenticatedResellerRoute: AuthenticatedResellerRoute,
+  AuthenticatedResellerRoute: AuthenticatedResellerRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
