@@ -8,13 +8,12 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
-import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import { ResellerHeader } from "@/components/reseller-header";
 import { getMyResellerContext } from "@/lib/reseller.functions";
 import { RESELLER_MODULE_LABELS, type ResellerModuleKey, type ResellerPerm } from "@/lib/reseller-keys";
 
@@ -279,23 +278,19 @@ function ResellerLayout() {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex items-center gap-3 border-b px-4 py-3">
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button size="icon" variant="ghost" className="lg:hidden"><Menu className="h-5 w-5" /></Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">{SidebarBody}</SheetContent>
-            </Sheet>
-            <div className="font-semibold">{L({ bn: "রিসেলার ড্যাশবোর্ড", en: "Reseller Dashboard" })}</div>
-            <Badge variant="secondary" className="ml-auto">
-              {L({ bn: "ব্যালেন্স", en: "Balance" })}: ৳{Number(reseller.current_balance ?? 0).toLocaleString()}
-            </Badge>
-            <LangToggle />
-            <ThemeToggle />
-            <Button size="icon" variant="ghost" onClick={async () => { await signOut(); navigate({ to: "/auth" }); }}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </header>
+          <ResellerHeader
+            displayName={reseller.business_name || reseller.name}
+            balance={Number(reseller.current_balance ?? 0)}
+            menu={
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button size="icon" variant="outline" className="h-9 w-9 rounded-lg lg:hidden"><Menu className="h-4 w-4" /></Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-64 p-0">{SidebarBody}</SheetContent>
+              </Sheet>
+            }
+          />
+
           <main className="min-w-0 flex-1 p-4 md:p-6"><Outlet /></main>
         </div>
       </div>
