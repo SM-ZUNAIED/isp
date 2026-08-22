@@ -83,6 +83,7 @@ import { Route as AuthenticatedResellerCustomersPendingRouteImport } from './rou
 import { Route as AuthenticatedResellerCustomersPackageChangeRouteImport } from './routes/_authenticated.reseller.customers.package-change'
 import { Route as AuthenticatedResellerCustomersOnlineRouteImport } from './routes/_authenticated.reseller.customers.online'
 import { Route as AuthenticatedResellerCustomersOfflineRouteImport } from './routes/_authenticated.reseller.customers.offline'
+import { Route as AuthenticatedResellerCustomersImportRouteImport } from './routes/_authenticated.reseller.customers.import'
 import { Route as AuthenticatedResellerCustomersFreeRouteImport } from './routes/_authenticated.reseller.customers.free'
 import { Route as AuthenticatedResellerCustomersExpiredRouteImport } from './routes/_authenticated.reseller.customers.expired'
 import { Route as AuthenticatedResellerCustomersDisableRouteImport } from './routes/_authenticated.reseller.customers.disable'
@@ -543,6 +544,12 @@ const AuthenticatedResellerCustomersOfflineRoute =
     path: '/customers/offline',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
+const AuthenticatedResellerCustomersImportRoute =
+  AuthenticatedResellerCustomersImportRouteImport.update({
+    id: '/customers/import',
+    path: '/customers/import',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerCustomersFreeRoute =
   AuthenticatedResellerCustomersFreeRouteImport.update({
     id: '/customers/free',
@@ -806,6 +813,7 @@ export interface FileRoutesByFullPath {
   '/reseller/customers/disable': typeof AuthenticatedResellerCustomersDisableRoute
   '/reseller/customers/expired': typeof AuthenticatedResellerCustomersExpiredRoute
   '/reseller/customers/free': typeof AuthenticatedResellerCustomersFreeRoute
+  '/reseller/customers/import': typeof AuthenticatedResellerCustomersImportRoute
   '/reseller/customers/offline': typeof AuthenticatedResellerCustomersOfflineRoute
   '/reseller/customers/online': typeof AuthenticatedResellerCustomersOnlineRoute
   '/reseller/customers/package-change': typeof AuthenticatedResellerCustomersPackageChangeRoute
@@ -912,6 +920,7 @@ export interface FileRoutesByTo {
   '/reseller/customers/disable': typeof AuthenticatedResellerCustomersDisableRoute
   '/reseller/customers/expired': typeof AuthenticatedResellerCustomersExpiredRoute
   '/reseller/customers/free': typeof AuthenticatedResellerCustomersFreeRoute
+  '/reseller/customers/import': typeof AuthenticatedResellerCustomersImportRoute
   '/reseller/customers/offline': typeof AuthenticatedResellerCustomersOfflineRoute
   '/reseller/customers/online': typeof AuthenticatedResellerCustomersOnlineRoute
   '/reseller/customers/package-change': typeof AuthenticatedResellerCustomersPackageChangeRoute
@@ -1022,6 +1031,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/customers/disable': typeof AuthenticatedResellerCustomersDisableRoute
   '/_authenticated/reseller/customers/expired': typeof AuthenticatedResellerCustomersExpiredRoute
   '/_authenticated/reseller/customers/free': typeof AuthenticatedResellerCustomersFreeRoute
+  '/_authenticated/reseller/customers/import': typeof AuthenticatedResellerCustomersImportRoute
   '/_authenticated/reseller/customers/offline': typeof AuthenticatedResellerCustomersOfflineRoute
   '/_authenticated/reseller/customers/online': typeof AuthenticatedResellerCustomersOnlineRoute
   '/_authenticated/reseller/customers/package-change': typeof AuthenticatedResellerCustomersPackageChangeRoute
@@ -1132,6 +1142,7 @@ export interface FileRouteTypes {
     | '/reseller/customers/disable'
     | '/reseller/customers/expired'
     | '/reseller/customers/free'
+    | '/reseller/customers/import'
     | '/reseller/customers/offline'
     | '/reseller/customers/online'
     | '/reseller/customers/package-change'
@@ -1238,6 +1249,7 @@ export interface FileRouteTypes {
     | '/reseller/customers/disable'
     | '/reseller/customers/expired'
     | '/reseller/customers/free'
+    | '/reseller/customers/import'
     | '/reseller/customers/offline'
     | '/reseller/customers/online'
     | '/reseller/customers/package-change'
@@ -1347,6 +1359,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/customers/disable'
     | '/_authenticated/reseller/customers/expired'
     | '/_authenticated/reseller/customers/free'
+    | '/_authenticated/reseller/customers/import'
     | '/_authenticated/reseller/customers/offline'
     | '/_authenticated/reseller/customers/online'
     | '/_authenticated/reseller/customers/package-change'
@@ -1921,6 +1934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResellerCustomersOfflineRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
+    '/_authenticated/reseller/customers/import': {
+      id: '/_authenticated/reseller/customers/import'
+      path: '/customers/import'
+      fullPath: '/reseller/customers/import'
+      preLoaderRoute: typeof AuthenticatedResellerCustomersImportRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
     '/_authenticated/reseller/customers/free': {
       id: '/_authenticated/reseller/customers/free'
       path: '/customers/free'
@@ -2273,6 +2293,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerCustomersDisableRoute: typeof AuthenticatedResellerCustomersDisableRoute
   AuthenticatedResellerCustomersExpiredRoute: typeof AuthenticatedResellerCustomersExpiredRoute
   AuthenticatedResellerCustomersFreeRoute: typeof AuthenticatedResellerCustomersFreeRoute
+  AuthenticatedResellerCustomersImportRoute: typeof AuthenticatedResellerCustomersImportRoute
   AuthenticatedResellerCustomersOfflineRoute: typeof AuthenticatedResellerCustomersOfflineRoute
   AuthenticatedResellerCustomersOnlineRoute: typeof AuthenticatedResellerCustomersOnlineRoute
   AuthenticatedResellerCustomersPackageChangeRoute: typeof AuthenticatedResellerCustomersPackageChangeRoute
@@ -2351,6 +2372,8 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
     AuthenticatedResellerCustomersExpiredRoute,
   AuthenticatedResellerCustomersFreeRoute:
     AuthenticatedResellerCustomersFreeRoute,
+  AuthenticatedResellerCustomersImportRoute:
+    AuthenticatedResellerCustomersImportRoute,
   AuthenticatedResellerCustomersOfflineRoute:
     AuthenticatedResellerCustomersOfflineRoute,
   AuthenticatedResellerCustomersOnlineRoute:
