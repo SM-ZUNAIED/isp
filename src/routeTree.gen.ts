@@ -21,6 +21,7 @@ import { Route as AuthenticatedResellerIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.receipt.$receiptNo'
 import { Route as AuthenticatedResellerSupportRouteImport } from './routes/_authenticated.reseller.support'
+import { Route as AuthenticatedResellerSmsRouteImport } from './routes/_authenticated.reseller.sms'
 import { Route as AuthenticatedResellerReportsRouteImport } from './routes/_authenticated.reseller.reports'
 import { Route as AuthenticatedResellerPackagesRouteImport } from './routes/_authenticated.reseller.packages'
 import { Route as AuthenticatedResellerCustomersRouteImport } from './routes/_authenticated.reseller.customers'
@@ -126,6 +127,12 @@ const AuthenticatedResellerSupportRoute =
   AuthenticatedResellerSupportRouteImport.update({
     id: '/support',
     path: '/support',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerSmsRoute =
+  AuthenticatedResellerSmsRouteImport.update({
+    id: '/sms',
+    path: '/sms',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
 const AuthenticatedResellerReportsRoute =
@@ -423,6 +430,7 @@ export interface FileRoutesByFullPath {
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/reseller/reports': typeof AuthenticatedResellerReportsRoute
+  '/reseller/sms': typeof AuthenticatedResellerSmsRoute
   '/reseller/support': typeof AuthenticatedResellerSupportRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -479,6 +487,7 @@ export interface FileRoutesByTo {
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/reseller/reports': typeof AuthenticatedResellerReportsRoute
+  '/reseller/sms': typeof AuthenticatedResellerSmsRoute
   '/reseller/support': typeof AuthenticatedResellerSupportRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -539,6 +548,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/_authenticated/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/_authenticated/reseller/reports': typeof AuthenticatedResellerReportsRoute
+  '/_authenticated/reseller/sms': typeof AuthenticatedResellerSmsRoute
   '/_authenticated/reseller/support': typeof AuthenticatedResellerSupportRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -599,6 +609,7 @@ export interface FileRouteTypes {
     | '/reseller/customers'
     | '/reseller/packages'
     | '/reseller/reports'
+    | '/reseller/sms'
     | '/reseller/support'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
@@ -655,6 +666,7 @@ export interface FileRouteTypes {
     | '/reseller/customers'
     | '/reseller/packages'
     | '/reseller/reports'
+    | '/reseller/sms'
     | '/reseller/support'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
@@ -714,6 +726,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/customers'
     | '/_authenticated/reseller/packages'
     | '/_authenticated/reseller/reports'
+    | '/_authenticated/reseller/sms'
     | '/_authenticated/reseller/support'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
@@ -835,6 +848,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/reseller/support'
       preLoaderRoute: typeof AuthenticatedResellerSupportRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/sms': {
+      id: '/_authenticated/reseller/sms'
+      path: '/sms'
+      fullPath: '/reseller/sms'
+      preLoaderRoute: typeof AuthenticatedResellerSmsRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/reports': {
@@ -1260,6 +1280,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerCustomersRoute: typeof AuthenticatedResellerCustomersRoute
   AuthenticatedResellerPackagesRoute: typeof AuthenticatedResellerPackagesRoute
   AuthenticatedResellerReportsRoute: typeof AuthenticatedResellerReportsRoute
+  AuthenticatedResellerSmsRoute: typeof AuthenticatedResellerSmsRoute
   AuthenticatedResellerSupportRoute: typeof AuthenticatedResellerSupportRoute
   AuthenticatedResellerIndexRoute: typeof AuthenticatedResellerIndexRoute
 }
@@ -1273,6 +1294,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerCustomersRoute: AuthenticatedResellerCustomersRoute,
   AuthenticatedResellerPackagesRoute: AuthenticatedResellerPackagesRoute,
   AuthenticatedResellerReportsRoute: AuthenticatedResellerReportsRoute,
+  AuthenticatedResellerSmsRoute: AuthenticatedResellerSmsRoute,
   AuthenticatedResellerSupportRoute: AuthenticatedResellerSupportRoute,
   AuthenticatedResellerIndexRoute: AuthenticatedResellerIndexRoute,
 }
