@@ -306,7 +306,12 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     }
     setBusy(true);
     try {
-      await requestOtp({ data: { mobile: mobile.trim() } });
+      const r = await requestOtp({ data: { mobile: mobile.trim() } });
+      if (!r.sent) {
+        toast.error(bn ? "OTP পাঠানো যায়নি" : "Could not send OTP", { description: r.error });
+        setBusy(false);
+        return;
+      }
       setStep("otp");
       setCooldown(60);
       toast.success(bn ? "OTP পাঠানো হয়েছে" : "OTP sent", {
@@ -326,6 +331,11 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     setBusy(true);
     try {
       const res = await verifyOtp({ data: { mobile: mobile.trim(), code: code.trim(), password } });
+      if (!res.created) {
+        toast.error(bn ? "যাচাই ব্যর্থ" : "Verification failed", { description: res.error });
+        setBusy(false);
+        return;
+      }
       const { error } = await supabase.auth.signInWithPassword({ email: res.email, password });
       if (error) {
         toast.success(bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created", {
