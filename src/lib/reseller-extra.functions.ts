@@ -32,7 +32,7 @@ export const resellerSmsSummary = createServerFn({ method: "GET" })
       });
     }
     const { data: setRow } = await admin.from("settings").select("sms_api_config").limit(1).maybeSingle();
-    const cfg = (setRow?.sms_api_config ?? null) as { url?: string; provider?: string; method?: string } | null;
+    const cfg = ((setRow as { sms_api_config?: unknown } | null)?.sms_api_config ?? null) as { url?: string; provider?: string; method?: string } | null;
     return {
       customers: ids.length,
       sent,
@@ -66,7 +66,7 @@ export const resellerSendSms = createServerFn({ method: "POST" })
     const admin = await getAdminClient();
 
     const { data: setRow } = await admin.from("settings").select("sms_api_config").limit(1).maybeSingle();
-    const cfg = (setRow?.sms_api_config as SmsConfig | null) ?? null;
+    const cfg = (((setRow as { sms_api_config?: unknown } | null)?.sms_api_config ?? null) as SmsConfig | null);
     if (!cfg?.url) throw new Error("SMS gateway is not configured by admin");
 
     let q = admin.from("customers").select("id, mobile, full_name").eq("reseller_id", r.id);
