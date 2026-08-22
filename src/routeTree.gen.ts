@@ -70,6 +70,7 @@ import { Route as AuthenticatedResellerReportsDueRouteImport } from './routes/_a
 import { Route as AuthenticatedResellerReportsBtrcExportRouteImport } from './routes/_authenticated.reseller.reports.btrc-export'
 import { Route as AuthenticatedResellerReportsBillSheetRouteImport } from './routes/_authenticated.reseller.reports.bill-sheet'
 import { Route as AuthenticatedResellerReportsBillGenerateRouteImport } from './routes/_authenticated.reseller.reports.bill-generate'
+import { Route as AuthenticatedResellerManagerSmsLogRouteImport } from './routes/_authenticated.reseller.manager.sms-log'
 import { Route as AuthenticatedResellerCustomersRecentRouteImport } from './routes/_authenticated.reseller.customers.recent'
 import { Route as AuthenticatedResellerCustomersPendingRouteImport } from './routes/_authenticated.reseller.customers.pending'
 import { Route as AuthenticatedResellerCustomersPackageChangeRouteImport } from './routes/_authenticated.reseller.customers.package-change'
@@ -452,6 +453,12 @@ const AuthenticatedResellerReportsBillGenerateRoute =
     path: '/reports/bill-generate',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
+const AuthenticatedResellerManagerSmsLogRoute =
+  AuthenticatedResellerManagerSmsLogRouteImport.update({
+    id: '/manager/sms-log',
+    path: '/manager/sms-log',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerCustomersRecentRoute =
   AuthenticatedResellerCustomersRecentRouteImport.update({
     id: '/customers/recent',
@@ -715,6 +722,7 @@ export interface FileRoutesByFullPath {
   '/reseller/customers/package-change': typeof AuthenticatedResellerCustomersPackageChangeRoute
   '/reseller/customers/pending': typeof AuthenticatedResellerCustomersPendingRoute
   '/reseller/customers/recent': typeof AuthenticatedResellerCustomersRecentRoute
+  '/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
   '/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
   '/reseller/reports/bill-sheet': typeof AuthenticatedResellerReportsBillSheetRoute
   '/reseller/reports/btrc-export': typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -808,6 +816,7 @@ export interface FileRoutesByTo {
   '/reseller/customers/package-change': typeof AuthenticatedResellerCustomersPackageChangeRoute
   '/reseller/customers/pending': typeof AuthenticatedResellerCustomersPendingRoute
   '/reseller/customers/recent': typeof AuthenticatedResellerCustomersRecentRoute
+  '/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
   '/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
   '/reseller/reports/bill-sheet': typeof AuthenticatedResellerReportsBillSheetRoute
   '/reseller/reports/btrc-export': typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -905,6 +914,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/customers/package-change': typeof AuthenticatedResellerCustomersPackageChangeRoute
   '/_authenticated/reseller/customers/pending': typeof AuthenticatedResellerCustomersPendingRoute
   '/_authenticated/reseller/customers/recent': typeof AuthenticatedResellerCustomersRecentRoute
+  '/_authenticated/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
   '/_authenticated/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
   '/_authenticated/reseller/reports/bill-sheet': typeof AuthenticatedResellerReportsBillSheetRoute
   '/_authenticated/reseller/reports/btrc-export': typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -1002,6 +1012,7 @@ export interface FileRouteTypes {
     | '/reseller/customers/package-change'
     | '/reseller/customers/pending'
     | '/reseller/customers/recent'
+    | '/reseller/manager/sms-log'
     | '/reseller/reports/bill-generate'
     | '/reseller/reports/bill-sheet'
     | '/reseller/reports/btrc-export'
@@ -1095,6 +1106,7 @@ export interface FileRouteTypes {
     | '/reseller/customers/package-change'
     | '/reseller/customers/pending'
     | '/reseller/customers/recent'
+    | '/reseller/manager/sms-log'
     | '/reseller/reports/bill-generate'
     | '/reseller/reports/bill-sheet'
     | '/reseller/reports/btrc-export'
@@ -1191,6 +1203,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/customers/package-change'
     | '/_authenticated/reseller/customers/pending'
     | '/_authenticated/reseller/customers/recent'
+    | '/_authenticated/reseller/manager/sms-log'
     | '/_authenticated/reseller/reports/bill-generate'
     | '/_authenticated/reseller/reports/bill-sheet'
     | '/_authenticated/reseller/reports/btrc-export'
@@ -1661,6 +1674,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResellerReportsBillGenerateRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
+    '/_authenticated/reseller/manager/sms-log': {
+      id: '/_authenticated/reseller/manager/sms-log'
+      path: '/manager/sms-log'
+      fullPath: '/reseller/manager/sms-log'
+      preLoaderRoute: typeof AuthenticatedResellerManagerSmsLogRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
     '/_authenticated/reseller/customers/recent': {
       id: '/_authenticated/reseller/customers/recent'
       path: '/customers/recent'
@@ -2013,6 +2033,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerCustomersPackageChangeRoute: typeof AuthenticatedResellerCustomersPackageChangeRoute
   AuthenticatedResellerCustomersPendingRoute: typeof AuthenticatedResellerCustomersPendingRoute
   AuthenticatedResellerCustomersRecentRoute: typeof AuthenticatedResellerCustomersRecentRoute
+  AuthenticatedResellerManagerSmsLogRoute: typeof AuthenticatedResellerManagerSmsLogRoute
   AuthenticatedResellerReportsBillGenerateRoute: typeof AuthenticatedResellerReportsBillGenerateRoute
   AuthenticatedResellerReportsBillSheetRoute: typeof AuthenticatedResellerReportsBillSheetRoute
   AuthenticatedResellerReportsBtrcExportRoute: typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -2078,6 +2099,8 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
     AuthenticatedResellerCustomersPendingRoute,
   AuthenticatedResellerCustomersRecentRoute:
     AuthenticatedResellerCustomersRecentRoute,
+  AuthenticatedResellerManagerSmsLogRoute:
+    AuthenticatedResellerManagerSmsLogRoute,
   AuthenticatedResellerReportsBillGenerateRoute:
     AuthenticatedResellerReportsBillGenerateRoute,
   AuthenticatedResellerReportsBillSheetRoute:
