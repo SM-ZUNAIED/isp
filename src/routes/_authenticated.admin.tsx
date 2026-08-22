@@ -23,7 +23,7 @@ import {
   ChevronDown, Home,
   Briefcase, CalendarCheck, Plane, HandCoins, Scale, PieChart,
   Headphones, Phone, PhoneCall, CalendarClock, History, Mic, Megaphone,
-  Palette, Paintbrush,
+  Palette, Paintbrush, Store, UserPlus,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
