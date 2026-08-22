@@ -24,6 +24,7 @@ import { Route as AuthenticatedResellerSupportRouteImport } from './routes/_auth
 import { Route as AuthenticatedResellerSmsRouteImport } from './routes/_authenticated.reseller.sms'
 import { Route as AuthenticatedResellerReportsRouteImport } from './routes/_authenticated.reseller.reports'
 import { Route as AuthenticatedResellerPackagesRouteImport } from './routes/_authenticated.reseller.packages'
+import { Route as AuthenticatedResellerMikrotikRouteImport } from './routes/_authenticated.reseller.mikrotik'
 import { Route as AuthenticatedResellerCustomersRouteImport } from './routes/_authenticated.reseller.customers'
 import { Route as AuthenticatedResellerCustomerSearchRouteImport } from './routes/_authenticated.reseller.customer-search'
 import { Route as AuthenticatedResellerAccountsHistoryRouteImport } from './routes/_authenticated.reseller.accounts-history'
@@ -145,6 +146,12 @@ const AuthenticatedResellerPackagesRoute =
   AuthenticatedResellerPackagesRouteImport.update({
     id: '/packages',
     path: '/packages',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerMikrotikRoute =
+  AuthenticatedResellerMikrotikRouteImport.update({
+    id: '/mikrotik',
+    path: '/mikrotik',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
 const AuthenticatedResellerCustomersRoute =
@@ -428,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/reseller/sms': typeof AuthenticatedResellerSmsRoute
@@ -485,6 +493,7 @@ export interface FileRoutesByTo {
   '/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/reseller/sms': typeof AuthenticatedResellerSmsRoute
@@ -546,6 +555,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
   '/_authenticated/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/_authenticated/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/_authenticated/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/_authenticated/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/_authenticated/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/_authenticated/reseller/sms': typeof AuthenticatedResellerSmsRoute
@@ -607,6 +617,7 @@ export interface FileRouteTypes {
     | '/reseller/accounts-history'
     | '/reseller/customer-search'
     | '/reseller/customers'
+    | '/reseller/mikrotik'
     | '/reseller/packages'
     | '/reseller/reports'
     | '/reseller/sms'
@@ -664,6 +675,7 @@ export interface FileRouteTypes {
     | '/reseller/accounts-history'
     | '/reseller/customer-search'
     | '/reseller/customers'
+    | '/reseller/mikrotik'
     | '/reseller/packages'
     | '/reseller/reports'
     | '/reseller/sms'
@@ -724,6 +736,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/accounts-history'
     | '/_authenticated/reseller/customer-search'
     | '/_authenticated/reseller/customers'
+    | '/_authenticated/reseller/mikrotik'
     | '/_authenticated/reseller/packages'
     | '/_authenticated/reseller/reports'
     | '/_authenticated/reseller/sms'
@@ -869,6 +882,13 @@ declare module '@tanstack/react-router' {
       path: '/packages'
       fullPath: '/reseller/packages'
       preLoaderRoute: typeof AuthenticatedResellerPackagesRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/mikrotik': {
+      id: '/_authenticated/reseller/mikrotik'
+      path: '/mikrotik'
+      fullPath: '/reseller/mikrotik'
+      preLoaderRoute: typeof AuthenticatedResellerMikrotikRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/customers': {
@@ -1278,6 +1298,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerAccountsHistoryRoute: typeof AuthenticatedResellerAccountsHistoryRoute
   AuthenticatedResellerCustomerSearchRoute: typeof AuthenticatedResellerCustomerSearchRoute
   AuthenticatedResellerCustomersRoute: typeof AuthenticatedResellerCustomersRoute
+  AuthenticatedResellerMikrotikRoute: typeof AuthenticatedResellerMikrotikRoute
   AuthenticatedResellerPackagesRoute: typeof AuthenticatedResellerPackagesRoute
   AuthenticatedResellerReportsRoute: typeof AuthenticatedResellerReportsRoute
   AuthenticatedResellerSmsRoute: typeof AuthenticatedResellerSmsRoute
@@ -1292,6 +1313,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerCustomerSearchRoute:
     AuthenticatedResellerCustomerSearchRoute,
   AuthenticatedResellerCustomersRoute: AuthenticatedResellerCustomersRoute,
+  AuthenticatedResellerMikrotikRoute: AuthenticatedResellerMikrotikRoute,
   AuthenticatedResellerPackagesRoute: AuthenticatedResellerPackagesRoute,
   AuthenticatedResellerReportsRoute: AuthenticatedResellerReportsRoute,
   AuthenticatedResellerSmsRoute: AuthenticatedResellerSmsRoute,
