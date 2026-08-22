@@ -94,6 +94,7 @@ import { Route as AuthenticatedResellerCustomersAddRouteImport } from './routes/
 import { Route as AuthenticatedResellerCustomersActiveRouteImport } from './routes/_authenticated.reseller.customers.active'
 import { Route as AuthenticatedResellerAdminLocationRouteImport } from './routes/_authenticated.reseller.admin.location'
 import { Route as AuthenticatedResellerAdminEmployeesRouteImport } from './routes/_authenticated.reseller.admin.employees'
+import { Route as AuthenticatedResellerAdminAddUserRouteImport } from './routes/_authenticated.reseller.admin.add-user'
 import { Route as AuthenticatedResellerAccountsIncomesRouteImport } from './routes/_authenticated.reseller.accounts.incomes'
 import { Route as AuthenticatedResellerAccountsExpensesRouteImport } from './routes/_authenticated.reseller.accounts.expenses'
 import { Route as AuthenticatedResellerAccountsBillCollectionRouteImport } from './routes/_authenticated.reseller.accounts.bill-collection'
@@ -608,6 +609,12 @@ const AuthenticatedResellerAdminEmployeesRoute =
     path: '/admin/employees',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
+const AuthenticatedResellerAdminAddUserRoute =
+  AuthenticatedResellerAdminAddUserRouteImport.update({
+    id: '/admin/add-user',
+    path: '/admin/add-user',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerAccountsIncomesRoute =
   AuthenticatedResellerAccountsIncomesRouteImport.update({
     id: '/accounts/incomes',
@@ -787,6 +794,7 @@ export interface FileRoutesByFullPath {
   '/reseller/accounts/bill-collection': typeof AuthenticatedResellerAccountsBillCollectionRoute
   '/reseller/accounts/expenses': typeof AuthenticatedResellerAccountsExpensesRoute
   '/reseller/accounts/incomes': typeof AuthenticatedResellerAccountsIncomesRoute
+  '/reseller/admin/add-user': typeof AuthenticatedResellerAdminAddUserRoute
   '/reseller/admin/employees': typeof AuthenticatedResellerAdminEmployeesRoute
   '/reseller/admin/location': typeof AuthenticatedResellerAdminLocationRoute
   '/reseller/customers/active': typeof AuthenticatedResellerCustomersActiveRoute
@@ -892,6 +900,7 @@ export interface FileRoutesByTo {
   '/reseller/accounts/bill-collection': typeof AuthenticatedResellerAccountsBillCollectionRoute
   '/reseller/accounts/expenses': typeof AuthenticatedResellerAccountsExpensesRoute
   '/reseller/accounts/incomes': typeof AuthenticatedResellerAccountsIncomesRoute
+  '/reseller/admin/add-user': typeof AuthenticatedResellerAdminAddUserRoute
   '/reseller/admin/employees': typeof AuthenticatedResellerAdminEmployeesRoute
   '/reseller/admin/location': typeof AuthenticatedResellerAdminLocationRoute
   '/reseller/customers/active': typeof AuthenticatedResellerCustomersActiveRoute
@@ -1001,6 +1010,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/accounts/bill-collection': typeof AuthenticatedResellerAccountsBillCollectionRoute
   '/_authenticated/reseller/accounts/expenses': typeof AuthenticatedResellerAccountsExpensesRoute
   '/_authenticated/reseller/accounts/incomes': typeof AuthenticatedResellerAccountsIncomesRoute
+  '/_authenticated/reseller/admin/add-user': typeof AuthenticatedResellerAdminAddUserRoute
   '/_authenticated/reseller/admin/employees': typeof AuthenticatedResellerAdminEmployeesRoute
   '/_authenticated/reseller/admin/location': typeof AuthenticatedResellerAdminLocationRoute
   '/_authenticated/reseller/customers/active': typeof AuthenticatedResellerCustomersActiveRoute
@@ -1110,6 +1120,7 @@ export interface FileRouteTypes {
     | '/reseller/accounts/bill-collection'
     | '/reseller/accounts/expenses'
     | '/reseller/accounts/incomes'
+    | '/reseller/admin/add-user'
     | '/reseller/admin/employees'
     | '/reseller/admin/location'
     | '/reseller/customers/active'
@@ -1215,6 +1226,7 @@ export interface FileRouteTypes {
     | '/reseller/accounts/bill-collection'
     | '/reseller/accounts/expenses'
     | '/reseller/accounts/incomes'
+    | '/reseller/admin/add-user'
     | '/reseller/admin/employees'
     | '/reseller/admin/location'
     | '/reseller/customers/active'
@@ -1323,6 +1335,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/accounts/bill-collection'
     | '/_authenticated/reseller/accounts/expenses'
     | '/_authenticated/reseller/accounts/incomes'
+    | '/_authenticated/reseller/admin/add-user'
     | '/_authenticated/reseller/admin/employees'
     | '/_authenticated/reseller/admin/location'
     | '/_authenticated/reseller/customers/active'
@@ -1985,6 +1998,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResellerAdminEmployeesRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
+    '/_authenticated/reseller/admin/add-user': {
+      id: '/_authenticated/reseller/admin/add-user'
+      path: '/admin/add-user'
+      fullPath: '/reseller/admin/add-user'
+      preLoaderRoute: typeof AuthenticatedResellerAdminAddUserRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
     '/_authenticated/reseller/accounts/incomes': {
       id: '/_authenticated/reseller/accounts/incomes'
       path: '/accounts/incomes'
@@ -2241,6 +2261,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerAccountsBillCollectionRoute: typeof AuthenticatedResellerAccountsBillCollectionRoute
   AuthenticatedResellerAccountsExpensesRoute: typeof AuthenticatedResellerAccountsExpensesRoute
   AuthenticatedResellerAccountsIncomesRoute: typeof AuthenticatedResellerAccountsIncomesRoute
+  AuthenticatedResellerAdminAddUserRoute: typeof AuthenticatedResellerAdminAddUserRoute
   AuthenticatedResellerAdminEmployeesRoute: typeof AuthenticatedResellerAdminEmployeesRoute
   AuthenticatedResellerAdminLocationRoute: typeof AuthenticatedResellerAdminLocationRoute
   AuthenticatedResellerCustomersActiveRoute: typeof AuthenticatedResellerCustomersActiveRoute
@@ -2306,6 +2327,8 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
     AuthenticatedResellerAccountsExpensesRoute,
   AuthenticatedResellerAccountsIncomesRoute:
     AuthenticatedResellerAccountsIncomesRoute,
+  AuthenticatedResellerAdminAddUserRoute:
+    AuthenticatedResellerAdminAddUserRoute,
   AuthenticatedResellerAdminEmployeesRoute:
     AuthenticatedResellerAdminEmployeesRoute,
   AuthenticatedResellerAdminLocationRoute:
