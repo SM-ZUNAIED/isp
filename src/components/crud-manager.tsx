@@ -35,6 +35,12 @@ export type CrudField = {
   prefix?: string;
 };
 
+export type CrudExtraColumn = {
+  key: string;
+  label: Bi;
+  render: (row: Record<string, unknown>) => ReactNode;
+};
+
 export type CrudProps = {
   table: OpsTable;
   title: Bi;
@@ -44,6 +50,7 @@ export type CrudProps = {
   ascending?: boolean;
   searchFields?: string[];
   readOnly?: boolean;
+  extraColumns?: CrudExtraColumn[];
 };
 
 type Row = Record<string, unknown>;
