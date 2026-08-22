@@ -117,6 +117,11 @@ const NAV: Array<NavItem> = [
   { kind: "group", id: "design", icon: Palette, adminOnly: true, permKey: "appearance", label: { bn: "ডিজাইন ও থিম", en: "Design & Theme" }, children: [
     { kind: "link", to: "/admin/appearance", icon: Paintbrush, label: { bn: "অ্যাপিয়ারেন্স", en: "Appearance" } },
   ] },
+  { kind: "group", id: "reseller-panel", icon: Store, adminOnly: true, label: { bn: "রিসেলার প্যানেল", en: "Reseller Panel" }, children: [
+    { kind: "link", to: "/admin/resellers/add", icon: UserPlus, label: { bn: "রিসেলার যোগ করুন", en: "Add Reseller" } },
+    { kind: "link", to: "/admin/resellers", icon: Users2, exact: true, label: { bn: "রিসেলার তালিকা", en: "Resellers" } },
+    { kind: "link", to: "/admin/resellers/access", icon: ShieldCheck, label: { bn: "রিসেলার অ্যাক্সেস", en: "Reseller Access" } },
+  ] },
   { kind: "link", to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true, permKey: "settings" },
 ];
 
