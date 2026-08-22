@@ -203,22 +203,56 @@ function ResellerLayout() {
   const isActive = (to: string, exact?: boolean) =>
     exact ? location.pathname === to : location.pathname.startsWith(to);
 
+  const groupOpen = (n: NavItem) =>
+    !!n.children?.some((c) => location.pathname === c.to) || location.pathname.startsWith(`${n.to}/`);
+
   const SidebarBody = (
     <nav className="space-y-1 p-3">
-      {items.map((n) => (
-        <Link
-          key={n.to}
-          to={n.to}
-          onClick={() => setOpen(false)}
-          className={cn(
-            "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-            isActive(n.to, n.exact) ? "bg-primary text-primary-foreground" : "hover:bg-muted",
-          )}
-        >
-          <n.icon className="h-4 w-4" />
-          {L(RESELLER_MODULE_LABELS[n.key])}
-        </Link>
-      ))}
+      {items.map((n) =>
+        n.children ? (
+          <Collapsible key={n.key} defaultOpen={groupOpen(n)}>
+            <CollapsibleTrigger
+              className={cn(
+                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors [&[data-state=open]>svg:last-child]:rotate-180",
+                groupOpen(n) ? "bg-muted font-medium" : "hover:bg-muted",
+              )}
+            >
+              <n.icon className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-left">{L(RESELLER_MODULE_LABELS[n.key])}</span>
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-1 space-y-0.5 border-l pl-5">
+              {n.children.map((c) => (
+                <Link
+                  key={c.to}
+                  to={c.to}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "block rounded-md px-3 py-1.5 text-sm transition-colors",
+                    location.pathname === c.to ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {L(c.label)}
+                </Link>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        ) : (
+          <Link
+            key={n.to}
+            to={n.to}
+            onClick={() => setOpen(false)}
+            className={cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+              isActive(n.to, n.exact) ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+            )}
+          >
+            <n.icon className="h-4 w-4" />
+            {L(RESELLER_MODULE_LABELS[n.key])}
+          </Link>
+        ),
+      )}
+
       <Link
         to="/reseller/profile"
         onClick={() => setOpen(false)}
