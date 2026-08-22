@@ -202,7 +202,9 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const raw = email.trim();
+    const identifier = /^01[3-9]\d{8}$/.test(raw) ? mobileToEmail(raw) : raw;
+    const { data, error } = await supabase.auth.signInWithPassword({ email: identifier, password });
     if (error) {
       setBusy(false);
       toast.error(bn ? "লগইন ব্যর্থ" : "Login failed", { description: error.message });
@@ -216,18 +218,18 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <IconField id="l-email" icon={Mail} label={bn ? "ইমেইল" : "Email"}>
+      <IconField id="l-email" icon={Mail} label={bn ? "মোবাইল বা ইমেইল" : "Mobile or email"}>
         <Input
           id="l-email"
-          type="email"
           required
-          autoComplete="email"
+          autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="owner@example.com"
+          placeholder={bn ? "01XXXXXXXXX বা owner@example.com" : "01XXXXXXXXX or owner@example.com"}
           className="h-11 pl-10"
         />
       </IconField>
+
 
       <IconField
         id="l-pass"
