@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useI18n } from "@/hooks/use-i18n";
-import { listResellers, updateReseller, resetResellerPassword, deleteReseller } from "@/lib/reseller.functions";
+import { Textarea } from "@/components/ui/textarea";
+import { listResellers, listResellerRefs, updateReseller, resetResellerPassword, deleteReseller } from "@/lib/reseller.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/resellers/")({
   component: ResellersPage,
@@ -21,8 +22,11 @@ export const Route = createFileRoute("/_authenticated/admin/resellers/")({
 
 type Row = {
   id: string; name: string; business_name: string | null; username: string;
-  email: string | null; phone: string | null; status: string;
-  current_balance: number; created_at: string; last_login_at: string | null;
+  email: string | null; phone: string | null; address: string | null; status: string;
+  current_balance: number; credit_limit: number; commission_percent: number;
+  manager_staff_id: string | null; mikrotik_id: string | null;
+  package_id: string | null; zone_id: string | null; notes: string | null;
+  created_at: string; last_login_at: string | null;
   customer_count: number; module_count: number;
 };
 
@@ -33,15 +37,18 @@ function ResellersPage() {
   const navigate = useNavigate();
 
   const listFn = useServerFn(listResellers);
+  const refsFn = useServerFn(listResellerRefs);
   const updateFn = useServerFn(updateReseller);
   const resetFn = useServerFn(resetResellerPassword);
   const delFn = useServerFn(deleteReseller);
 
   const q = useQuery({ queryKey: ["resellers"], queryFn: () => listFn() });
+  const refs = useQuery({ queryKey: ["reseller-refs"], queryFn: () => refsFn() });
   const [term, setTerm] = useState("");
   const [pwFor, setPwFor] = useState<Row | null>(null);
   const [pw, setPw] = useState("");
   const [editing, setEditing] = useState<Row | null>(null);
+  const [addBalance, setAddBalance] = useState("");
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["resellers"] });
 
@@ -51,10 +58,30 @@ function ResellersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
   const saveM = useMutation({
-    mutationFn: (v: Row) => updateFn({ data: { id: v.id, name: v.name, business_name: v.business_name, phone: v.phone, email: v.email ?? undefined } }),
-    onSuccess: () => { toast.success(L({ bn: "সেভ হয়েছে", en: "Saved" })); setEditing(null); invalidate(); },
+    mutationFn: (v: Row) =>
+      updateFn({
+        data: {
+          id: v.id,
+          name: v.name,
+          business_name: v.business_name,
+          phone: v.phone,
+          email: v.email ?? undefined,
+          address: v.address,
+          status: v.status as "active" | "inactive" | "suspended",
+          current_balance: Number(v.current_balance ?? 0) + (Number(addBalance) || 0),
+          credit_limit: Number(v.credit_limit ?? 0),
+          commission_percent: Number(v.commission_percent ?? 0),
+          manager_staff_id: v.manager_staff_id || null,
+          mikrotik_id: v.mikrotik_id || null,
+          package_id: v.package_id || null,
+          zone_id: v.zone_id || null,
+          notes: v.notes,
+        },
+      }),
+    onSuccess: () => { toast.success(L({ bn: "সেভ হয়েছে", en: "Saved" })); setEditing(null); setAddBalance(""); invalidate(); },
     onError: (e: Error) => toast.error(e.message),
   });
+
   const pwM = useMutation({
     mutationFn: () => resetFn({ data: { id: pwFor!.id, password: pw } }),
     onSuccess: () => { toast.success(L({ bn: "পাসওয়ার্ড রিসেট হয়েছে", en: "Password reset" })); setPwFor(null); setPw(""); },
