@@ -30,6 +30,7 @@ import { Route as AuthenticatedResellerMikrotikRouteImport } from './routes/_aut
 import { Route as AuthenticatedResellerManagerRouteImport } from './routes/_authenticated.reseller.manager'
 import { Route as AuthenticatedResellerCustomersRouteImport } from './routes/_authenticated.reseller.customers'
 import { Route as AuthenticatedResellerCustomerSearchRouteImport } from './routes/_authenticated.reseller.customer-search'
+import { Route as AuthenticatedResellerAdminRouteImport } from './routes/_authenticated.reseller.admin'
 import { Route as AuthenticatedResellerAccountsHistoryRouteImport } from './routes/_authenticated.reseller.accounts-history'
 import { Route as AuthenticatedResellerAccountsRouteImport } from './routes/_authenticated.reseller.accounts'
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
@@ -185,6 +186,12 @@ const AuthenticatedResellerCustomerSearchRoute =
   AuthenticatedResellerCustomerSearchRouteImport.update({
     id: '/customer-search',
     path: '/customer-search',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerAdminRoute =
+  AuthenticatedResellerAdminRouteImport.update({
+    id: '/admin',
+    path: '/admin',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
 const AuthenticatedResellerAccountsHistoryRoute =
@@ -454,6 +461,7 @@ export interface FileRoutesByFullPath {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/reseller/accounts': typeof AuthenticatedResellerAccountsRoute
   '/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
+  '/reseller/admin': typeof AuthenticatedResellerAdminRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/reseller/manager': typeof AuthenticatedResellerManagerRoute
@@ -515,6 +523,7 @@ export interface FileRoutesByTo {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/reseller/accounts': typeof AuthenticatedResellerAccountsRoute
   '/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
+  '/reseller/admin': typeof AuthenticatedResellerAdminRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/reseller/manager': typeof AuthenticatedResellerManagerRoute
@@ -580,6 +589,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/_authenticated/reseller/accounts': typeof AuthenticatedResellerAccountsRoute
   '/_authenticated/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
+  '/_authenticated/reseller/admin': typeof AuthenticatedResellerAdminRoute
   '/_authenticated/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/_authenticated/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/_authenticated/reseller/manager': typeof AuthenticatedResellerManagerRoute
@@ -645,6 +655,7 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/reseller/accounts'
     | '/reseller/accounts-history'
+    | '/reseller/admin'
     | '/reseller/customer-search'
     | '/reseller/customers'
     | '/reseller/manager'
@@ -706,6 +717,7 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/reseller/accounts'
     | '/reseller/accounts-history'
+    | '/reseller/admin'
     | '/reseller/customer-search'
     | '/reseller/customers'
     | '/reseller/manager'
@@ -770,6 +782,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/zones'
     | '/_authenticated/reseller/accounts'
     | '/_authenticated/reseller/accounts-history'
+    | '/_authenticated/reseller/admin'
     | '/_authenticated/reseller/customer-search'
     | '/_authenticated/reseller/customers'
     | '/_authenticated/reseller/manager'
@@ -963,6 +976,13 @@ declare module '@tanstack/react-router' {
       path: '/customer-search'
       fullPath: '/reseller/customer-search'
       preLoaderRoute: typeof AuthenticatedResellerCustomerSearchRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/admin': {
+      id: '/_authenticated/reseller/admin'
+      path: '/admin'
+      fullPath: '/reseller/admin'
+      preLoaderRoute: typeof AuthenticatedResellerAdminRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/accounts-history': {
@@ -1356,6 +1376,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerAccountsRoute: typeof AuthenticatedResellerAccountsRoute
   AuthenticatedResellerAccountsHistoryRoute: typeof AuthenticatedResellerAccountsHistoryRoute
+  AuthenticatedResellerAdminRoute: typeof AuthenticatedResellerAdminRoute
   AuthenticatedResellerCustomerSearchRoute: typeof AuthenticatedResellerCustomerSearchRoute
   AuthenticatedResellerCustomersRoute: typeof AuthenticatedResellerCustomersRoute
   AuthenticatedResellerManagerRoute: typeof AuthenticatedResellerManagerRoute
@@ -1373,6 +1394,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerAccountsRoute: AuthenticatedResellerAccountsRoute,
   AuthenticatedResellerAccountsHistoryRoute:
     AuthenticatedResellerAccountsHistoryRoute,
+  AuthenticatedResellerAdminRoute: AuthenticatedResellerAdminRoute,
   AuthenticatedResellerCustomerSearchRoute:
     AuthenticatedResellerCustomerSearchRoute,
   AuthenticatedResellerCustomersRoute: AuthenticatedResellerCustomersRoute,
