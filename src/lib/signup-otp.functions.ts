@@ -26,13 +26,18 @@ export const requestSignupOtp = createServerFn({ method: "POST" })
 
     const mobile = data.mobile;
 
-    // Already registered?
+    // Already registered? (only if a real auth user still exists)
     const { data: existing } = await supabaseAdmin
       .from("profiles")
       .select("id")
       .eq("mobile", mobile)
       .maybeSingle();
-    if (existing) throw new Error("This mobile number is already registered. Please sign in.");
+    if (existing) {
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(existing.id);
+      if (authUser?.user) {
+        return { sent: false as const, error: "This mobile number is already registered. Please sign in." };
+      }
+    }
 
     // Rate limit: max 5 codes per 15 minutes per number.
     const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
@@ -41,7 +46,7 @@ export const requestSignupOtp = createServerFn({ method: "POST" })
       .select("id", { count: "exact", head: true })
       .eq("mobile", mobile)
       .gte("created_at", since);
-    if ((count ?? 0) >= 5) throw new Error("Too many attempts. Please try again later.");
+    if ((count ?? 0) >= 5) return { sent: false as const, error: "Too many attempts. Please try again later." };
 
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const { error: insErr } = await supabaseAdmin.from("signup_otps").insert({
@@ -49,7 +54,7 @@ export const requestSignupOtp = createServerFn({ method: "POST" })
       code_hash: await sha256Hex(`${mobile}:${code}`),
       expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     });
-    if (insErr) throw new Error("Could not create verification code.");
+    if (insErr) return { sent: false as const, error: "Could not create verification code." };
 
     const { data: setRow } = await supabaseAdmin
       .from("settings")
@@ -57,12 +62,12 @@ export const requestSignupOtp = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
     const cfg = (setRow?.sms_api_config as SmsConfig | null) ?? null;
-    if (!cfg?.url) throw new Error("SMS gateway is not configured. Contact the operator.");
+    if (!cfg?.url) return { sent: false as const, error: "SMS gateway is not configured. Contact the operator." };
 
     const res = await sendSms(cfg, mobile, `Your verification code is ${code}. Valid for 5 minutes.`);
-    if (!res.ok) throw new Error("Could not send the verification SMS. Please try again.");
+    if (!res.ok) return { sent: false as const, error: "Could not send the verification SMS. Please try again." };
 
-    return { sent: true };
+    return { sent: true as const };
   });
 
 /** Step 2 — verify OTP and create the account. */
@@ -81,13 +86,15 @@ export const verifySignupOtp = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    if (!row) throw new Error("No verification code found. Please request a new one.");
-    if (new Date(row.expires_at).getTime() < Date.now()) throw new Error("The code has expired. Request a new one.");
-    if (row.attempts >= 5) throw new Error("Too many wrong attempts. Request a new code.");
+    const fail = (error: string) => ({ created: false as const, error });
+
+    if (!row) return fail("No verification code found. Please request a new one.");
+    if (new Date(row.expires_at).getTime() < Date.now()) return fail("The code has expired. Request a new one.");
+    if (row.attempts >= 5) return fail("Too many wrong attempts. Request a new code.");
 
     if (row.code_hash !== (await sha256Hex(`${mobile}:${code}`))) {
       await supabaseAdmin.from("signup_otps").update({ attempts: row.attempts + 1 }).eq("id", row.id);
-      throw new Error("The verification code is incorrect.");
+      return fail("The verification code is incorrect.");
     }
 
     await supabaseAdmin.from("signup_otps").update({ consumed: true }).eq("id", row.id);
@@ -99,9 +106,9 @@ export const verifySignupOtp = createServerFn({ method: "POST" })
       user_metadata: { mobile, full_name: mobile },
     });
     if (error) {
-      if (/already/i.test(error.message)) throw new Error("This mobile number is already registered.");
-      throw new Error("Could not create the account. Please try again.");
+      if (/already/i.test(error.message)) return fail("This mobile number is already registered.");
+      return fail("Could not create the account. Please try again.");
     }
 
-    return { created: true, email: mobileToEmail(mobile) };
+    return { created: true as const, email: mobileToEmail(mobile) };
   });
