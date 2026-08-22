@@ -539,7 +539,7 @@ export const resellerAccountsHistory = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     const term = (data.q ?? "").toLowerCase();
-    const list = (rows ?? []) as Array<Record<string, unknown>>;
+    const list = (rows ?? []) as unknown as Array<Record<string, string | number | null>>;
     return term
       ? list.filter((x) => JSON.stringify(x).toLowerCase().includes(term))
       : list;
@@ -627,28 +627,28 @@ export const resellerNetwork = createServerFn({ method: "POST" })
     const r = await requireReseller(context.userId, data.module);
     const admin = await getAdminClient();
     if (data.module === "mikrotik") {
-      if (!r.mikrotik_id) return { rows: [] as Array<Record<string, unknown>> };
+      if (!r.mikrotik_id) return { rows: [] as Array<Record<string, string | number | boolean | null>> };
       // Credentials are never exposed to the reseller.
       const { data: rows } = await admin
         .from("mikrotiks")
         .select("id, name, ip_address, is_online, cpu_load, ram_usage, last_checked_at")
         .eq("id", r.mikrotik_id);
-      return { rows: (rows ?? []) as Array<Record<string, unknown>> };
+      return { rows: (rows ?? []) as Array<Record<string, string | number | boolean | null>> };
     }
     if (data.module === "manager") {
-      if (!r.manager_staff_id) return { rows: [] as Array<Record<string, unknown>> };
+      if (!r.manager_staff_id) return { rows: [] as Array<Record<string, string | number | boolean | null>> };
       const { data: rows } = await admin
         .from("staff")
         .select("id, staff_code, full_name, designation, mobile, email, status")
         .eq("id", r.manager_staff_id);
-      return { rows: (rows ?? []) as Array<Record<string, unknown>> };
+      return { rows: (rows ?? []) as Array<Record<string, string | number | boolean | null>> };
     }
     // POP = Point of Presence, modelled by zones in this system.
     const { data: rows } = await admin
       .from("zones")
       .select("id, name, description")
       .eq(r.zone_id ? "id" : "id", r.zone_id ?? "00000000-0000-0000-0000-000000000000");
-    return { rows: (rows ?? []) as Array<Record<string, unknown>> };
+    return { rows: (rows ?? []) as Array<Record<string, string | number | boolean | null>> };
   });
 
 export const resellerSmsLog = createServerFn({ method: "GET" })

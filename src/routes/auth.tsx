@@ -25,7 +25,7 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-async function routeAfterLogin(userId: string): Promise<"/admin" | "/customer"> {
+async function routeAfterLogin(userId: string): Promise<"/admin" | "/customer" | "/reseller"> {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const { data, error } = await supabase
       .from("user_roles")
@@ -36,6 +36,7 @@ async function routeAfterLogin(userId: string): Promise<"/admin" | "/customer"> 
 
     const roles = (data ?? []).map((r) => r.role as string);
     if (roles.includes("admin") || roles.includes("manager") || roles.includes("staff")) return "/admin";
+    if (roles.includes("reseller")) return "/reseller";
     if (roles.includes("customer")) return "/customer";
 
     if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 300));

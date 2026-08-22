@@ -20,9 +20,17 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedResellerIndexRouteImport } from './routes/_authenticated.reseller.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.receipt.$receiptNo'
+import { Route as AuthenticatedResellerSupportRouteImport } from './routes/_authenticated.reseller.support'
+import { Route as AuthenticatedResellerSmsRouteImport } from './routes/_authenticated.reseller.sms'
+import { Route as AuthenticatedResellerReportsRouteImport } from './routes/_authenticated.reseller.reports'
+import { Route as AuthenticatedResellerProfileRouteImport } from './routes/_authenticated.reseller.profile'
+import { Route as AuthenticatedResellerPopRouteImport } from './routes/_authenticated.reseller.pop'
 import { Route as AuthenticatedResellerPackagesRouteImport } from './routes/_authenticated.reseller.packages'
+import { Route as AuthenticatedResellerMikrotikRouteImport } from './routes/_authenticated.reseller.mikrotik'
+import { Route as AuthenticatedResellerManagerRouteImport } from './routes/_authenticated.reseller.manager'
 import { Route as AuthenticatedResellerCustomersRouteImport } from './routes/_authenticated.reseller.customers'
 import { Route as AuthenticatedResellerCustomerSearchRouteImport } from './routes/_authenticated.reseller.customer-search'
+import { Route as AuthenticatedResellerAdminRouteImport } from './routes/_authenticated.reseller.admin'
 import { Route as AuthenticatedResellerAccountsHistoryRouteImport } from './routes/_authenticated.reseller.accounts-history'
 import { Route as AuthenticatedResellerAccountsRouteImport } from './routes/_authenticated.reseller.accounts'
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
@@ -120,10 +128,52 @@ const PayBillReceiptReceiptNoRoute = PayBillReceiptReceiptNoRouteImport.update({
   path: '/receipt/$receiptNo',
   getParentRoute: () => PayBillRoute,
 } as any)
+const AuthenticatedResellerSupportRoute =
+  AuthenticatedResellerSupportRouteImport.update({
+    id: '/support',
+    path: '/support',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerSmsRoute =
+  AuthenticatedResellerSmsRouteImport.update({
+    id: '/sms',
+    path: '/sms',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerReportsRoute =
+  AuthenticatedResellerReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerProfileRoute =
+  AuthenticatedResellerProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerPopRoute =
+  AuthenticatedResellerPopRouteImport.update({
+    id: '/pop',
+    path: '/pop',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerPackagesRoute =
   AuthenticatedResellerPackagesRouteImport.update({
     id: '/packages',
     path: '/packages',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerMikrotikRoute =
+  AuthenticatedResellerMikrotikRouteImport.update({
+    id: '/mikrotik',
+    path: '/mikrotik',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerManagerRoute =
+  AuthenticatedResellerManagerRouteImport.update({
+    id: '/manager',
+    path: '/manager',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
 const AuthenticatedResellerCustomersRoute =
@@ -136,6 +186,12 @@ const AuthenticatedResellerCustomerSearchRoute =
   AuthenticatedResellerCustomerSearchRouteImport.update({
     id: '/customer-search',
     path: '/customer-search',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerAdminRoute =
+  AuthenticatedResellerAdminRouteImport.update({
+    id: '/admin',
+    path: '/admin',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
 const AuthenticatedResellerAccountsHistoryRoute =
@@ -405,9 +461,17 @@ export interface FileRoutesByFullPath {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/reseller/accounts': typeof AuthenticatedResellerAccountsRoute
   '/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
+  '/reseller/admin': typeof AuthenticatedResellerAdminRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/reseller/manager': typeof AuthenticatedResellerManagerRoute
+  '/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
+  '/reseller/pop': typeof AuthenticatedResellerPopRoute
+  '/reseller/profile': typeof AuthenticatedResellerProfileRoute
+  '/reseller/reports': typeof AuthenticatedResellerReportsRoute
+  '/reseller/sms': typeof AuthenticatedResellerSmsRoute
+  '/reseller/support': typeof AuthenticatedResellerSupportRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -459,9 +523,17 @@ export interface FileRoutesByTo {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/reseller/accounts': typeof AuthenticatedResellerAccountsRoute
   '/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
+  '/reseller/admin': typeof AuthenticatedResellerAdminRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/reseller/manager': typeof AuthenticatedResellerManagerRoute
+  '/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
+  '/reseller/pop': typeof AuthenticatedResellerPopRoute
+  '/reseller/profile': typeof AuthenticatedResellerProfileRoute
+  '/reseller/reports': typeof AuthenticatedResellerReportsRoute
+  '/reseller/sms': typeof AuthenticatedResellerSmsRoute
+  '/reseller/support': typeof AuthenticatedResellerSupportRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/reseller': typeof AuthenticatedResellerIndexRoute
@@ -517,9 +589,17 @@ export interface FileRoutesById {
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/_authenticated/reseller/accounts': typeof AuthenticatedResellerAccountsRoute
   '/_authenticated/reseller/accounts-history': typeof AuthenticatedResellerAccountsHistoryRoute
+  '/_authenticated/reseller/admin': typeof AuthenticatedResellerAdminRoute
   '/_authenticated/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/_authenticated/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/_authenticated/reseller/manager': typeof AuthenticatedResellerManagerRoute
+  '/_authenticated/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/_authenticated/reseller/packages': typeof AuthenticatedResellerPackagesRoute
+  '/_authenticated/reseller/pop': typeof AuthenticatedResellerPopRoute
+  '/_authenticated/reseller/profile': typeof AuthenticatedResellerProfileRoute
+  '/_authenticated/reseller/reports': typeof AuthenticatedResellerReportsRoute
+  '/_authenticated/reseller/sms': typeof AuthenticatedResellerSmsRoute
+  '/_authenticated/reseller/support': typeof AuthenticatedResellerSupportRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -575,9 +655,17 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/reseller/accounts'
     | '/reseller/accounts-history'
+    | '/reseller/admin'
     | '/reseller/customer-search'
     | '/reseller/customers'
+    | '/reseller/manager'
+    | '/reseller/mikrotik'
     | '/reseller/packages'
+    | '/reseller/pop'
+    | '/reseller/profile'
+    | '/reseller/reports'
+    | '/reseller/sms'
+    | '/reseller/support'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
     | '/reseller/'
@@ -629,9 +717,17 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/reseller/accounts'
     | '/reseller/accounts-history'
+    | '/reseller/admin'
     | '/reseller/customer-search'
     | '/reseller/customers'
+    | '/reseller/manager'
+    | '/reseller/mikrotik'
     | '/reseller/packages'
+    | '/reseller/pop'
+    | '/reseller/profile'
+    | '/reseller/reports'
+    | '/reseller/sms'
+    | '/reseller/support'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
     | '/reseller'
@@ -686,9 +782,17 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/zones'
     | '/_authenticated/reseller/accounts'
     | '/_authenticated/reseller/accounts-history'
+    | '/_authenticated/reseller/admin'
     | '/_authenticated/reseller/customer-search'
     | '/_authenticated/reseller/customers'
+    | '/_authenticated/reseller/manager'
+    | '/_authenticated/reseller/mikrotik'
     | '/_authenticated/reseller/packages'
+    | '/_authenticated/reseller/pop'
+    | '/_authenticated/reseller/profile'
+    | '/_authenticated/reseller/reports'
+    | '/_authenticated/reseller/sms'
+    | '/_authenticated/reseller/support'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
     | '/_authenticated/reseller/'
@@ -804,11 +908,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayBillReceiptReceiptNoRouteImport
       parentRoute: typeof PayBillRoute
     }
+    '/_authenticated/reseller/support': {
+      id: '/_authenticated/reseller/support'
+      path: '/support'
+      fullPath: '/reseller/support'
+      preLoaderRoute: typeof AuthenticatedResellerSupportRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/sms': {
+      id: '/_authenticated/reseller/sms'
+      path: '/sms'
+      fullPath: '/reseller/sms'
+      preLoaderRoute: typeof AuthenticatedResellerSmsRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/reports': {
+      id: '/_authenticated/reseller/reports'
+      path: '/reports'
+      fullPath: '/reseller/reports'
+      preLoaderRoute: typeof AuthenticatedResellerReportsRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/profile': {
+      id: '/_authenticated/reseller/profile'
+      path: '/profile'
+      fullPath: '/reseller/profile'
+      preLoaderRoute: typeof AuthenticatedResellerProfileRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/pop': {
+      id: '/_authenticated/reseller/pop'
+      path: '/pop'
+      fullPath: '/reseller/pop'
+      preLoaderRoute: typeof AuthenticatedResellerPopRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
     '/_authenticated/reseller/packages': {
       id: '/_authenticated/reseller/packages'
       path: '/packages'
       fullPath: '/reseller/packages'
       preLoaderRoute: typeof AuthenticatedResellerPackagesRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/mikrotik': {
+      id: '/_authenticated/reseller/mikrotik'
+      path: '/mikrotik'
+      fullPath: '/reseller/mikrotik'
+      preLoaderRoute: typeof AuthenticatedResellerMikrotikRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/manager': {
+      id: '/_authenticated/reseller/manager'
+      path: '/manager'
+      fullPath: '/reseller/manager'
+      preLoaderRoute: typeof AuthenticatedResellerManagerRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/customers': {
@@ -823,6 +976,13 @@ declare module '@tanstack/react-router' {
       path: '/customer-search'
       fullPath: '/reseller/customer-search'
       preLoaderRoute: typeof AuthenticatedResellerCustomerSearchRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/admin': {
+      id: '/_authenticated/reseller/admin'
+      path: '/admin'
+      fullPath: '/reseller/admin'
+      preLoaderRoute: typeof AuthenticatedResellerAdminRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/accounts-history': {
@@ -1216,9 +1376,17 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerAccountsRoute: typeof AuthenticatedResellerAccountsRoute
   AuthenticatedResellerAccountsHistoryRoute: typeof AuthenticatedResellerAccountsHistoryRoute
+  AuthenticatedResellerAdminRoute: typeof AuthenticatedResellerAdminRoute
   AuthenticatedResellerCustomerSearchRoute: typeof AuthenticatedResellerCustomerSearchRoute
   AuthenticatedResellerCustomersRoute: typeof AuthenticatedResellerCustomersRoute
+  AuthenticatedResellerManagerRoute: typeof AuthenticatedResellerManagerRoute
+  AuthenticatedResellerMikrotikRoute: typeof AuthenticatedResellerMikrotikRoute
   AuthenticatedResellerPackagesRoute: typeof AuthenticatedResellerPackagesRoute
+  AuthenticatedResellerPopRoute: typeof AuthenticatedResellerPopRoute
+  AuthenticatedResellerProfileRoute: typeof AuthenticatedResellerProfileRoute
+  AuthenticatedResellerReportsRoute: typeof AuthenticatedResellerReportsRoute
+  AuthenticatedResellerSmsRoute: typeof AuthenticatedResellerSmsRoute
+  AuthenticatedResellerSupportRoute: typeof AuthenticatedResellerSupportRoute
   AuthenticatedResellerIndexRoute: typeof AuthenticatedResellerIndexRoute
 }
 
@@ -1226,10 +1394,18 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerAccountsRoute: AuthenticatedResellerAccountsRoute,
   AuthenticatedResellerAccountsHistoryRoute:
     AuthenticatedResellerAccountsHistoryRoute,
+  AuthenticatedResellerAdminRoute: AuthenticatedResellerAdminRoute,
   AuthenticatedResellerCustomerSearchRoute:
     AuthenticatedResellerCustomerSearchRoute,
   AuthenticatedResellerCustomersRoute: AuthenticatedResellerCustomersRoute,
+  AuthenticatedResellerManagerRoute: AuthenticatedResellerManagerRoute,
+  AuthenticatedResellerMikrotikRoute: AuthenticatedResellerMikrotikRoute,
   AuthenticatedResellerPackagesRoute: AuthenticatedResellerPackagesRoute,
+  AuthenticatedResellerPopRoute: AuthenticatedResellerPopRoute,
+  AuthenticatedResellerProfileRoute: AuthenticatedResellerProfileRoute,
+  AuthenticatedResellerReportsRoute: AuthenticatedResellerReportsRoute,
+  AuthenticatedResellerSmsRoute: AuthenticatedResellerSmsRoute,
+  AuthenticatedResellerSupportRoute: AuthenticatedResellerSupportRoute,
   AuthenticatedResellerIndexRoute: AuthenticatedResellerIndexRoute,
 }
 
