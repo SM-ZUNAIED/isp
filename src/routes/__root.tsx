@@ -129,6 +129,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeVars />
       <ThemeProvider>
         <I18nProvider>
           <AuthProvider>
