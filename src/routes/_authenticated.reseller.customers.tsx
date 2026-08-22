@@ -190,7 +190,7 @@ function ResellerCustomers() {
               <Select
                 value={form.package_id || "none"}
                 onValueChange={(v) => {
-                  const p = (refs.data?.packages ?? []).find((x: { id: string }) => x.id === v);
+                  const p = ((refs.data?.packages ?? []) as Array<{ id: string; monthly_price: number }>).find((x) => x.id === v);
                   setForm((s) => ({ ...s, package_id: v === "none" ? "" : v, monthly_bill: p ? String(p.monthly_price) : s.monthly_bill }));
                 }}
               >
