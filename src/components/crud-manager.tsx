@@ -215,6 +215,7 @@ export function CrudManager(props: CrudProps) {
                 <TableHeader>
                   <TableRow>
                     {tableFields.map((f) => <TableHead key={f.key}>{L(f.label)}</TableHead>)}
+                    {(props.extraColumns ?? []).map((c) => <TableHead key={c.key}>{L(c.label)}</TableHead>)}
                     {!props.readOnly && <TableHead className="text-right">{lang === "en" ? "Actions" : "অ্যাকশন"}</TableHead>}
                   </TableRow>
                 </TableHeader>
