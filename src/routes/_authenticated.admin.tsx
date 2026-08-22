@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { getSettings } from "@/lib/support.functions";
 import { useLogoUrl } from "@/hooks/use-logo";
+import { ProfileMenu } from "@/components/profile-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/use-permissions";
 import type { PermissionKey } from "@/lib/permissions.functions";
@@ -369,17 +370,18 @@ function SidebarContent({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
 
 
       <div className="border-t p-3">
-        <div className="mb-2 px-2 text-xs text-muted-foreground truncate">{user?.email}</div>
-        <Button
-          className="w-full justify-start bg-destructive text-destructive-foreground hover:brightness-110 shadow-soft"
-          onClick={async () => {
+        <ProfileMenu
+          name={user?.email?.split("@")[0] ?? "Admin"}
+          role={{ bn: "অ্যাডমিন", en: "Administrator" }}
+          profileTo="/admin/settings"
+          align="start"
+          onLogout={async () => {
             await signOut();
             navigate({ to: "/", replace: true });
           }}
-        >
-          <LogOut className="mr-2 h-4 w-4" /> {t("admin.logout")}
-        </Button>
+        />
       </div>
+
     </div>
   );
 }
