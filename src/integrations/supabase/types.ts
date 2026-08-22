@@ -192,6 +192,7 @@ export type Database = {
           late_fee: number | null
           notes: string | null
           paid_amount: number | null
+          reseller_id: string | null
           status: Database["public"]["Enums"]["bill_status"]
           updated_at: string
         }
@@ -208,6 +209,7 @@ export type Database = {
           late_fee?: number | null
           notes?: string | null
           paid_amount?: number | null
+          reseller_id?: string | null
           status?: Database["public"]["Enums"]["bill_status"]
           updated_at?: string
         }
@@ -224,6 +226,7 @@ export type Database = {
           late_fee?: number | null
           notes?: string | null
           paid_amount?: number | null
+          reseller_id?: string | null
           status?: Database["public"]["Enums"]["bill_status"]
           updated_at?: string
         }
@@ -233,6 +236,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bills_reseller_id_fkey"
+            columns: ["reseller_id"]
+            isOneToOne: false
+            referencedRelation: "resellers"
             referencedColumns: ["id"]
           },
         ]
@@ -364,6 +374,7 @@ export type Database = {
           post_office_id: string | null
           pppoe_password: string | null
           pppoe_username: string | null
+          reseller_id: string | null
           road_id: string | null
           road_name: string | null
           router_info: string | null
@@ -410,6 +421,7 @@ export type Database = {
           post_office_id?: string | null
           pppoe_password?: string | null
           pppoe_username?: string | null
+          reseller_id?: string | null
           road_id?: string | null
           road_name?: string | null
           router_info?: string | null
@@ -456,6 +468,7 @@ export type Database = {
           post_office_id?: string | null
           pppoe_password?: string | null
           pppoe_username?: string | null
+          reseller_id?: string | null
           road_id?: string | null
           road_name?: string | null
           router_info?: string | null
@@ -474,6 +487,13 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_reseller_id_fkey"
+            columns: ["reseller_id"]
+            isOneToOne: false
+            referencedRelation: "resellers"
             referencedColumns: ["id"]
           },
           {
@@ -1112,6 +1132,7 @@ export type Database = {
           paid_at: string
           receipt_number: string | null
           received_by: string | null
+          reseller_id: string | null
           submission_ref: string | null
           transaction_id: string | null
           verification_status: string
@@ -1129,6 +1150,7 @@ export type Database = {
           paid_at?: string
           receipt_number?: string | null
           received_by?: string | null
+          reseller_id?: string | null
           submission_ref?: string | null
           transaction_id?: string | null
           verification_status?: string
@@ -1146,6 +1168,7 @@ export type Database = {
           paid_at?: string
           receipt_number?: string | null
           received_by?: string | null
+          reseller_id?: string | null
           submission_ref?: string | null
           transaction_id?: string | null
           verification_status?: string
@@ -1165,6 +1188,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_reseller_id_fkey"
+            columns: ["reseller_id"]
+            isOneToOne: false
+            referencedRelation: "resellers"
             referencedColumns: ["id"]
           },
         ]
@@ -1286,6 +1316,190 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      reseller_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          reseller_id: string | null
+          resource: string | null
+          resource_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          reseller_id?: string | null
+          resource?: string | null
+          resource_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          reseller_id?: string | null
+          resource?: string | null
+          resource_id?: string | null
+        }
+        Relationships: []
+      }
+      reseller_permissions: {
+        Row: {
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          permission_key: string
+          reseller_id: string
+          updated_at: string
+        }
+        Insert: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          permission_key: string
+          reseller_id: string
+          updated_at?: string
+        }
+        Update: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          permission_key?: string
+          reseller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reseller_permissions_reseller_id_fkey"
+            columns: ["reseller_id"]
+            isOneToOne: false
+            referencedRelation: "resellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resellers: {
+        Row: {
+          address: string | null
+          business_name: string | null
+          commission_percent: number
+          created_at: string
+          created_by: string | null
+          credit_limit: number
+          current_balance: number
+          email: string | null
+          id: string
+          last_login_at: string | null
+          manager_staff_id: string | null
+          mikrotik_id: string | null
+          name: string
+          notes: string | null
+          opening_balance: number
+          package_id: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          username: string
+          zone_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_name?: string | null
+          commission_percent?: number
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number
+          current_balance?: number
+          email?: string | null
+          id?: string
+          last_login_at?: string | null
+          manager_staff_id?: string | null
+          mikrotik_id?: string | null
+          name: string
+          notes?: string | null
+          opening_balance?: number
+          package_id?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          username: string
+          zone_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_name?: string | null
+          commission_percent?: number
+          created_at?: string
+          created_by?: string | null
+          credit_limit?: number
+          current_balance?: number
+          email?: string | null
+          id?: string
+          last_login_at?: string | null
+          manager_staff_id?: string | null
+          mikrotik_id?: string | null
+          name?: string
+          notes?: string | null
+          opening_balance?: number
+          package_id?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          username?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resellers_manager_staff_id_fkey"
+            columns: ["manager_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resellers_mikrotik_id_fkey"
+            columns: ["mikrotik_id"]
+            isOneToOne: false
+            referencedRelation: "mikrotiks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resellers_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resellers_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       roads: {
         Row: {
@@ -1583,6 +1797,7 @@ export type Database = {
           customer_id: string | null
           description: string | null
           id: string
+          reseller_id: string | null
           status: Database["public"]["Enums"]["ticket_status"]
           subject: string
           ticket_number: string
@@ -1595,6 +1810,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          reseller_id?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           subject: string
           ticket_number: string
@@ -1607,6 +1823,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          reseller_id?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           subject?: string
           ticket_number?: string
@@ -1618,6 +1835,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_reseller_id_fkey"
+            columns: ["reseller_id"]
+            isOneToOne: false
+            referencedRelation: "resellers"
             referencedColumns: ["id"]
           },
         ]
@@ -1835,6 +2059,7 @@ export type Database = {
         Args: { _approve: boolean; _payment_id: string }
         Returns: Json
       }
+      current_reseller_id: { Args: never; Returns: string }
       has_permission: {
         Args: { _key: string; _need_edit?: boolean; _user_id: string }
         Returns: boolean
