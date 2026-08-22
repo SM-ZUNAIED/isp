@@ -20,6 +20,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedResellerIndexRouteImport } from './routes/_authenticated.reseller.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.receipt.$receiptNo'
+import { Route as AuthenticatedResellerPackagesRouteImport } from './routes/_authenticated.reseller.packages'
 import { Route as AuthenticatedResellerCustomersRouteImport } from './routes/_authenticated.reseller.customers'
 import { Route as AuthenticatedResellerCustomerSearchRouteImport } from './routes/_authenticated.reseller.customer-search'
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
@@ -117,6 +118,12 @@ const PayBillReceiptReceiptNoRoute = PayBillReceiptReceiptNoRouteImport.update({
   path: '/receipt/$receiptNo',
   getParentRoute: () => PayBillRoute,
 } as any)
+const AuthenticatedResellerPackagesRoute =
+  AuthenticatedResellerPackagesRouteImport.update({
+    id: '/packages',
+    path: '/packages',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerCustomersRoute =
   AuthenticatedResellerCustomersRouteImport.update({
     id: '/customers',
@@ -384,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -435,6 +443,7 @@ export interface FileRoutesByTo {
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/reseller': typeof AuthenticatedResellerIndexRoute
@@ -490,6 +499,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
   '/_authenticated/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/_authenticated/reseller/customers': typeof AuthenticatedResellerCustomersRoute
+  '/_authenticated/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -545,6 +555,7 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/reseller/customer-search'
     | '/reseller/customers'
+    | '/reseller/packages'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
     | '/reseller/'
@@ -596,6 +607,7 @@ export interface FileRouteTypes {
     | '/admin/zones'
     | '/reseller/customer-search'
     | '/reseller/customers'
+    | '/reseller/packages'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
     | '/reseller'
@@ -650,6 +662,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/zones'
     | '/_authenticated/reseller/customer-search'
     | '/_authenticated/reseller/customers'
+    | '/_authenticated/reseller/packages'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
     | '/_authenticated/reseller/'
@@ -764,6 +777,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pay-bill/receipt/$receiptNo'
       preLoaderRoute: typeof PayBillReceiptReceiptNoRouteImport
       parentRoute: typeof PayBillRoute
+    }
+    '/_authenticated/reseller/packages': {
+      id: '/_authenticated/reseller/packages'
+      path: '/packages'
+      fullPath: '/reseller/packages'
+      preLoaderRoute: typeof AuthenticatedResellerPackagesRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/customers': {
       id: '/_authenticated/reseller/customers'
@@ -1156,6 +1176,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerCustomerSearchRoute: typeof AuthenticatedResellerCustomerSearchRoute
   AuthenticatedResellerCustomersRoute: typeof AuthenticatedResellerCustomersRoute
+  AuthenticatedResellerPackagesRoute: typeof AuthenticatedResellerPackagesRoute
   AuthenticatedResellerIndexRoute: typeof AuthenticatedResellerIndexRoute
 }
 
@@ -1163,6 +1184,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerCustomerSearchRoute:
     AuthenticatedResellerCustomerSearchRoute,
   AuthenticatedResellerCustomersRoute: AuthenticatedResellerCustomersRoute,
+  AuthenticatedResellerPackagesRoute: AuthenticatedResellerPackagesRoute,
   AuthenticatedResellerIndexRoute: AuthenticatedResellerIndexRoute,
 }
 
