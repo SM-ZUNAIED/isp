@@ -17,7 +17,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { useResellerCtx } from "./_authenticated.reseller";
 import { resellerTickets, resellerCreateTicket, resellerCustomers } from "@/lib/reseller.functions";
 
-export const Route = createFileRoute("/_authenticated/reseller/support")({
+export const Route = createFileRoute("/_authenticated/reseller/support/")({
   component: ResellerSupport,
 });
 

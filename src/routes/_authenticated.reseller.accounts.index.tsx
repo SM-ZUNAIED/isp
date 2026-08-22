@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useI18n } from "@/hooks/use-i18n";
 import { resellerAccounts } from "@/lib/reseller.functions";
 
-export const Route = createFileRoute("/_authenticated/reseller/accounts")({
+export const Route = createFileRoute("/_authenticated/reseller/accounts/")({
   component: ResellerAccountsPage,
 });
 

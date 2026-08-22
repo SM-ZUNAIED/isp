@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ResellerNetworkTable } from "@/components/reseller-network-table";
 
-export const Route = createFileRoute("/_authenticated/reseller/mikrotik")({
+export const Route = createFileRoute("/_authenticated/reseller/mikrotik/")({
   component: () => (
     <ResellerNetworkTable
       module="mikrotik"
