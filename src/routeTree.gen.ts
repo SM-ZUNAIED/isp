@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminAppearanceRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminAddressRouteImport } from './routes/_authenticated.admin.address'
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
 import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated.admin.access'
+import { Route as AuthenticatedAdminResellersIndexRouteImport } from './routes/_authenticated.admin.resellers.index'
 import { Route as AuthenticatedAdminHrIndexRouteImport } from './routes/_authenticated.admin.hr.index'
 import { Route as AuthenticatedAdminCallCenterIndexRouteImport } from './routes/_authenticated.admin.call-center.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
@@ -194,6 +195,12 @@ const AuthenticatedAdminAccessRoute =
   AuthenticatedAdminAccessRouteImport.update({
     id: '/access',
     path: '/access',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminResellersIndexRoute =
+  AuthenticatedAdminResellersIndexRouteImport.update({
+    id: '/resellers/',
+    path: '/resellers/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminHrIndexRoute =
@@ -362,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
   '/admin/hr/': typeof AuthenticatedAdminHrIndexRoute
+  '/admin/resellers/': typeof AuthenticatedAdminResellersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -408,6 +416,7 @@ export interface FileRoutesByTo {
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center': typeof AuthenticatedAdminCallCenterIndexRoute
   '/admin/hr': typeof AuthenticatedAdminHrIndexRoute
+  '/admin/resellers': typeof AuthenticatedAdminResellersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -457,6 +466,7 @@ export interface FileRoutesById {
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/_authenticated/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
   '/_authenticated/admin/hr/': typeof AuthenticatedAdminHrIndexRoute
+  '/_authenticated/admin/resellers/': typeof AuthenticatedAdminResellersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -506,6 +516,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/run'
     | '/admin/call-center/'
     | '/admin/hr/'
+    | '/admin/resellers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -552,6 +563,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/run'
     | '/admin/call-center'
     | '/admin/hr'
+    | '/admin/resellers'
   id:
     | '__root__'
     | '/'
@@ -600,6 +612,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/run'
     | '/_authenticated/admin/call-center/'
     | '/_authenticated/admin/hr/'
+    | '/_authenticated/admin/resellers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -795,6 +808,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAccessRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/resellers/': {
+      id: '/_authenticated/admin/resellers/'
+      path: '/resellers'
+      fullPath: '/admin/resellers/'
+      preLoaderRoute: typeof AuthenticatedAdminResellersIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/hr/': {
       id: '/_authenticated/admin/hr/'
       path: '/hr'
@@ -976,6 +996,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminResellersAddRoute: typeof AuthenticatedAdminResellersAddRoute
   AuthenticatedAdminCallCenterIndexRoute: typeof AuthenticatedAdminCallCenterIndexRoute
   AuthenticatedAdminHrIndexRoute: typeof AuthenticatedAdminHrIndexRoute
+  AuthenticatedAdminResellersIndexRoute: typeof AuthenticatedAdminResellersIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -1026,6 +1047,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCallCenterIndexRoute:
     AuthenticatedAdminCallCenterIndexRoute,
   AuthenticatedAdminHrIndexRoute: AuthenticatedAdminHrIndexRoute,
+  AuthenticatedAdminResellersIndexRoute: AuthenticatedAdminResellersIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
