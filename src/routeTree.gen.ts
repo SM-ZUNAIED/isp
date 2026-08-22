@@ -54,6 +54,7 @@ import { Route as AuthenticatedAdminHrIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCallCenterIndexRouteImport } from './routes/_authenticated.admin.call-center.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedResellerSmsLogRouteImport } from './routes/_authenticated.reseller.sms.log'
+import { Route as AuthenticatedResellerSmsBalanceRouteImport } from './routes/_authenticated.reseller.sms.balance'
 import { Route as AuthenticatedResellerReportsSManagerRechargeRouteImport } from './routes/_authenticated.reseller.reports.s-manager-recharge'
 import { Route as AuthenticatedResellerReportsSManagerBalanceLogRouteImport } from './routes/_authenticated.reseller.reports.s-manager-balance-log'
 import { Route as AuthenticatedResellerReportsPermanentDiscountRouteImport } from './routes/_authenticated.reseller.reports.permanent-discount'
@@ -350,6 +351,12 @@ const AuthenticatedResellerSmsLogRoute =
   AuthenticatedResellerSmsLogRouteImport.update({
     id: '/sms/log',
     path: '/sms/log',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerSmsBalanceRoute =
+  AuthenticatedResellerSmsBalanceRouteImport.update({
+    id: '/sms/balance',
+    path: '/sms/balance',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
 const AuthenticatedResellerReportsSManagerRechargeRoute =
@@ -699,6 +706,7 @@ export interface FileRoutesByFullPath {
   '/reseller/reports/permanent-discount': typeof AuthenticatedResellerReportsPermanentDiscountRoute
   '/reseller/reports/s-manager-balance-log': typeof AuthenticatedResellerReportsSManagerBalanceLogRoute
   '/reseller/reports/s-manager-recharge': typeof AuthenticatedResellerReportsSManagerRechargeRoute
+  '/reseller/sms/balance': typeof AuthenticatedResellerSmsBalanceRoute
   '/reseller/sms/log': typeof AuthenticatedResellerSmsLogRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
@@ -788,6 +796,7 @@ export interface FileRoutesByTo {
   '/reseller/reports/permanent-discount': typeof AuthenticatedResellerReportsPermanentDiscountRoute
   '/reseller/reports/s-manager-balance-log': typeof AuthenticatedResellerReportsSManagerBalanceLogRoute
   '/reseller/reports/s-manager-recharge': typeof AuthenticatedResellerReportsSManagerRechargeRoute
+  '/reseller/sms/balance': typeof AuthenticatedResellerSmsBalanceRoute
   '/reseller/sms/log': typeof AuthenticatedResellerSmsLogRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center': typeof AuthenticatedAdminCallCenterIndexRoute
@@ -881,6 +890,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/reports/permanent-discount': typeof AuthenticatedResellerReportsPermanentDiscountRoute
   '/_authenticated/reseller/reports/s-manager-balance-log': typeof AuthenticatedResellerReportsSManagerBalanceLogRoute
   '/_authenticated/reseller/reports/s-manager-recharge': typeof AuthenticatedResellerReportsSManagerRechargeRoute
+  '/_authenticated/reseller/sms/balance': typeof AuthenticatedResellerSmsBalanceRoute
   '/_authenticated/reseller/sms/log': typeof AuthenticatedResellerSmsLogRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/_authenticated/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
@@ -974,6 +984,7 @@ export interface FileRouteTypes {
     | '/reseller/reports/permanent-discount'
     | '/reseller/reports/s-manager-balance-log'
     | '/reseller/reports/s-manager-recharge'
+    | '/reseller/sms/balance'
     | '/reseller/sms/log'
     | '/api/public/cron/run'
     | '/admin/call-center/'
@@ -1063,6 +1074,7 @@ export interface FileRouteTypes {
     | '/reseller/reports/permanent-discount'
     | '/reseller/reports/s-manager-balance-log'
     | '/reseller/reports/s-manager-recharge'
+    | '/reseller/sms/balance'
     | '/reseller/sms/log'
     | '/api/public/cron/run'
     | '/admin/call-center'
@@ -1155,6 +1167,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/reports/permanent-discount'
     | '/_authenticated/reseller/reports/s-manager-balance-log'
     | '/_authenticated/reseller/reports/s-manager-recharge'
+    | '/_authenticated/reseller/sms/balance'
     | '/_authenticated/reseller/sms/log'
     | '/api/public/cron/run'
     | '/_authenticated/admin/call-center/'
@@ -1495,6 +1508,13 @@ declare module '@tanstack/react-router' {
       path: '/sms/log'
       fullPath: '/reseller/sms/log'
       preLoaderRoute: typeof AuthenticatedResellerSmsLogRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/sms/balance': {
+      id: '/_authenticated/reseller/sms/balance'
+      path: '/sms/balance'
+      fullPath: '/reseller/sms/balance'
+      preLoaderRoute: typeof AuthenticatedResellerSmsBalanceRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/reports/s-manager-recharge': {
@@ -1945,6 +1965,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerReportsPermanentDiscountRoute: typeof AuthenticatedResellerReportsPermanentDiscountRoute
   AuthenticatedResellerReportsSManagerBalanceLogRoute: typeof AuthenticatedResellerReportsSManagerBalanceLogRoute
   AuthenticatedResellerReportsSManagerRechargeRoute: typeof AuthenticatedResellerReportsSManagerRechargeRoute
+  AuthenticatedResellerSmsBalanceRoute: typeof AuthenticatedResellerSmsBalanceRoute
   AuthenticatedResellerSmsLogRoute: typeof AuthenticatedResellerSmsLogRoute
   AuthenticatedResellerAccountsIndexRoute: typeof AuthenticatedResellerAccountsIndexRoute
   AuthenticatedResellerAdminIndexRoute: typeof AuthenticatedResellerAdminIndexRoute
@@ -2016,6 +2037,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
     AuthenticatedResellerReportsSManagerBalanceLogRoute,
   AuthenticatedResellerReportsSManagerRechargeRoute:
     AuthenticatedResellerReportsSManagerRechargeRoute,
+  AuthenticatedResellerSmsBalanceRoute: AuthenticatedResellerSmsBalanceRoute,
   AuthenticatedResellerSmsLogRoute: AuthenticatedResellerSmsLogRoute,
   AuthenticatedResellerAccountsIndexRoute:
     AuthenticatedResellerAccountsIndexRoute,
