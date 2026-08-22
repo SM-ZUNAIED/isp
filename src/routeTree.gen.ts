@@ -20,6 +20,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedResellerIndexRouteImport } from './routes/_authenticated.reseller.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.receipt.$receiptNo'
+import { Route as AuthenticatedResellerCustomersRouteImport } from './routes/_authenticated.reseller.customers'
 import { Route as AuthenticatedAdminZonesRouteImport } from './routes/_authenticated.admin.zones'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated.admin.users'
 import { Route as AuthenticatedAdminTicketsRouteImport } from './routes/_authenticated.admin.tickets'
@@ -115,6 +116,12 @@ const PayBillReceiptReceiptNoRoute = PayBillReceiptReceiptNoRouteImport.update({
   path: '/receipt/$receiptNo',
   getParentRoute: () => PayBillRoute,
 } as any)
+const AuthenticatedResellerCustomersRoute =
+  AuthenticatedResellerCustomersRouteImport.update({
+    id: '/customers',
+    path: '/customers',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedAdminZonesRoute = AuthenticatedAdminZonesRouteImport.update({
   id: '/zones',
   path: '/zones',
@@ -368,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
+  '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -417,6 +425,7 @@ export interface FileRoutesByTo {
   '/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/zones': typeof AuthenticatedAdminZonesRoute
+  '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/reseller': typeof AuthenticatedResellerIndexRoute
@@ -470,6 +479,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tickets': typeof AuthenticatedAdminTicketsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/zones': typeof AuthenticatedAdminZonesRoute
+  '/_authenticated/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/zones'
+    | '/reseller/customers'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
     | '/reseller/'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/zones'
+    | '/reseller/customers'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
     | '/reseller'
@@ -624,6 +636,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tickets'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/zones'
+    | '/_authenticated/reseller/customers'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
     | '/_authenticated/reseller/'
@@ -738,6 +751,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pay-bill/receipt/$receiptNo'
       preLoaderRoute: typeof PayBillReceiptReceiptNoRouteImport
       parentRoute: typeof PayBillRoute
+    }
+    '/_authenticated/reseller/customers': {
+      id: '/_authenticated/reseller/customers'
+      path: '/customers'
+      fullPath: '/reseller/customers'
+      preLoaderRoute: typeof AuthenticatedResellerCustomersRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/admin/zones': {
       id: '/_authenticated/admin/zones'
@@ -1114,10 +1134,12 @@ const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedResellerRouteChildren {
+  AuthenticatedResellerCustomersRoute: typeof AuthenticatedResellerCustomersRoute
   AuthenticatedResellerIndexRoute: typeof AuthenticatedResellerIndexRoute
 }
 
 const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
+  AuthenticatedResellerCustomersRoute: AuthenticatedResellerCustomersRoute,
   AuthenticatedResellerIndexRoute: AuthenticatedResellerIndexRoute,
 }
 
