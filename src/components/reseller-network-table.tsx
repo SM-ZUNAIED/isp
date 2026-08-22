@@ -24,7 +24,7 @@ export function ResellerNetworkTable({
   const L = (b: Bn) => (lang === "en" ? b.en : b.bn);
   const fn = useServerFn(resellerNetwork);
   const q = useQuery({ queryKey: ["reseller-network", module], queryFn: () => fn({ data: { module } }) });
-  const rows = (q.data?.rows ?? []) as Array<Record<string, unknown>>;
+  const rows = ((q.data as { rows?: Array<Record<string, unknown>> } | undefined)?.rows ?? []) as Array<Record<string, unknown>>;
 
   return (
     <div className="space-y-6">
