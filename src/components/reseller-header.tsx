@@ -2,13 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, ChevronDown, LogOut, Moon, Search, Sun, UserCircle2, UserPlus, Wallet } from "lucide-react";
+import { Bell, Moon, Search, Sun, UserPlus, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ProfileMenu } from "@/components/profile-menu";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
@@ -26,7 +24,7 @@ export function ResellerHeader({
   displayName: string;
   balance: number;
 }) {
-  const { lang, toggle: toggleLang } = useI18n();
+  const { lang } = useI18n();
   const L = (b: Bn) => (lang === "en" ? b.en : b.bn);
   const { theme, toggle: toggleTheme } = useTheme();
   const { signOut } = useAuth();
@@ -135,30 +133,12 @@ export function ResellerHeader({
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9 gap-2 rounded-lg">
-              <UserCircle2 className="h-4 w-4" />
-              <span className="max-w-24 truncate">{displayName}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/reseller/profile"><UserCircle2 className="mr-2 h-4 w-4" />{L({ bn: "প্রোফাইল", en: "Profile" })}</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={toggleLang}>
-              <span className="mr-2 w-4 text-center text-xs font-bold">{lang === "bn" ? "EN" : "বাং"}</span>
-              {L({ bn: "English", en: "বাংলা" })}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={async () => { await signOut(); navigate({ to: "/auth" }); }}>
-              <LogOut className="mr-2 h-4 w-4" />{L({ bn: "লগআউট", en: "Logout" })}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProfileMenu
+          name={displayName}
+          role={{ bn: "রিসেলার", en: "Reseller" }}
+          profileTo="/reseller/profile"
+          onLogout={async () => { await signOut(); navigate({ to: "/auth" }); }}
+        />
       </div>
     </header>
   );
