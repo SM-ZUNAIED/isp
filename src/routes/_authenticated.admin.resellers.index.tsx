@@ -163,7 +163,7 @@ function ResellersPage() {
                         onClick={() => navigate({ to: "/admin/resellers/access", search: { reseller: r.id } as never })}>
                         <ShieldCheck className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" title={L({ bn: "এডিট", en: "Edit" })} onClick={() => setEditing(r)}>
+                      <Button size="icon" variant="ghost" title={L({ bn: "এডিট", en: "Edit" })} onClick={() => { setAddBalance(""); setEditing(r); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button size="icon" variant="ghost" title={L({ bn: "পাসওয়ার্ড রিসেট", en: "Reset Password" })} onClick={() => setPwFor(r)}>
