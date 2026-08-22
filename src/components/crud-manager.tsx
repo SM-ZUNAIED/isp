@@ -245,7 +245,7 @@ export function CrudManager(props: CrudProps) {
                   ))}
                   {filtered.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={tableFields.length + 1} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={tableFields.length + (props.extraColumns?.length ?? 0) + 1} className="text-center text-muted-foreground py-8">
                         {lang === "en" ? "No records found." : "কোনো তথ্য নেই।"}
                       </TableCell>
                     </TableRow>
