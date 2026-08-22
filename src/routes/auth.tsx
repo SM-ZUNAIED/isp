@@ -268,81 +268,131 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
   );
 }
 
-/* ---------- Signup ---------- */
+/* ---------- Signup (mobile + password + OTP) ---------- */
 function SignupForm({ onDone }: { onDone: () => void }) {
   const { lang } = useI18n();
   const bn = lang === "bn";
-  const [fullName, setFullName] = useState("");
+  const requestOtp = useServerFn(requestSignupOtp);
+  const verifyOtp = useServerFn(verifySignupOtp);
+  const [step, setStep] = useState<"details" | "otp">("details");
   const [mobile, setMobile] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mobile && !/^01[3-9]\d{8}$/.test(mobile)) {
-      return toast.error(bn ? "সঠিক মোবাইল নম্বর দিন" : "Enter a valid mobile number");
-    }
-    if (password.length < 6) {
-      return toast.error(bn ? "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর" : "Password must be at least 6 characters");
-    }
-    setBusy(true);
-    const redirectTo = `${window.location.origin}/auth`;
-    const { error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        emailRedirectTo: redirectTo,
-        data: { full_name: fullName.trim(), mobile: mobile.trim() || null },
-      },
-    });
-    setBusy(false);
-    if (error) {
-      toast.error(bn ? "সাইন আপ ব্যর্থ" : "Signup failed", { description: error.message });
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  const errMsg = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+  const sendCode = async () => {
+    if (!/^01[3-9]\d{8}$/.test(mobile.trim())) {
+      toast.error(bn ? "সঠিক মোবাইল নম্বর দিন" : "Enter a valid mobile number");
       return;
     }
-    toast.success(bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created", {
-      description: bn ? "এখন লগইন করুন।" : "You can log in now.",
-    });
-    onDone();
+    if (password.length < 6) {
+      toast.error(bn ? "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর" : "Password must be at least 6 characters");
+      return;
+    }
+    setBusy(true);
+    try {
+      await requestOtp({ data: { mobile: mobile.trim() } });
+      setStep("otp");
+      setCooldown(60);
+      toast.success(bn ? "OTP পাঠানো হয়েছে" : "OTP sent", {
+        description: bn ? `${mobile} নম্বরে ৬ ডিজিটের কোড পাঠানো হয়েছে।` : `A 6-digit code was sent to ${mobile}.`,
+      });
+    } catch (e) {
+      toast.error(bn ? "OTP পাঠানো যায়নি" : "Could not send OTP", { description: errMsg(e) });
+    }
+    setBusy(false);
   };
 
-  return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <IconField id="s-name" icon={User} label={bn ? "পূর্ণ নাম" : "Full name"}>
-        <Input
-          id="s-name"
-          required
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          placeholder={bn ? "আপনার নাম" : "Your name"}
-          className="h-11 pl-10"
-        />
-      </IconField>
+  const confirm = async () => {
+    if (!/^\d{6}$/.test(code.trim())) {
+      toast.error(bn ? "৬ ডিজিটের কোড দিন" : "Enter the 6-digit code");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await verifyOtp({ data: { mobile: mobile.trim(), code: code.trim(), password } });
+      const { error } = await supabase.auth.signInWithPassword({ email: res.email, password });
+      if (error) {
+        toast.success(bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created", {
+          description: bn ? "এখন লগইন করুন।" : "You can log in now.",
+        });
+        onDone();
+      } else {
+        toast.success(bn ? "যাচাই সম্পন্ন, স্বাগতম!" : "Verified — welcome!");
+      }
+    } catch (e) {
+      toast.error(bn ? "যাচাই ব্যর্থ" : "Verification failed", { description: errMsg(e) });
+    }
+    setBusy(false);
+  };
 
-      <IconField id="s-mobile" icon={Phone} label={bn ? "মোবাইল" : "Mobile"}>
+  if (step === "otp") {
+    return (
+      <form onSubmit={(e) => { e.preventDefault(); void confirm(); }} className="space-y-4">
+        <p className="text-sm text-muted-foreground text-center">
+          {bn ? <>কোড পাঠানো হয়েছে <span className="font-medium text-foreground">{mobile}</span> নম্বরে।</>
+              : <>We sent a code to <span className="font-medium text-foreground">{mobile}</span>.</>}
+        </p>
+
+        <IconField id="s-otp" icon={ShieldCheck} label={bn ? "OTP কোড" : "OTP code"}>
+          <Input
+            id="s-otp"
+            inputMode="numeric"
+            maxLength={6}
+            required
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+            placeholder="••••••"
+            className="h-11 pl-10 tracking-[0.4em] text-center"
+          />
+        </IconField>
+
+        <Button type="submit" disabled={busy} className="w-full h-11 text-base bg-gradient-primary text-primary-foreground shadow-glow">
+          {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+          {bn ? "যাচাই করে অ্যাকাউন্ট তৈরি করুন" : "Verify & create account"}
+        </Button>
+
+        <div className="flex items-center justify-between text-xs">
+          <button type="button" onClick={() => setStep("details")} className="font-medium text-primary hover:underline">
+            {bn ? "নম্বর পরিবর্তন" : "Change number"}
+          </button>
+          <button
+            type="button"
+            disabled={busy || cooldown > 0}
+            onClick={() => void sendCode()}
+            className="font-medium text-primary hover:underline disabled:opacity-50 disabled:no-underline"
+          >
+            {cooldown > 0
+              ? (bn ? `আবার পাঠান (${cooldown}স)` : `Resend in ${cooldown}s`)
+              : (bn ? "কোড আবার পাঠান" : "Resend code")}
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); void sendCode(); }} className="space-y-4">
+      <IconField id="s-mobile" icon={Phone} label={bn ? "মোবাইল নম্বর" : "Mobile number"}>
         <Input
           id="s-mobile"
+          required
           value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
+          onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
           inputMode="numeric"
           maxLength={11}
           placeholder="01XXXXXXXXX"
           className="h-11 pl-10 tracking-wider"
-        />
-      </IconField>
-
-      <IconField id="s-email" icon={Mail} label={bn ? "ইমেইল" : "Email"}>
-        <Input
-          id="s-email"
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          className="h-11 pl-10"
         />
       </IconField>
 
@@ -376,11 +426,12 @@ function SignupForm({ onDone }: { onDone: () => void }) {
 
       <Button type="submit" disabled={busy} className="w-full h-11 text-base bg-gradient-primary text-primary-foreground shadow-glow">
         {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-        {bn ? "অ্যাকাউন্ট তৈরি করুন" : "Create account"}
+        {bn ? "OTP পাঠান" : "Send OTP"}
       </Button>
     </form>
   );
 }
+
 
 /* ---------- Forgot ---------- */
 const forgotSchema = z.object({
