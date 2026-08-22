@@ -53,6 +53,7 @@ import { Route as AuthenticatedAdminResellersIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminHrIndexRouteImport } from './routes/_authenticated.admin.hr.index'
 import { Route as AuthenticatedAdminCallCenterIndexRouteImport } from './routes/_authenticated.admin.call-center.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
+import { Route as AuthenticatedResellerSmsSettingsRouteImport } from './routes/_authenticated.reseller.sms.settings'
 import { Route as AuthenticatedResellerSmsSendRouteImport } from './routes/_authenticated.reseller.sms.send'
 import { Route as AuthenticatedResellerSmsLogRouteImport } from './routes/_authenticated.reseller.sms.log'
 import { Route as AuthenticatedResellerSmsGatewayRouteImport } from './routes/_authenticated.reseller.sms.gateway'
@@ -349,6 +350,12 @@ const ApiPublicCronRunRoute = ApiPublicCronRunRouteImport.update({
   path: '/api/public/cron/run',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedResellerSmsSettingsRoute =
+  AuthenticatedResellerSmsSettingsRouteImport.update({
+    id: '/sms/settings',
+    path: '/sms/settings',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerSmsSendRoute =
   AuthenticatedResellerSmsSendRouteImport.update({
     id: '/sms/send',
@@ -724,6 +731,7 @@ export interface FileRoutesByFullPath {
   '/reseller/sms/gateway': typeof AuthenticatedResellerSmsGatewayRoute
   '/reseller/sms/log': typeof AuthenticatedResellerSmsLogRoute
   '/reseller/sms/send': typeof AuthenticatedResellerSmsSendRoute
+  '/reseller/sms/settings': typeof AuthenticatedResellerSmsSettingsRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
   '/admin/hr/': typeof AuthenticatedAdminHrIndexRoute
@@ -816,6 +824,7 @@ export interface FileRoutesByTo {
   '/reseller/sms/gateway': typeof AuthenticatedResellerSmsGatewayRoute
   '/reseller/sms/log': typeof AuthenticatedResellerSmsLogRoute
   '/reseller/sms/send': typeof AuthenticatedResellerSmsSendRoute
+  '/reseller/sms/settings': typeof AuthenticatedResellerSmsSettingsRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center': typeof AuthenticatedAdminCallCenterIndexRoute
   '/admin/hr': typeof AuthenticatedAdminHrIndexRoute
@@ -912,6 +921,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/sms/gateway': typeof AuthenticatedResellerSmsGatewayRoute
   '/_authenticated/reseller/sms/log': typeof AuthenticatedResellerSmsLogRoute
   '/_authenticated/reseller/sms/send': typeof AuthenticatedResellerSmsSendRoute
+  '/_authenticated/reseller/sms/settings': typeof AuthenticatedResellerSmsSettingsRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/_authenticated/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
   '/_authenticated/admin/hr/': typeof AuthenticatedAdminHrIndexRoute
@@ -1008,6 +1018,7 @@ export interface FileRouteTypes {
     | '/reseller/sms/gateway'
     | '/reseller/sms/log'
     | '/reseller/sms/send'
+    | '/reseller/sms/settings'
     | '/api/public/cron/run'
     | '/admin/call-center/'
     | '/admin/hr/'
@@ -1100,6 +1111,7 @@ export interface FileRouteTypes {
     | '/reseller/sms/gateway'
     | '/reseller/sms/log'
     | '/reseller/sms/send'
+    | '/reseller/sms/settings'
     | '/api/public/cron/run'
     | '/admin/call-center'
     | '/admin/hr'
@@ -1195,6 +1207,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/sms/gateway'
     | '/_authenticated/reseller/sms/log'
     | '/_authenticated/reseller/sms/send'
+    | '/_authenticated/reseller/sms/settings'
     | '/api/public/cron/run'
     | '/_authenticated/admin/call-center/'
     | '/_authenticated/admin/hr/'
@@ -1528,6 +1541,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/cron/run'
       preLoaderRoute: typeof ApiPublicCronRunRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/reseller/sms/settings': {
+      id: '/_authenticated/reseller/sms/settings'
+      path: '/sms/settings'
+      fullPath: '/reseller/sms/settings'
+      preLoaderRoute: typeof AuthenticatedResellerSmsSettingsRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/sms/send': {
       id: '/_authenticated/reseller/sms/send'
@@ -2009,6 +2029,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerSmsGatewayRoute: typeof AuthenticatedResellerSmsGatewayRoute
   AuthenticatedResellerSmsLogRoute: typeof AuthenticatedResellerSmsLogRoute
   AuthenticatedResellerSmsSendRoute: typeof AuthenticatedResellerSmsSendRoute
+  AuthenticatedResellerSmsSettingsRoute: typeof AuthenticatedResellerSmsSettingsRoute
   AuthenticatedResellerAccountsIndexRoute: typeof AuthenticatedResellerAccountsIndexRoute
   AuthenticatedResellerAdminIndexRoute: typeof AuthenticatedResellerAdminIndexRoute
   AuthenticatedResellerCustomersIndexRoute: typeof AuthenticatedResellerCustomersIndexRoute
@@ -2083,6 +2104,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerSmsGatewayRoute: AuthenticatedResellerSmsGatewayRoute,
   AuthenticatedResellerSmsLogRoute: AuthenticatedResellerSmsLogRoute,
   AuthenticatedResellerSmsSendRoute: AuthenticatedResellerSmsSendRoute,
+  AuthenticatedResellerSmsSettingsRoute: AuthenticatedResellerSmsSettingsRoute,
   AuthenticatedResellerAccountsIndexRoute:
     AuthenticatedResellerAccountsIndexRoute,
   AuthenticatedResellerAdminIndexRoute: AuthenticatedResellerAdminIndexRoute,
