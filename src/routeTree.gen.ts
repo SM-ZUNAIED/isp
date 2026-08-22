@@ -72,6 +72,7 @@ import { Route as AuthenticatedResellerReportsBillSheetRouteImport } from './rou
 import { Route as AuthenticatedResellerReportsBillGenerateRouteImport } from './routes/_authenticated.reseller.reports.bill-generate'
 import { Route as AuthenticatedResellerPopAreaRouteImport } from './routes/_authenticated.reseller.pop.area'
 import { Route as AuthenticatedResellerPackagesSyncProfilesRouteImport } from './routes/_authenticated.reseller.packages.sync-profiles'
+import { Route as AuthenticatedResellerPackagesAddSubRouteImport } from './routes/_authenticated.reseller.packages.add-sub'
 import { Route as AuthenticatedResellerPackagesAddRouteImport } from './routes/_authenticated.reseller.packages.add'
 import { Route as AuthenticatedResellerMikrotikSyncRouteImport } from './routes/_authenticated.reseller.mikrotik.sync'
 import { Route as AuthenticatedResellerManagerSmsLogRouteImport } from './routes/_authenticated.reseller.manager.sms-log'
@@ -469,6 +470,12 @@ const AuthenticatedResellerPackagesSyncProfilesRoute =
     path: '/packages/sync-profiles',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
+const AuthenticatedResellerPackagesAddSubRoute =
+  AuthenticatedResellerPackagesAddSubRouteImport.update({
+    id: '/packages/add-sub',
+    path: '/packages/add-sub',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerPackagesAddRoute =
   AuthenticatedResellerPackagesAddRouteImport.update({
     id: '/packages/add',
@@ -753,6 +760,7 @@ export interface FileRoutesByFullPath {
   '/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
   '/reseller/mikrotik/sync': typeof AuthenticatedResellerMikrotikSyncRoute
   '/reseller/packages/add': typeof AuthenticatedResellerPackagesAddRoute
+  '/reseller/packages/add-sub': typeof AuthenticatedResellerPackagesAddSubRoute
   '/reseller/packages/sync-profiles': typeof AuthenticatedResellerPackagesSyncProfilesRoute
   '/reseller/pop/area': typeof AuthenticatedResellerPopAreaRoute
   '/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
@@ -851,6 +859,7 @@ export interface FileRoutesByTo {
   '/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
   '/reseller/mikrotik/sync': typeof AuthenticatedResellerMikrotikSyncRoute
   '/reseller/packages/add': typeof AuthenticatedResellerPackagesAddRoute
+  '/reseller/packages/add-sub': typeof AuthenticatedResellerPackagesAddSubRoute
   '/reseller/packages/sync-profiles': typeof AuthenticatedResellerPackagesSyncProfilesRoute
   '/reseller/pop/area': typeof AuthenticatedResellerPopAreaRoute
   '/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
@@ -953,6 +962,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
   '/_authenticated/reseller/mikrotik/sync': typeof AuthenticatedResellerMikrotikSyncRoute
   '/_authenticated/reseller/packages/add': typeof AuthenticatedResellerPackagesAddRoute
+  '/_authenticated/reseller/packages/add-sub': typeof AuthenticatedResellerPackagesAddSubRoute
   '/_authenticated/reseller/packages/sync-profiles': typeof AuthenticatedResellerPackagesSyncProfilesRoute
   '/_authenticated/reseller/pop/area': typeof AuthenticatedResellerPopAreaRoute
   '/_authenticated/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
@@ -1055,6 +1065,7 @@ export interface FileRouteTypes {
     | '/reseller/manager/sms-log'
     | '/reseller/mikrotik/sync'
     | '/reseller/packages/add'
+    | '/reseller/packages/add-sub'
     | '/reseller/packages/sync-profiles'
     | '/reseller/pop/area'
     | '/reseller/reports/bill-generate'
@@ -1153,6 +1164,7 @@ export interface FileRouteTypes {
     | '/reseller/manager/sms-log'
     | '/reseller/mikrotik/sync'
     | '/reseller/packages/add'
+    | '/reseller/packages/add-sub'
     | '/reseller/packages/sync-profiles'
     | '/reseller/pop/area'
     | '/reseller/reports/bill-generate'
@@ -1254,6 +1266,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/manager/sms-log'
     | '/_authenticated/reseller/mikrotik/sync'
     | '/_authenticated/reseller/packages/add'
+    | '/_authenticated/reseller/packages/add-sub'
     | '/_authenticated/reseller/packages/sync-profiles'
     | '/_authenticated/reseller/pop/area'
     | '/_authenticated/reseller/reports/bill-generate'
@@ -1740,6 +1753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResellerPackagesSyncProfilesRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
+    '/_authenticated/reseller/packages/add-sub': {
+      id: '/_authenticated/reseller/packages/add-sub'
+      path: '/packages/add-sub'
+      fullPath: '/reseller/packages/add-sub'
+      preLoaderRoute: typeof AuthenticatedResellerPackagesAddSubRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
     '/_authenticated/reseller/packages/add': {
       id: '/_authenticated/reseller/packages/add'
       path: '/packages/add'
@@ -2116,6 +2136,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerManagerSmsLogRoute: typeof AuthenticatedResellerManagerSmsLogRoute
   AuthenticatedResellerMikrotikSyncRoute: typeof AuthenticatedResellerMikrotikSyncRoute
   AuthenticatedResellerPackagesAddRoute: typeof AuthenticatedResellerPackagesAddRoute
+  AuthenticatedResellerPackagesAddSubRoute: typeof AuthenticatedResellerPackagesAddSubRoute
   AuthenticatedResellerPackagesSyncProfilesRoute: typeof AuthenticatedResellerPackagesSyncProfilesRoute
   AuthenticatedResellerPopAreaRoute: typeof AuthenticatedResellerPopAreaRoute
   AuthenticatedResellerReportsBillGenerateRoute: typeof AuthenticatedResellerReportsBillGenerateRoute
@@ -2188,6 +2209,8 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerMikrotikSyncRoute:
     AuthenticatedResellerMikrotikSyncRoute,
   AuthenticatedResellerPackagesAddRoute: AuthenticatedResellerPackagesAddRoute,
+  AuthenticatedResellerPackagesAddSubRoute:
+    AuthenticatedResellerPackagesAddSubRoute,
   AuthenticatedResellerPackagesSyncProfilesRoute:
     AuthenticatedResellerPackagesSyncProfilesRoute,
   AuthenticatedResellerPopAreaRoute: AuthenticatedResellerPopAreaRoute,
