@@ -55,7 +55,7 @@ export const requestSignupOtp = createServerFn({ method: "POST" })
     const { error: insErr } = await supabaseAdmin.from("signup_otps").insert({
       mobile,
       code_hash: await sha256(`${mobile}:${code}`),
-      expires_at: new Date(Date.now() * 1 + 5 * 60 * 1000).toISOString(),
+      expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     });
     if (insErr) throw new Error("Could not create verification code.");
 
