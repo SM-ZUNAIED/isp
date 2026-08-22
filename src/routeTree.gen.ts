@@ -70,6 +70,7 @@ import { Route as AuthenticatedResellerReportsDueRouteImport } from './routes/_a
 import { Route as AuthenticatedResellerReportsBtrcExportRouteImport } from './routes/_authenticated.reseller.reports.btrc-export'
 import { Route as AuthenticatedResellerReportsBillSheetRouteImport } from './routes/_authenticated.reseller.reports.bill-sheet'
 import { Route as AuthenticatedResellerReportsBillGenerateRouteImport } from './routes/_authenticated.reseller.reports.bill-generate'
+import { Route as AuthenticatedResellerMikrotikSyncRouteImport } from './routes/_authenticated.reseller.mikrotik.sync'
 import { Route as AuthenticatedResellerManagerSmsLogRouteImport } from './routes/_authenticated.reseller.manager.sms-log'
 import { Route as AuthenticatedResellerCustomersRecentRouteImport } from './routes/_authenticated.reseller.customers.recent'
 import { Route as AuthenticatedResellerCustomersPendingRouteImport } from './routes/_authenticated.reseller.customers.pending'
@@ -453,6 +454,12 @@ const AuthenticatedResellerReportsBillGenerateRoute =
     path: '/reports/bill-generate',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
+const AuthenticatedResellerMikrotikSyncRoute =
+  AuthenticatedResellerMikrotikSyncRouteImport.update({
+    id: '/mikrotik/sync',
+    path: '/mikrotik/sync',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerManagerSmsLogRoute =
   AuthenticatedResellerManagerSmsLogRouteImport.update({
     id: '/manager/sms-log',
@@ -723,6 +730,7 @@ export interface FileRoutesByFullPath {
   '/reseller/customers/pending': typeof AuthenticatedResellerCustomersPendingRoute
   '/reseller/customers/recent': typeof AuthenticatedResellerCustomersRecentRoute
   '/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
+  '/reseller/mikrotik/sync': typeof AuthenticatedResellerMikrotikSyncRoute
   '/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
   '/reseller/reports/bill-sheet': typeof AuthenticatedResellerReportsBillSheetRoute
   '/reseller/reports/btrc-export': typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -817,6 +825,7 @@ export interface FileRoutesByTo {
   '/reseller/customers/pending': typeof AuthenticatedResellerCustomersPendingRoute
   '/reseller/customers/recent': typeof AuthenticatedResellerCustomersRecentRoute
   '/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
+  '/reseller/mikrotik/sync': typeof AuthenticatedResellerMikrotikSyncRoute
   '/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
   '/reseller/reports/bill-sheet': typeof AuthenticatedResellerReportsBillSheetRoute
   '/reseller/reports/btrc-export': typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -915,6 +924,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/customers/pending': typeof AuthenticatedResellerCustomersPendingRoute
   '/_authenticated/reseller/customers/recent': typeof AuthenticatedResellerCustomersRecentRoute
   '/_authenticated/reseller/manager/sms-log': typeof AuthenticatedResellerManagerSmsLogRoute
+  '/_authenticated/reseller/mikrotik/sync': typeof AuthenticatedResellerMikrotikSyncRoute
   '/_authenticated/reseller/reports/bill-generate': typeof AuthenticatedResellerReportsBillGenerateRoute
   '/_authenticated/reseller/reports/bill-sheet': typeof AuthenticatedResellerReportsBillSheetRoute
   '/_authenticated/reseller/reports/btrc-export': typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -1013,6 +1023,7 @@ export interface FileRouteTypes {
     | '/reseller/customers/pending'
     | '/reseller/customers/recent'
     | '/reseller/manager/sms-log'
+    | '/reseller/mikrotik/sync'
     | '/reseller/reports/bill-generate'
     | '/reseller/reports/bill-sheet'
     | '/reseller/reports/btrc-export'
@@ -1107,6 +1118,7 @@ export interface FileRouteTypes {
     | '/reseller/customers/pending'
     | '/reseller/customers/recent'
     | '/reseller/manager/sms-log'
+    | '/reseller/mikrotik/sync'
     | '/reseller/reports/bill-generate'
     | '/reseller/reports/bill-sheet'
     | '/reseller/reports/btrc-export'
@@ -1204,6 +1216,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/customers/pending'
     | '/_authenticated/reseller/customers/recent'
     | '/_authenticated/reseller/manager/sms-log'
+    | '/_authenticated/reseller/mikrotik/sync'
     | '/_authenticated/reseller/reports/bill-generate'
     | '/_authenticated/reseller/reports/bill-sheet'
     | '/_authenticated/reseller/reports/btrc-export'
@@ -1674,6 +1687,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResellerReportsBillGenerateRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
+    '/_authenticated/reseller/mikrotik/sync': {
+      id: '/_authenticated/reseller/mikrotik/sync'
+      path: '/mikrotik/sync'
+      fullPath: '/reseller/mikrotik/sync'
+      preLoaderRoute: typeof AuthenticatedResellerMikrotikSyncRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
     '/_authenticated/reseller/manager/sms-log': {
       id: '/_authenticated/reseller/manager/sms-log'
       path: '/manager/sms-log'
@@ -2034,6 +2054,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerCustomersPendingRoute: typeof AuthenticatedResellerCustomersPendingRoute
   AuthenticatedResellerCustomersRecentRoute: typeof AuthenticatedResellerCustomersRecentRoute
   AuthenticatedResellerManagerSmsLogRoute: typeof AuthenticatedResellerManagerSmsLogRoute
+  AuthenticatedResellerMikrotikSyncRoute: typeof AuthenticatedResellerMikrotikSyncRoute
   AuthenticatedResellerReportsBillGenerateRoute: typeof AuthenticatedResellerReportsBillGenerateRoute
   AuthenticatedResellerReportsBillSheetRoute: typeof AuthenticatedResellerReportsBillSheetRoute
   AuthenticatedResellerReportsBtrcExportRoute: typeof AuthenticatedResellerReportsBtrcExportRoute
@@ -2101,6 +2122,8 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
     AuthenticatedResellerCustomersRecentRoute,
   AuthenticatedResellerManagerSmsLogRoute:
     AuthenticatedResellerManagerSmsLogRoute,
+  AuthenticatedResellerMikrotikSyncRoute:
+    AuthenticatedResellerMikrotikSyncRoute,
   AuthenticatedResellerReportsBillGenerateRoute:
     AuthenticatedResellerReportsBillGenerateRoute,
   AuthenticatedResellerReportsBillSheetRoute:
