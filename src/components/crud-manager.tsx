@@ -227,6 +227,9 @@ export function CrudManager(props: CrudProps) {
                           {f.badge ? <Badge variant="secondary">{display(f, r)}</Badge> : display(f, r)}
                         </TableCell>
                       ))}
+                      {(props.extraColumns ?? []).map((c) => (
+                        <TableCell key={c.key}>{c.render(r)}</TableCell>
+                      ))}
                       {!props.readOnly && (
                         <TableCell className="text-right whitespace-nowrap">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(r)}>
