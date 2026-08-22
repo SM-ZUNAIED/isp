@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import {
-  Loader2, LogIn, UserPlus, Wifi, Mail, Lock, User, Phone,
+  Loader2, LogIn, UserPlus, Wifi, Mail, Lock, Phone,
   Eye, EyeOff, ShieldCheck, Zap, HeadphonesIcon, ArrowLeft, KeyRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { requestSignupOtp, verifySignupOtp, mobileToEmail } from "@/lib/signup-otp.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
