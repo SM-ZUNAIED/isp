@@ -8,13 +8,12 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
-import { ThemeToggle, LangToggle } from "@/components/theme-lang-toggles";
+import { ResellerHeader } from "@/components/reseller-header";
 import { getMyResellerContext } from "@/lib/reseller.functions";
 import { RESELLER_MODULE_LABELS, type ResellerModuleKey, type ResellerPerm } from "@/lib/reseller-keys";
 
