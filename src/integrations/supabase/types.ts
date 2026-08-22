@@ -1650,6 +1650,36 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_otps: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          mobile: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed?: boolean
+          created_at?: string
+          expires_at: string
+          id?: string
+          mobile: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed?: boolean
+          created_at?: string
+          expires_at?: string
+          id?: string
+          mobile?: string
+        }
+        Relationships: []
+      }
       sip_numbers: {
         Row: {
           assigned_staff_id: string | null
