@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useMemo } from "react";
+import { Link2, Link2Off } from "lucide-react";
 import { CrudManager } from "@/components/crud-manager";
+import { Badge } from "@/components/ui/badge";
+import { listStaff } from "@/lib/staff.functions";
+import { useTx } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/hr/employees")({
   head: () => ({ meta: [{ title: "Employees — HR" }] }),
@@ -7,6 +14,18 @@ export const Route = createFileRoute("/_authenticated/admin/hr/employees")({
 });
 
 function Page() {
+  const tx = useTx();
+  const list = useServerFn(listStaff);
+  const staffQ = useQuery({ queryKey: ["admin-staff"], queryFn: () => list() });
+
+  const loginMap = useMemo(() => {
+    const m = new Map<string, string | null>();
+    for (const s of staffQ.data ?? []) {
+      if (s.user_id) m.set(s.id, s.linked_user_email ?? null);
+    }
+    return m;
+  }, [staffQ.data]);
+
   return (
     <CrudManager
       table="staff"
@@ -15,6 +34,28 @@ function Page() {
       orderBy="created_at"
       ascending={false}
       searchFields={["full_name", "staff_code", "mobile", "designation"]}
+      extraColumns={[
+        {
+          key: "login",
+          label: { bn: "লগইন", en: "Login" },
+          render: (row) => {
+            const id = String(row.id);
+            if (!loginMap.has(id)) {
+              return (
+                <Badge variant="outline" className="gap-1 text-muted-foreground">
+                  <Link2Off className="h-3 w-3" /> {tx("লিংক নেই", "Unlinked")}
+                </Badge>
+              );
+            }
+            return (
+              <Badge variant="outline" className="gap-1 border-green-500/30 text-green-600">
+                <Link2 className="h-3 w-3" />
+                {loginMap.get(id) ?? tx("লিংকড", "Linked")}
+              </Badge>
+            );
+          },
+        },
+      ]}
       fields={[
         { key: "staff_code", label: { bn: "স্টাফ আইডি", en: "Staff ID" }, type: "text", required: true },
         { key: "full_name", label: { bn: "নাম", en: "Full Name" }, type: "text", required: true },

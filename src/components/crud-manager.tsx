@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Plus, Loader2, Trash2, Pencil, Search } from "lucide-react";
@@ -35,6 +35,12 @@ export type CrudField = {
   prefix?: string;
 };
 
+export type CrudExtraColumn = {
+  key: string;
+  label: Bi;
+  render: (row: Record<string, unknown>) => ReactNode;
+};
+
 export type CrudProps = {
   table: OpsTable;
   title: Bi;
@@ -44,6 +50,7 @@ export type CrudProps = {
   ascending?: boolean;
   searchFields?: string[];
   readOnly?: boolean;
+  extraColumns?: CrudExtraColumn[];
 };
 
 type Row = Record<string, unknown>;
@@ -208,6 +215,7 @@ export function CrudManager(props: CrudProps) {
                 <TableHeader>
                   <TableRow>
                     {tableFields.map((f) => <TableHead key={f.key}>{L(f.label)}</TableHead>)}
+                    {(props.extraColumns ?? []).map((c) => <TableHead key={c.key}>{L(c.label)}</TableHead>)}
                     {!props.readOnly && <TableHead className="text-right">{lang === "en" ? "Actions" : "অ্যাকশন"}</TableHead>}
                   </TableRow>
                 </TableHeader>
@@ -218,6 +226,9 @@ export function CrudManager(props: CrudProps) {
                         <TableCell key={f.key}>
                           {f.badge ? <Badge variant="secondary">{display(f, r)}</Badge> : display(f, r)}
                         </TableCell>
+                      ))}
+                      {(props.extraColumns ?? []).map((c) => (
+                        <TableCell key={c.key}>{c.render(r)}</TableCell>
                       ))}
                       {!props.readOnly && (
                         <TableCell className="text-right whitespace-nowrap">
@@ -234,7 +245,7 @@ export function CrudManager(props: CrudProps) {
                   ))}
                   {filtered.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={tableFields.length + 1} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={tableFields.length + (props.extraColumns?.length ?? 0) + 1} className="text-center text-muted-foreground py-8">
                         {lang === "en" ? "No records found." : "কোনো তথ্য নেই।"}
                       </TableCell>
                     </TableRow>
