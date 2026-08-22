@@ -250,6 +250,7 @@ const LandingContent = z.object({
   coverage_title_en: z.string().optional().nullable(),
   coverage_subtitle_bn: z.string().optional().nullable(),
   coverage_subtitle_en: z.string().optional().nullable(),
+  theme: z.record(z.string(), z.any()).optional().nullable(),
   cities: z.array(z.object({
     name_bn: z.string().default(""),
     name_en: z.string().default(""),
