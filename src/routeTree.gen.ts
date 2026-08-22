@@ -40,6 +40,7 @@ import { Route as AuthenticatedAdminHrIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCallCenterIndexRouteImport } from './routes/_authenticated.admin.call-center.index'
 import { Route as ApiPublicCronRunRouteImport } from './routes/api/public/cron/run'
 import { Route as AuthenticatedAdminResellersAddRouteImport } from './routes/_authenticated.admin.resellers.add'
+import { Route as AuthenticatedAdminResellersAccessRouteImport } from './routes/_authenticated.admin.resellers.access'
 import { Route as AuthenticatedAdminReportsAddressRouteImport } from './routes/_authenticated.admin.reports.address'
 import { Route as AuthenticatedAdminHrSalaryPoliciesRouteImport } from './routes/_authenticated.admin.hr.salary-policies'
 import { Route as AuthenticatedAdminHrReportsRouteImport } from './routes/_authenticated.admin.hr.reports'
@@ -226,6 +227,12 @@ const AuthenticatedAdminResellersAddRoute =
     path: '/resellers/add',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminResellersAccessRoute =
+  AuthenticatedAdminResellersAccessRouteImport.update({
+    id: '/resellers/access',
+    path: '/resellers/access',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminReportsAddressRoute =
   AuthenticatedAdminReportsAddressRouteImport.update({
     id: '/reports/address',
@@ -365,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/admin/hr/reports': typeof AuthenticatedAdminHrReportsRoute
   '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
+  '/admin/resellers/access': typeof AuthenticatedAdminResellersAccessRoute
   '/admin/resellers/add': typeof AuthenticatedAdminResellersAddRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
@@ -412,6 +420,7 @@ export interface FileRoutesByTo {
   '/admin/hr/reports': typeof AuthenticatedAdminHrReportsRoute
   '/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
+  '/admin/resellers/access': typeof AuthenticatedAdminResellersAccessRoute
   '/admin/resellers/add': typeof AuthenticatedAdminResellersAddRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/admin/call-center': typeof AuthenticatedAdminCallCenterIndexRoute
@@ -462,6 +471,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/hr/reports': typeof AuthenticatedAdminHrReportsRoute
   '/_authenticated/admin/hr/salary-policies': typeof AuthenticatedAdminHrSalaryPoliciesRoute
   '/_authenticated/admin/reports/address': typeof AuthenticatedAdminReportsAddressRoute
+  '/_authenticated/admin/resellers/access': typeof AuthenticatedAdminResellersAccessRoute
   '/_authenticated/admin/resellers/add': typeof AuthenticatedAdminResellersAddRoute
   '/api/public/cron/run': typeof ApiPublicCronRunRoute
   '/_authenticated/admin/call-center/': typeof AuthenticatedAdminCallCenterIndexRoute
@@ -512,6 +522,7 @@ export interface FileRouteTypes {
     | '/admin/hr/reports'
     | '/admin/hr/salary-policies'
     | '/admin/reports/address'
+    | '/admin/resellers/access'
     | '/admin/resellers/add'
     | '/api/public/cron/run'
     | '/admin/call-center/'
@@ -559,6 +570,7 @@ export interface FileRouteTypes {
     | '/admin/hr/reports'
     | '/admin/hr/salary-policies'
     | '/admin/reports/address'
+    | '/admin/resellers/access'
     | '/admin/resellers/add'
     | '/api/public/cron/run'
     | '/admin/call-center'
@@ -608,6 +620,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/hr/reports'
     | '/_authenticated/admin/hr/salary-policies'
     | '/_authenticated/admin/reports/address'
+    | '/_authenticated/admin/resellers/access'
     | '/_authenticated/admin/resellers/add'
     | '/api/public/cron/run'
     | '/_authenticated/admin/call-center/'
@@ -843,6 +856,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminResellersAddRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/resellers/access': {
+      id: '/_authenticated/admin/resellers/access'
+      path: '/resellers/access'
+      fullPath: '/admin/resellers/access'
+      preLoaderRoute: typeof AuthenticatedAdminResellersAccessRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/reports/address': {
       id: '/_authenticated/admin/reports/address'
       path: '/reports/address'
@@ -993,6 +1013,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminHrReportsRoute: typeof AuthenticatedAdminHrReportsRoute
   AuthenticatedAdminHrSalaryPoliciesRoute: typeof AuthenticatedAdminHrSalaryPoliciesRoute
   AuthenticatedAdminReportsAddressRoute: typeof AuthenticatedAdminReportsAddressRoute
+  AuthenticatedAdminResellersAccessRoute: typeof AuthenticatedAdminResellersAccessRoute
   AuthenticatedAdminResellersAddRoute: typeof AuthenticatedAdminResellersAddRoute
   AuthenticatedAdminCallCenterIndexRoute: typeof AuthenticatedAdminCallCenterIndexRoute
   AuthenticatedAdminHrIndexRoute: typeof AuthenticatedAdminHrIndexRoute
@@ -1043,6 +1064,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminHrSalaryPoliciesRoute:
     AuthenticatedAdminHrSalaryPoliciesRoute,
   AuthenticatedAdminReportsAddressRoute: AuthenticatedAdminReportsAddressRoute,
+  AuthenticatedAdminResellersAccessRoute:
+    AuthenticatedAdminResellersAccessRoute,
   AuthenticatedAdminResellersAddRoute: AuthenticatedAdminResellersAddRoute,
   AuthenticatedAdminCallCenterIndexRoute:
     AuthenticatedAdminCallCenterIndexRoute,
