@@ -539,7 +539,7 @@ export const resellerAccountsHistory = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     const term = (data.q ?? "").toLowerCase();
-    const list = (rows ?? []) as Array<Record<string, unknown>>;
+    const list = (rows ?? []) as unknown as Array<Record<string, string | number | null>>;
     return term
       ? list.filter((x) => JSON.stringify(x).toLowerCase().includes(term))
       : list;
