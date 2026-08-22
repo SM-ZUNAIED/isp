@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { mobileToEmail, sha256Hex } from "@/lib/mobile-auth";
 
 const mobileSchema = z
   .string()
@@ -14,15 +15,6 @@ const VerifyInputSchema = z.object({
   password: z.string().min(6).max(72),
 });
 
-export const mobileToEmail = (mobile: string) => `${mobile.trim()}@mobile.local`;
-
-async function sha256(value: string) {
-  const bytes = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
 
 /** Step 1 — send a 6-digit OTP to the mobile number. */
 export const requestSignupOtp = createServerFn({ method: "POST" })
@@ -54,7 +46,7 @@ export const requestSignupOtp = createServerFn({ method: "POST" })
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const { error: insErr } = await supabaseAdmin.from("signup_otps").insert({
       mobile,
-      code_hash: await sha256(`${mobile}:${code}`),
+      code_hash: await sha256Hex(`${mobile}:${code}`),
       expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     });
     if (insErr) throw new Error("Could not create verification code.");
@@ -93,7 +85,7 @@ export const verifySignupOtp = createServerFn({ method: "POST" })
     if (new Date(row.expires_at).getTime() < Date.now()) throw new Error("The code has expired. Request a new one.");
     if (row.attempts >= 5) throw new Error("Too many wrong attempts. Request a new code.");
 
-    if (row.code_hash !== (await sha256(`${mobile}:${code}`))) {
+    if (row.code_hash !== (await sha256Hex(`${mobile}:${code}`))) {
       await supabaseAdmin.from("signup_otps").update({ attempts: row.attempts + 1 }).eq("id", row.id);
       throw new Error("The verification code is incorrect.");
     }

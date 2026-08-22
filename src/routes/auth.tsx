@@ -7,7 +7,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { requestSignupOtp, verifySignupOtp, mobileToEmail } from "@/lib/signup-otp.functions";
+import { requestSignupOtp, verifySignupOtp } from "@/lib/signup-otp.functions";
+import { mobileToEmail } from "@/lib/mobile-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
