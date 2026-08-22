@@ -14,6 +14,7 @@ import { Route as PayBillRouteImport } from './routes/pay-bill'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedResellerRouteImport } from './routes/_authenticated.reseller'
 import { Route as AuthenticatedCustomerRouteImport } from './routes/_authenticated.customer'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
@@ -81,6 +82,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedResellerRoute = AuthenticatedResellerRouteImport.update({
+  id: '/reseller',
+  path: '/reseller',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCustomerRoute = AuthenticatedCustomerRouteImport.update({
   id: '/customer',
@@ -337,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/customer': typeof AuthenticatedCustomerRoute
+  '/reseller': typeof AuthenticatedResellerRoute
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
@@ -385,6 +392,7 @@ export interface FileRoutesByTo {
   '/pay-bill': typeof PayBillRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/customer': typeof AuthenticatedCustomerRoute
+  '/reseller': typeof AuthenticatedResellerRoute
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
@@ -436,6 +444,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/customer': typeof AuthenticatedCustomerRoute
+  '/_authenticated/reseller': typeof AuthenticatedResellerRoute
   '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
   '/_authenticated/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/_authenticated/admin/address': typeof AuthenticatedAdminAddressRoute
@@ -487,6 +496,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/customer'
+    | '/reseller'
     | '/admin/access'
     | '/admin/accounts'
     | '/admin/address'
@@ -535,6 +545,7 @@ export interface FileRouteTypes {
     | '/pay-bill'
     | '/reset-password'
     | '/customer'
+    | '/reseller'
     | '/admin/access'
     | '/admin/accounts'
     | '/admin/address'
@@ -585,6 +596,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/customer'
+    | '/_authenticated/reseller'
     | '/_authenticated/admin/access'
     | '/_authenticated/admin/accounts'
     | '/_authenticated/admin/address'
@@ -673,6 +685,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/reseller': {
+      id: '/_authenticated/reseller'
+      path: '/reseller'
+      fullPath: '/reseller'
+      preLoaderRoute: typeof AuthenticatedResellerRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/customer': {
       id: '/_authenticated/customer'
@@ -1079,11 +1098,13 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedCustomerRoute: typeof AuthenticatedCustomerRoute
+  AuthenticatedResellerRoute: typeof AuthenticatedResellerRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedCustomerRoute: AuthenticatedCustomerRoute,
+  AuthenticatedResellerRoute: AuthenticatedResellerRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
