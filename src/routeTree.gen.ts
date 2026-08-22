@@ -31,6 +31,7 @@ import { Route as AuthenticatedAdminNoticesRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminMikrotikRouteImport } from './routes/_authenticated.admin.mikrotik'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated.admin.customers'
 import { Route as AuthenticatedAdminBillsRouteImport } from './routes/_authenticated.admin.bills'
+import { Route as AuthenticatedAdminAppearanceRouteImport } from './routes/_authenticated.admin.appearance'
 import { Route as AuthenticatedAdminAddressRouteImport } from './routes/_authenticated.admin.address'
 import { Route as AuthenticatedAdminAccountsRouteImport } from './routes/_authenticated.admin.accounts'
 import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated.admin.access'
@@ -170,6 +171,12 @@ const AuthenticatedAdminBillsRoute = AuthenticatedAdminBillsRouteImport.update({
   path: '/bills',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminAppearanceRoute =
+  AuthenticatedAdminAppearanceRouteImport.update({
+    id: '/appearance',
+    path: '/appearance',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAddressRoute =
   AuthenticatedAdminAddressRouteImport.update({
     id: '/address',
@@ -312,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
+  '/admin/appearance': typeof AuthenticatedAdminAppearanceRoute
   '/admin/bills': typeof AuthenticatedAdminBillsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/mikrotik': typeof AuthenticatedAdminMikrotikRoute
@@ -356,6 +364,7 @@ export interface FileRoutesByTo {
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/admin/address': typeof AuthenticatedAdminAddressRoute
+  '/admin/appearance': typeof AuthenticatedAdminAppearanceRoute
   '/admin/bills': typeof AuthenticatedAdminBillsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/mikrotik': typeof AuthenticatedAdminMikrotikRoute
@@ -403,6 +412,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
   '/_authenticated/admin/accounts': typeof AuthenticatedAdminAccountsRoute
   '/_authenticated/admin/address': typeof AuthenticatedAdminAddressRoute
+  '/_authenticated/admin/appearance': typeof AuthenticatedAdminAppearanceRoute
   '/_authenticated/admin/bills': typeof AuthenticatedAdminBillsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/mikrotik': typeof AuthenticatedAdminMikrotikRoute
@@ -450,6 +460,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/accounts'
     | '/admin/address'
+    | '/admin/appearance'
     | '/admin/bills'
     | '/admin/customers'
     | '/admin/mikrotik'
@@ -494,6 +505,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/accounts'
     | '/admin/address'
+    | '/admin/appearance'
     | '/admin/bills'
     | '/admin/customers'
     | '/admin/mikrotik'
@@ -540,6 +552,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/access'
     | '/_authenticated/admin/accounts'
     | '/_authenticated/admin/address'
+    | '/_authenticated/admin/appearance'
     | '/_authenticated/admin/bills'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/mikrotik'
@@ -741,6 +754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBillsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/appearance': {
+      id: '/_authenticated/admin/appearance'
+      path: '/appearance'
+      fullPath: '/admin/appearance'
+      preLoaderRoute: typeof AuthenticatedAdminAppearanceRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/address': {
       id: '/_authenticated/admin/address'
       path: '/address'
@@ -902,6 +922,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAccessRoute: typeof AuthenticatedAdminAccessRoute
   AuthenticatedAdminAccountsRoute: typeof AuthenticatedAdminAccountsRoute
   AuthenticatedAdminAddressRoute: typeof AuthenticatedAdminAddressRoute
+  AuthenticatedAdminAppearanceRoute: typeof AuthenticatedAdminAppearanceRoute
   AuthenticatedAdminBillsRoute: typeof AuthenticatedAdminBillsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminMikrotikRoute: typeof AuthenticatedAdminMikrotikRoute
@@ -940,6 +961,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAccessRoute: AuthenticatedAdminAccessRoute,
   AuthenticatedAdminAccountsRoute: AuthenticatedAdminAccountsRoute,
   AuthenticatedAdminAddressRoute: AuthenticatedAdminAddressRoute,
+  AuthenticatedAdminAppearanceRoute: AuthenticatedAdminAppearanceRoute,
   AuthenticatedAdminBillsRoute: AuthenticatedAdminBillsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminMikrotikRoute: AuthenticatedAdminMikrotikRoute,

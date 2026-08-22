@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { ThemeVars } from "@/components/theme-vars";
 import { I18nProvider } from "@/hooks/use-i18n";
 import { getSiteMeta } from "@/lib/site-meta.functions";
 
@@ -129,6 +130,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeVars />
       <ThemeProvider>
         <I18nProvider>
           <AuthProvider>

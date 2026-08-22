@@ -23,6 +23,7 @@ import {
   ChevronDown, Home,
   Briefcase, CalendarCheck, Plane, HandCoins, Scale, PieChart,
   Headphones, Phone, PhoneCall, CalendarClock, History, Mic, Megaphone,
+  Palette, Paintbrush,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -113,6 +114,9 @@ const NAV: Array<NavItem> = [
   { kind: "link", to: "/admin/users", labelKey: "admin.nav.users", icon: UserCog, adminOnly: true, permKey: "users" },
   { kind: "link", to: "/admin/access", icon: ShieldCheck, adminOnly: true, label: { bn: "অ্যাক্সেস কন্ট্রোল", en: "Access Control" } },
   { kind: "link", to: "/admin/roles", icon: BadgeCheck, adminOnly: true, label: { bn: "রোল / পদবি", en: "Roles / Designations" } },
+  { kind: "group", id: "design", icon: Palette, adminOnly: true, permKey: "appearance", label: { bn: "ডিজাইন ও থিম", en: "Design & Theme" }, children: [
+    { kind: "link", to: "/admin/appearance", icon: Paintbrush, label: { bn: "অ্যাপিয়ারেন্স", en: "Appearance" } },
+  ] },
   { kind: "link", to: "/admin/settings", labelKey: "admin.nav.settings", icon: SettingsIcon, adminOnly: true, permKey: "settings" },
 ];
 
