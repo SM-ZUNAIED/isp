@@ -23,6 +23,7 @@ import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.r
 import { Route as AuthenticatedResellerSupportRouteImport } from './routes/_authenticated.reseller.support'
 import { Route as AuthenticatedResellerSmsRouteImport } from './routes/_authenticated.reseller.sms'
 import { Route as AuthenticatedResellerReportsRouteImport } from './routes/_authenticated.reseller.reports'
+import { Route as AuthenticatedResellerProfileRouteImport } from './routes/_authenticated.reseller.profile'
 import { Route as AuthenticatedResellerPopRouteImport } from './routes/_authenticated.reseller.pop'
 import { Route as AuthenticatedResellerPackagesRouteImport } from './routes/_authenticated.reseller.packages'
 import { Route as AuthenticatedResellerMikrotikRouteImport } from './routes/_authenticated.reseller.mikrotik'
@@ -142,6 +143,12 @@ const AuthenticatedResellerReportsRoute =
   AuthenticatedResellerReportsRouteImport.update({
     id: '/reports',
     path: '/reports',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
+const AuthenticatedResellerProfileRoute =
+  AuthenticatedResellerProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
     getParentRoute: () => AuthenticatedResellerRoute,
   } as any)
 const AuthenticatedResellerPopRoute =
@@ -453,6 +460,7 @@ export interface FileRoutesByFullPath {
   '/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/reseller/pop': typeof AuthenticatedResellerPopRoute
+  '/reseller/profile': typeof AuthenticatedResellerProfileRoute
   '/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/reseller/sms': typeof AuthenticatedResellerSmsRoute
   '/reseller/support': typeof AuthenticatedResellerSupportRoute
@@ -513,6 +521,7 @@ export interface FileRoutesByTo {
   '/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/reseller/pop': typeof AuthenticatedResellerPopRoute
+  '/reseller/profile': typeof AuthenticatedResellerProfileRoute
   '/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/reseller/sms': typeof AuthenticatedResellerSmsRoute
   '/reseller/support': typeof AuthenticatedResellerSupportRoute
@@ -577,6 +586,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/mikrotik': typeof AuthenticatedResellerMikrotikRoute
   '/_authenticated/reseller/packages': typeof AuthenticatedResellerPackagesRoute
   '/_authenticated/reseller/pop': typeof AuthenticatedResellerPopRoute
+  '/_authenticated/reseller/profile': typeof AuthenticatedResellerProfileRoute
   '/_authenticated/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/_authenticated/reseller/sms': typeof AuthenticatedResellerSmsRoute
   '/_authenticated/reseller/support': typeof AuthenticatedResellerSupportRoute
@@ -641,6 +651,7 @@ export interface FileRouteTypes {
     | '/reseller/mikrotik'
     | '/reseller/packages'
     | '/reseller/pop'
+    | '/reseller/profile'
     | '/reseller/reports'
     | '/reseller/sms'
     | '/reseller/support'
@@ -701,6 +712,7 @@ export interface FileRouteTypes {
     | '/reseller/mikrotik'
     | '/reseller/packages'
     | '/reseller/pop'
+    | '/reseller/profile'
     | '/reseller/reports'
     | '/reseller/sms'
     | '/reseller/support'
@@ -764,6 +776,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/mikrotik'
     | '/_authenticated/reseller/packages'
     | '/_authenticated/reseller/pop'
+    | '/_authenticated/reseller/profile'
     | '/_authenticated/reseller/reports'
     | '/_authenticated/reseller/sms'
     | '/_authenticated/reseller/support'
@@ -901,6 +914,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reseller/reports'
       preLoaderRoute: typeof AuthenticatedResellerReportsRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
+    }
+    '/_authenticated/reseller/profile': {
+      id: '/_authenticated/reseller/profile'
+      path: '/profile'
+      fullPath: '/reseller/profile'
+      preLoaderRoute: typeof AuthenticatedResellerProfileRouteImport
       parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/pop': {
@@ -1342,6 +1362,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerMikrotikRoute: typeof AuthenticatedResellerMikrotikRoute
   AuthenticatedResellerPackagesRoute: typeof AuthenticatedResellerPackagesRoute
   AuthenticatedResellerPopRoute: typeof AuthenticatedResellerPopRoute
+  AuthenticatedResellerProfileRoute: typeof AuthenticatedResellerProfileRoute
   AuthenticatedResellerReportsRoute: typeof AuthenticatedResellerReportsRoute
   AuthenticatedResellerSmsRoute: typeof AuthenticatedResellerSmsRoute
   AuthenticatedResellerSupportRoute: typeof AuthenticatedResellerSupportRoute
@@ -1359,6 +1380,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
   AuthenticatedResellerMikrotikRoute: AuthenticatedResellerMikrotikRoute,
   AuthenticatedResellerPackagesRoute: AuthenticatedResellerPackagesRoute,
   AuthenticatedResellerPopRoute: AuthenticatedResellerPopRoute,
+  AuthenticatedResellerProfileRoute: AuthenticatedResellerProfileRoute,
   AuthenticatedResellerReportsRoute: AuthenticatedResellerReportsRoute,
   AuthenticatedResellerSmsRoute: AuthenticatedResellerSmsRoute,
   AuthenticatedResellerSupportRoute: AuthenticatedResellerSupportRoute,
