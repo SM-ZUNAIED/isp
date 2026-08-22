@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { getSettings } from "@/lib/support.functions";
 import { useLogoUrl } from "@/hooks/use-logo";
+import { ProfileMenu } from "@/components/profile-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/use-permissions";
 import type { PermissionKey } from "@/lib/permissions.functions";
