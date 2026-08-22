@@ -307,6 +307,26 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     setBusy(true);
     try {
       const r = await requestOtp({ data: { mobile: mobile.trim() } });
+      if (!r.sent && r.skipOtp) {
+        // No SMS gateway configured — create the account directly.
+        const res = await verifyOtp({ data: { mobile: mobile.trim(), code: "000000", password } });
+        if (!res.created) {
+          toast.error(bn ? "সাইন আপ ব্যর্থ" : "Sign up failed", { description: res.error });
+          setBusy(false);
+          return;
+        }
+        const { error } = await supabase.auth.signInWithPassword({ email: res.email, password });
+        if (error) {
+          toast.success(bn ? "অ্যাকাউন্ট তৈরি হয়েছে" : "Account created", {
+            description: bn ? "এখন লগইন করুন।" : "You can log in now.",
+          });
+          onDone();
+        } else {
+          toast.success(bn ? "স্বাগতম!" : "Welcome!");
+        }
+        setBusy(false);
+        return;
+      }
       if (!r.sent) {
         toast.error(bn ? "OTP পাঠানো যায়নি" : "Could not send OTP", { description: r.error });
         setBusy(false);

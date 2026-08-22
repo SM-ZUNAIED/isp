@@ -62,12 +62,13 @@ export const requestSignupOtp = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
     const cfg = (setRow?.sms_api_config as SmsConfig | null) ?? null;
-    if (!cfg?.url) return { sent: false as const, error: "SMS gateway is not configured. Contact the operator." };
+    // No SMS gateway configured yet -> let signup proceed without OTP.
+    if (!cfg?.url) return { sent: false as const, skipOtp: true as const };
 
     const res = await sendSms(cfg, mobile, `Your verification code is ${code}. Valid for 5 minutes.`);
     if (!res.ok) return { sent: false as const, error: "Could not send the verification SMS. Please try again." };
 
-    return { sent: true as const };
+    return { sent: true as const, skipOtp: false as const };
   });
 
 /** Step 2 — verify OTP and create the account. */
@@ -76,6 +77,13 @@ export const verifySignupOtp = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { mobile, code, password } = data;
+
+    const { data: setRow } = await supabaseAdmin
+      .from("settings")
+      .select("sms_api_config")
+      .limit(1)
+      .maybeSingle();
+    const smsConfigured = Boolean((setRow?.sms_api_config as { url?: string } | null)?.url);
 
     const { data: row } = await supabaseAdmin
       .from("signup_otps")
@@ -88,16 +96,18 @@ export const verifySignupOtp = createServerFn({ method: "POST" })
 
     const fail = (error: string) => ({ created: false as const, error });
 
-    if (!row) return fail("No verification code found. Please request a new one.");
-    if (new Date(row.expires_at).getTime() < Date.now()) return fail("The code has expired. Request a new one.");
-    if (row.attempts >= 5) return fail("Too many wrong attempts. Request a new code.");
+    if (smsConfigured) {
+      if (!row) return fail("No verification code found. Please request a new one.");
+      if (new Date(row.expires_at).getTime() < Date.now()) return fail("The code has expired. Request a new one.");
+      if (row.attempts >= 5) return fail("Too many wrong attempts. Request a new code.");
 
-    if (row.code_hash !== (await sha256Hex(`${mobile}:${code}`))) {
-      await supabaseAdmin.from("signup_otps").update({ attempts: row.attempts + 1 }).eq("id", row.id);
-      return fail("The verification code is incorrect.");
+      if (row.code_hash !== (await sha256Hex(`${mobile}:${code}`))) {
+        await supabaseAdmin.from("signup_otps").update({ attempts: row.attempts + 1 }).eq("id", row.id);
+        return fail("The verification code is incorrect.");
+      }
     }
 
-    await supabaseAdmin.from("signup_otps").update({ consumed: true }).eq("id", row.id);
+    if (row) await supabaseAdmin.from("signup_otps").update({ consumed: true }).eq("id", row.id);
 
     const { error } = await supabaseAdmin.auth.admin.createUser({
       email: mobileToEmail(mobile),
