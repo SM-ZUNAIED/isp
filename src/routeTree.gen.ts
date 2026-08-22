@@ -20,6 +20,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedResellerIndexRouteImport } from './routes/_authenticated.reseller.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as PayBillReceiptReceiptNoRouteImport } from './routes/pay-bill.receipt.$receiptNo'
+import { Route as AuthenticatedResellerReportsRouteImport } from './routes/_authenticated.reseller.reports'
 import { Route as AuthenticatedResellerPackagesRouteImport } from './routes/_authenticated.reseller.packages'
 import { Route as AuthenticatedResellerCustomersRouteImport } from './routes/_authenticated.reseller.customers'
 import { Route as AuthenticatedResellerCustomerSearchRouteImport } from './routes/_authenticated.reseller.customer-search'
@@ -120,6 +121,12 @@ const PayBillReceiptReceiptNoRoute = PayBillReceiptReceiptNoRouteImport.update({
   path: '/receipt/$receiptNo',
   getParentRoute: () => PayBillRoute,
 } as any)
+const AuthenticatedResellerReportsRoute =
+  AuthenticatedResellerReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthenticatedResellerRoute,
+  } as any)
 const AuthenticatedResellerPackagesRoute =
   AuthenticatedResellerPackagesRouteImport.update({
     id: '/packages',
@@ -408,6 +415,7 @@ export interface FileRoutesByFullPath {
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
+  '/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -462,6 +470,7 @@ export interface FileRoutesByTo {
   '/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/reseller/packages': typeof AuthenticatedResellerPackagesRoute
+  '/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/reseller': typeof AuthenticatedResellerIndexRoute
@@ -520,6 +529,7 @@ export interface FileRoutesById {
   '/_authenticated/reseller/customer-search': typeof AuthenticatedResellerCustomerSearchRoute
   '/_authenticated/reseller/customers': typeof AuthenticatedResellerCustomersRoute
   '/_authenticated/reseller/packages': typeof AuthenticatedResellerPackagesRoute
+  '/_authenticated/reseller/reports': typeof AuthenticatedResellerReportsRoute
   '/pay-bill/receipt/$receiptNo': typeof PayBillReceiptReceiptNoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/reseller/': typeof AuthenticatedResellerIndexRoute
@@ -578,6 +588,7 @@ export interface FileRouteTypes {
     | '/reseller/customer-search'
     | '/reseller/customers'
     | '/reseller/packages'
+    | '/reseller/reports'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin/'
     | '/reseller/'
@@ -632,6 +643,7 @@ export interface FileRouteTypes {
     | '/reseller/customer-search'
     | '/reseller/customers'
     | '/reseller/packages'
+    | '/reseller/reports'
     | '/pay-bill/receipt/$receiptNo'
     | '/admin'
     | '/reseller'
@@ -689,6 +701,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reseller/customer-search'
     | '/_authenticated/reseller/customers'
     | '/_authenticated/reseller/packages'
+    | '/_authenticated/reseller/reports'
     | '/pay-bill/receipt/$receiptNo'
     | '/_authenticated/admin/'
     | '/_authenticated/reseller/'
@@ -803,6 +816,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pay-bill/receipt/$receiptNo'
       preLoaderRoute: typeof PayBillReceiptReceiptNoRouteImport
       parentRoute: typeof PayBillRoute
+    }
+    '/_authenticated/reseller/reports': {
+      id: '/_authenticated/reseller/reports'
+      path: '/reports'
+      fullPath: '/reseller/reports'
+      preLoaderRoute: typeof AuthenticatedResellerReportsRouteImport
+      parentRoute: typeof AuthenticatedResellerRoute
     }
     '/_authenticated/reseller/packages': {
       id: '/_authenticated/reseller/packages'
@@ -1219,6 +1239,7 @@ interface AuthenticatedResellerRouteChildren {
   AuthenticatedResellerCustomerSearchRoute: typeof AuthenticatedResellerCustomerSearchRoute
   AuthenticatedResellerCustomersRoute: typeof AuthenticatedResellerCustomersRoute
   AuthenticatedResellerPackagesRoute: typeof AuthenticatedResellerPackagesRoute
+  AuthenticatedResellerReportsRoute: typeof AuthenticatedResellerReportsRoute
   AuthenticatedResellerIndexRoute: typeof AuthenticatedResellerIndexRoute
 }
 
@@ -1230,6 +1251,7 @@ const AuthenticatedResellerRouteChildren: AuthenticatedResellerRouteChildren = {
     AuthenticatedResellerCustomerSearchRoute,
   AuthenticatedResellerCustomersRoute: AuthenticatedResellerCustomersRoute,
   AuthenticatedResellerPackagesRoute: AuthenticatedResellerPackagesRoute,
+  AuthenticatedResellerReportsRoute: AuthenticatedResellerReportsRoute,
   AuthenticatedResellerIndexRoute: AuthenticatedResellerIndexRoute,
 }
 
