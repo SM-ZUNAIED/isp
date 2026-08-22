@@ -43,7 +43,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     name: "Emerald (Default)",
     emoji: "🌿",
     light: { primary: "#159A5C", accent: "#E8A33D", background: "#FBFEFC", foreground: "#141C2B", card: "#FFFFFF", muted: "#EEF3F6", border: "#DDE5EA" },
-    dark: { primary: "#2FD68A", accent: "#F2B650", background: "#0F1421", foreground: "#F3F6FA", card: "#18203000", muted: "#1F2839", border: "#2A3547" },
+    dark: { primary: "#2FD68A", accent: "#F2B650", background: "#0F1421", foreground: "#F3F6FA", card: "#182030", muted: "#1F2839", border: "#2A3547" },
   },
   {
     id: "warm-earth",
